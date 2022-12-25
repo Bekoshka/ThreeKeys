@@ -4,7 +4,7 @@ import pygame
 
 from common import all_sprites
 from landscape import Landscape
-from player import Player
+from player import Player, Monster
 from settings import WIDTH, HEIGHT, FPS, STEP
 from utils import load_image
 
@@ -72,6 +72,7 @@ class Game:
         self.screen = screen
         self.landscape = Landscape()
         self.landscape.generate_level()
+        self.monsters = [Monster(-3, 1)]
         self.player = Player(3, 5)
         self.camera = Camera(self.player, all_sprites)
         self.clock = pygame.time.Clock()
@@ -87,6 +88,7 @@ class Game:
     def render(self):
         self.screen.fill(pygame.Color(0, 0, 0))
         all_sprites.draw(self.screen)
+        all_sprites.update(self.screen)
         pygame.display.flip()
 
     def handle_events(self):
@@ -96,7 +98,7 @@ class Game:
                 return
             if event.type == pygame.KEYDOWN:
                 keys = pygame.key.get_pressed()
-                dx, dy = 0, 0
+                dx, dy, step = 0, 0, STEP
                 if keys[pygame.K_LEFT]:
                     dx -= STEP
                 if keys[pygame.K_RIGHT]:
@@ -105,5 +107,11 @@ class Game:
                     dy -= STEP
                 if keys[pygame.K_DOWN]:
                     dy += STEP
-                self.player.move(dx, dy)
-                self.camera.follow()
+                if dx != 0 and dy != 0:
+                    dx_sign = dx // STEP
+                    dy_sign = dy // STEP
+                    step = int(((STEP ** 2) // 2) ** 0.5)
+                    dx, dy = int(dx_sign * step), int(dy_sign * step)
+                if dx or dy:
+                    self.player.move(dx, dy, step)
+                    self.camera.follow()
