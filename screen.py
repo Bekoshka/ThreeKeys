@@ -98,20 +98,15 @@ class Game:
                 return
             if event.type == pygame.KEYDOWN:
                 keys = pygame.key.get_pressed()
-                dx, dy, step = 0, 0, STEP
+                dx, dy = 0, 0
                 if keys[pygame.K_LEFT]:
-                    dx -= STEP
+                    dx -= 1
                 if keys[pygame.K_RIGHT]:
-                    dx += STEP
+                    dx += 1
                 if keys[pygame.K_UP]:
-                    dy -= STEP
+                    dy -= 1
                 if keys[pygame.K_DOWN]:
-                    dy += STEP
-                if dx != 0 and dy != 0:
-                    dx_sign = dx // STEP
-                    dy_sign = dy // STEP
-                    step = int(((STEP ** 2) // 2) ** 0.5)
-                    dx, dy = int(dx_sign * step), int(dy_sign * step)
+                    dy += 1
                 if dx or dy:
-                    self.player.move(dx, dy, step)
+                    self.player.step(dx, dy)
                     self.camera.follow()

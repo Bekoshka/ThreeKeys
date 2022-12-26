@@ -1,7 +1,7 @@
 import pygame
 
 from common import all_sprites, landscape_sprites, obstacle_group
-from settings import tile_width, tile_height
+from settings import tile_width, tile_height, STEP
 
 
 class Tile(pygame.sprite.Sprite):
@@ -23,23 +23,23 @@ class Obstacle(Tile):
 
 class Movable(Tile):
     def __init__(self, images, pos_x, pos_y, groups):
-        super().__init__(images[0], pos_x, pos_y, groups)
-        self.move_images = images
+        self.move_images = images[(0, -1)]
         self.move_image_idx = 0
+        super().__init__(self.move_images[0], pos_x, pos_y, groups)
+        self.all_move_images = images
 
-    def move(self, dx, dy, step):
-        if dx == 0 and dy == 0:
-            return
+    def step(self, dx, dy):
+        if dx != 0 and dy != 0:
+            step = int(((STEP ** 2) // 2) ** 0.5)
+        else:
+            step = STEP
+        self.rotate_image_safe(dx, dy)
         self.animate_step_safe()
-        self.rotate_image_safe(self.calculate_angle(dx, dy))
-
-        dx_sign = dx // step
-        dy_sign = dy // step
         for i in range(step):
-            if self.move_part(abs(dx - i) * dx_sign, abs(dy - i) * dy_sign):
+            if self.step_part(abs(dx * step - i) * dx, abs(dy * step - i) * dy):
                 break
 
-    def move_part(self, dx, dy):
+    def step_part(self, dx, dy):
         x, y = self.rect.x, self.rect.y
         self.rect.x += dx
         self.rect.y += dy
@@ -48,40 +48,8 @@ class Movable(Tile):
             return False
         return True
 
-    @staticmethod
-    def calculate_angle(dx, dy):
-        if dy == 0 and dx != 0:
-            if dx > 0:
-                angle = -90
-            else:
-                angle = 90
-        elif dx == 0 and dy != 0:
-            if dy > 0:
-                angle = 180
-            else:
-                angle = 0
-        else:
-            if dy > 0:
-                if dx > 0:
-                    angle = -135
-                else:
-                    angle = 135
-            else:
-                if dx > 0:
-                    angle = -45
-                else:
-                    angle = 45
-        return angle
-
-    def rotate_image(self, angle):
-        self.image = pygame.transform.rotate(self.move_images[self.move_image_idx], angle)
-        self.rect = self.image.get_rect(center=self.rect.center)
-
-    def rotate_image_safe(self, angle):
-        safe_angle = angle
-        self.rotate_image(angle)
-        if pygame.sprite.spritecollide(self, obstacle_group, False, pygame.sprite.collide_mask):
-            self.rotate_image(safe_angle)
+    def rotate_image_safe(self, dx, dy):
+        self.move_images = self.all_move_images[(dx, dy)]
 
     def animate_step(self, idx):
         self.move_image_idx = idx
