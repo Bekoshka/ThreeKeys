@@ -1,29 +1,35 @@
-import pygame
+import itertools
 
-from common import player_group, obstacle_group, monster_group
-from tiles import Movable, Creature
+from common import player_group, monster_group
+from settings import KEY_COLOR, VECTORS_TO_DIRECTION
+from tiles import Creature
 from utils import load_image
 
 
-key_color = pygame.Color(0xff, 0x5c, 0xf9)
+def load_creature_images(name, frames):
+    images = {}
+    for dx, dy, n in itertools.product([-1, 0, 1], [-1, 0, 1], range(frames)):
+        if not dx and not dy:
+            continue
+        fname = f'{name}\\{name}_{VECTORS_TO_DIRECTION[dx, dy]}_{n}.png'
+        image = load_image(fname, KEY_COLOR)
+        if (dx, dy) in images.keys():
+            images[dx, dy].append(image)
+        else:
+            images[dx, dy] = [image]
+    return images
 
 
 class Player(Creature):
     def __init__(self, pos_x, pos_y):
-        image = [
-            load_image('mara.png', key_color),
-            load_image('mara2.png', key_color)
-        ]
-        super().__init__(image, 100, pos_x, pos_y, [player_group])
+        images = load_creature_images("mara", 2)
+        super().__init__(images, 100, pos_x, pos_y, [player_group])
 
 
 class Monster(Creature):
     def __init__(self, pos_x, pos_y):
-        image = [
-            load_image('mara.png', key_color),
-            load_image('mara2.png', key_color)
-        ]
-        super().__init__(image, 100, pos_x, pos_y, [monster_group])
+        images = load_creature_images("mara", 2)
+        super().__init__(images, 100, pos_x, pos_y, [monster_group])
 
 
 
