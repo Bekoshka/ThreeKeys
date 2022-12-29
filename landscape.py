@@ -14,6 +14,11 @@ class Sand(Background):
         super().__init__(load_image('sand.png', resize=True), pos_x, pos_y)
 
 
+class Forest(Obstacle):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('forest2.png', color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=True), pos_x, pos_y)
+
+
 class Box(Obstacle):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_image('box.png'), pos_x, pos_y)
@@ -26,7 +31,8 @@ class Rock(Obstacle):
 
 landscape_dict = {
     ".": Grass,
-    "#": Sand
+    "#": Sand,
+    '!': Forest
 }
 
 obstacle_dict = {

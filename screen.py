@@ -2,7 +2,7 @@ import sys
 
 import pygame
 
-from common import all_sprites
+from common import all_sprites, monster_group, landscape_sprites, obstacle_group, player_group
 from landscape import Landscape
 from player import Player, Monster
 from settings import WIDTH, HEIGHT, FPS, STEP
@@ -87,7 +87,10 @@ class Game:
 
     def render(self):
         self.screen.fill(pygame.Color(0, 0, 0))
-        all_sprites.draw(self.screen)
+        landscape_sprites.draw(self.screen)
+        obstacle_group.draw(self.screen)
+        monster_group.draw(self.screen)
+        player_group.draw(self.screen)
         all_sprites.update(self.screen)
         pygame.display.flip()
 
@@ -110,3 +113,17 @@ class Game:
                 if dx or dy:
                     self.player.step(dx, dy)
                     self.camera.follow()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    for monster in monster_group:
+                        if monster.rect.collidepoint(event.pos):
+                            print(f"clicked: {monster}")
+                            self.player.attack(monster)
+                elif event.button == 2:
+                    print(2)
+                elif event.button == 3:
+                    print(3)
+                elif event.button == 4:
+                    print(4)
+                elif event.button == 5:
+                    print(5)
