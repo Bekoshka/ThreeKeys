@@ -1,3 +1,4 @@
+from math import sqrt
 from random import randrange
 
 import pygame
@@ -103,9 +104,16 @@ class Attackable(Creature):
         self.damage = (15, 20)
 
     def attack(self, enemy):
-        self.image = self.attack_image
-        self.rect = self.image.get_rect(center=self.rect.center)
-        enemy.recieve_damage(randrange(*self.damage))
+        x1, y1, w, h = enemy.rect
+        x1, y1 = x1 + w // 2, y1 + h // 2
+        x2, y2, w, h = self.rect
+        x2, y2 = x2 + w // 2, y2 + h // 2
+        c = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+        if c < 130:
+            self.image = self.attack_image
+            self.rect = self.image.get_rect(center=self.rect.center)
+            enemy.recieve_damage(randrange(*self.damage))
 
 
 
