@@ -6,6 +6,7 @@ from common import all_sprites, monster_group, landscape_sprites, obstacle_group
 from landscape import Landscape
 from player import Player, Monster
 from settings import WIDTH, HEIGHT, FPS, STEP
+from tiles import Weapon, SLOT_LEFT_HAND, HealPotion, SLOT_RIGHT_HAND, Armor, SLOT_ARMOR
 from utils import load_image
 
 
@@ -72,8 +73,15 @@ class Game:
         self.screen = screen
         self.landscape = Landscape()
         self.landscape.generate_level()
-        self.monsters = [Monster(-3, 1)]
+        self.monsters = [Monster(3, 4)]
         self.player = Player(3, 5)
+        sword = Weapon("sword", "sword description", None, (15, 20), 50, SLOT_LEFT_HAND)
+        pot = HealPotion("ho", "hp desc", None, 10, SLOT_LEFT_HAND | SLOT_RIGHT_HAND)
+        armor = Armor("armor", "armor description", None, 15, SLOT_ARMOR)
+        self.player.ammunition.assign(sword, 1)
+        self.player.ammunition.assign(pot, 3)
+        self.monsters[0].ammunition.assign(armor, 2)
+
         self.camera = Camera(self.player, all_sprites)
         self.clock = pygame.time.Clock()
         self.running = False
@@ -95,35 +103,38 @@ class Game:
         pygame.display.flip()
 
     def handle_events(self):
+        dx, dy = 0, 0
+        enemy = None
+        button = 0
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            dx -= 1
+        if keys[pygame.K_RIGHT]:
+            dx += 1
+        if keys[pygame.K_UP]:
+            dy -= 1
+        if keys[pygame.K_DOWN]:
+            dy += 1
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
                 return
-            if event.type == pygame.KEYDOWN:
-                keys = pygame.key.get_pressed()
-                dx, dy = 0, 0
-                if keys[pygame.K_LEFT]:
-                    dx -= 1
-                if keys[pygame.K_RIGHT]:
-                    dx += 1
-                if keys[pygame.K_UP]:
-                    dy -= 1
-                if keys[pygame.K_DOWN]:
-                    dy += 1
-                if dx or dy:
-                    self.player.step(dx, dy)
-                    self.camera.follow()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
+                if event.button in [1, 3]:
                     for monster in monster_group:
                         if monster.rect.collidepoint(event.pos):
-                            print(f"clicked: {monster}")
-                            self.player.attack(monster)
-                elif event.button == 2:
-                    print(2)
-                elif event.button == 3:
-                    print(3)
-                elif event.button == 4:
-                    print(4)
-                elif event.button == 5:
-                    print(5)
+                            enemy = monster
+                            button = event.button
+
+        if enemy:
+            self.player.attack(enemy, button)
+        else:
+            self.player.step(dx, dy)
+            self.camera.follow()
+
+
+
+# TODO attack in move animation and not move animation
+# TODO FIX health bar animation
+
