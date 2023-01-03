@@ -1,7 +1,8 @@
 import itertools
 
 from common import player_group, monster_group
-from settings import KEY_COLOR, VECTORS_TO_DIRECTION, FPS
+from inventory import SmallHealPotion, Sword, LeftHand, RightHand
+from settings import KEY_COLOR, VECTORS_TO_DIRECTION, FPS, SLOT_RIGHT_HAND, SLOT_LEFT_HAND
 from tiles import Animation, Creature
 from utils import load_image
 
@@ -28,6 +29,11 @@ class Player(Creature):
             else:
                 animations[k] = Animation(images[k], 10, False)
         super().__init__(animations, 100, pos_x, pos_y, [player_group])
+        for i in range(7):
+            super().get_inventory().add_item(SmallHealPotion())
+        super().get_inventory().add_item(Sword())
+        self.get_ammunition().assign_default(LeftHand(), SLOT_LEFT_HAND)
+        self.get_ammunition().assign_default(RightHand(), SLOT_RIGHT_HAND)
 
 
 class Monster(Creature):

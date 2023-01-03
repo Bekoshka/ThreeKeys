@@ -2,11 +2,12 @@ import sys
 
 import pygame
 
-from common import all_sprites, monster_group, landscape_sprites, obstacle_group, player_group
+from common import all_sprites, monster_group, landscape_sprites, obstacle_group, player_group, inventory_hero_group, \
+    ammunition_hero_group
+from inventory import Weapon, HealPotion, Armor, SmallHealPotion, Sword, Hood
 from landscape import Landscape
 from player import Player, Monster
-from settings import WIDTH, HEIGHT, FPS, STEP
-from tiles import Weapon, SLOT_LEFT_HAND, HealPotion, SLOT_RIGHT_HAND, Armor, SLOT_ARMOR
+from settings import WIDTH, HEIGHT, FPS, SLOT_LEFT_HAND, SLOT_RIGHT_HAND, SLOT_ARMOR
 from utils import load_image
 
 
@@ -68,6 +69,8 @@ class Camera:
             self.apply(sprite)
 
 
+
+
 class Game:
     def __init__(self, screen):
         self.screen = screen
@@ -75,9 +78,9 @@ class Game:
         self.landscape.generate_level()
         self.monsters = [Monster(3, 4)]
         self.player = Player(3, 5)
-        sword = Weapon("sword", "sword description", None, (15, 20), 50, SLOT_LEFT_HAND)
-        pot = HealPotion("ho", "hp desc", None, 10, SLOT_LEFT_HAND | SLOT_RIGHT_HAND)
-        armor = Armor("armor", "armor description", None, 15, SLOT_ARMOR)
+        sword = Sword()
+        pot = SmallHealPotion()
+        armor = Hood()
         self.player.ammunition.assign(sword, 1)
         self.player.ammunition.assign(pot, 3)
         self.monsters[0].ammunition.assign(armor, 2)
@@ -126,7 +129,17 @@ class Game:
                         if monster.rect.collidepoint(event.pos):
                             enemy = monster
                             button = event.button
-
+                    for item in inventory_hero_group:
+                        if item.rect.collidepoint(event.pos):
+                            self.player.handle_inventory_item_click(item, button)
+                    for item in ammunition_hero_group:
+                        if item.rect.collidepoint(event.pos):
+                            self.player.handle_ammunition_item_click(item, button)
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_i:
+                    self.player.get_inventory().toggle_visibility()
+                if event.key == pygame.K_a:
+                    self.player.get_ammunition().toggle_visibility()
         if enemy:
             self.player.attack(enemy, button)
         else:
