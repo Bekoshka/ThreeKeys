@@ -75,7 +75,7 @@ class Game:
         self.landscape = Landscape()
         self.landscape.generate_level()
         self.player = Player(3, 5)
-        self.monsters = [Monster(3, 4, self)]
+        self.monsters = [Monster(3, 4, self), Monster(10, 20, self)]
 
         self.player.get_ammunition().assign(Sword(), SLOT_RIGHT_HAND)
         self.player.get_ammunition().assign(Hood(), SLOT_ARMOR)
@@ -155,8 +155,11 @@ class Game:
             self.camera.follow()
 
 # TODO universal load animation function
+# TODO player death animation
 # TODO FIX health bar animation
 # TODO MAKE SAVE
 # TODO MAKE NEWGAME LOAD BUTTONS
+# TODO LEVELS
+# TODO ANIMATED background
 # TODO MAKE GAME END TRIGGER ON EVENTS
 
