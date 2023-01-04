@@ -2,10 +2,12 @@ import sys
 
 import pygame
 
-from common import all_sprites, monster_group, landscape_sprites, obstacle_group, player_group
+from common import screen_map_group, monster_group, landscape_group, obstacle_group, player_group, \
+    buttons_group, slots_group, items_group
+from inventory import Sword, Hood
 from landscape import Landscape
 from player import Player, Monster
-from settings import WIDTH, HEIGHT, FPS, STEP
+from settings import WIDTH, HEIGHT, FPS, SLOT_LEFT_HAND, SLOT_RIGHT_HAND, SLOT_ARMOR, BUTTON_TO_SLOT
 from utils import load_image
 
 
@@ -72,9 +74,18 @@ class Game:
         self.screen = screen
         self.landscape = Landscape()
         self.landscape.generate_level()
-        self.monsters = [Monster(-3, 1)]
         self.player = Player(3, 5)
-        self.camera = Camera(self.player, all_sprites)
+        self.monsters = [Monster(3, 4, self), Monster(10, 20, self)]
+
+        self.player.get_ammunition().assign(Sword(), SLOT_RIGHT_HAND)
+        self.player.get_ammunition().assign(Hood(), SLOT_ARMOR)
+
+        self.monsters[0].get_ammunition().assign(Hood(), SLOT_ARMOR)
+        self.monsters[0].get_ammunition().assign(Sword(), SLOT_RIGHT_HAND)
+        self.monsters[0].get_inventory().add_item(Hood())
+        self.monsters[0].get_inventory().add_item(Sword())
+
+        self.camera = Camera(self.player, screen_map_group)
         self.clock = pygame.time.Clock()
         self.running = False
 
@@ -87,43 +98,68 @@ class Game:
 
     def render(self):
         self.screen.fill(pygame.Color(0, 0, 0))
-        landscape_sprites.draw(self.screen)
+
+        landscape_group.draw(self.screen)
         obstacle_group.draw(self.screen)
         monster_group.draw(self.screen)
         player_group.draw(self.screen)
-        all_sprites.update(self.screen)
+
+        screen_map_group.update(self.screen)
+
+        slots_group.draw(self.screen)
+        items_group.draw(self.screen)
+        buttons_group.draw(self.screen)
+        items_group.update(self.screen)
         pygame.display.flip()
 
     def handle_events(self):
+        dx, dy = 0, 0
+        enemy = None
+        button = 0
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            dx -= 1
+        if keys[pygame.K_RIGHT]:
+            dx += 1
+        if keys[pygame.K_UP]:
+            dy -= 1
+        if keys[pygame.K_DOWN]:
+            dy += 1
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
                 return
-            if event.type == pygame.KEYDOWN:
-                keys = pygame.key.get_pressed()
-                dx, dy = 0, 0
-                if keys[pygame.K_LEFT]:
-                    dx -= 1
-                if keys[pygame.K_RIGHT]:
-                    dx += 1
-                if keys[pygame.K_UP]:
-                    dy -= 1
-                if keys[pygame.K_DOWN]:
-                    dy += 1
-                if dx or dy:
-                    self.player.step(dx, dy)
-                    self.camera.follow()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
+                if event.button in [1, 3]:
                     for monster in monster_group:
                         if monster.rect.collidepoint(event.pos):
-                            print(f"clicked: {monster}")
-                            self.player.attack(monster)
-                elif event.button == 2:
-                    print(2)
-                elif event.button == 3:
-                    print(3)
-                elif event.button == 4:
-                    print(4)
-                elif event.button == 5:
-                    print(5)
+                            enemy = monster
+                            button = event.button
+                    for slot in slots_group:
+                        if slot.rect.collidepoint(event.pos):
+                            slot.click()
+                    for btn in buttons_group:
+                        if btn.rect.collidepoint(event.pos):
+                            btn.click()
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_i:
+                    self.player.get_inventory().set_visibility(True, True)
+                if event.key == pygame.K_a:
+                    self.player.get_ammunition().set_visibility(True)
+        if enemy:
+            self.player.apply_or_loot(enemy, BUTTON_TO_SLOT[button])
+        else:
+            self.player.step(dx, dy)
+            self.camera.follow()
+
+# TODO universal load animation function
+# TODO player death animation
+# TODO FIX health bar animation
+# TODO MAKE SAVE
+# TODO MAKE NEWGAME LOAD BUTTONS
+# TODO LEVELS
+# TODO ANIMATED background
+# TODO MAKE GAME END TRIGGER ON EVENTS
+

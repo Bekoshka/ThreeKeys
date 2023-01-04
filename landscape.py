@@ -31,13 +31,13 @@ class Rock(Obstacle):
 
 landscape_dict = {
     ".": Grass,
-    "#": Sand,
-    '!': Forest
+    "#": Sand
 }
 
 obstacle_dict = {
     "#": Box,
-    "$": Rock
+    "$": Rock,
+    '!': Forest
 }
 
 
