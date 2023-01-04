@@ -2,12 +2,12 @@ import sys
 
 import pygame
 
-from common import all_sprites, monster_group, landscape_sprites, obstacle_group, player_group, inventory_hero_group, \
-    ammunition_hero_group
-from inventory import Weapon, HealPotion, Armor, SmallHealPotion, Sword, Hood
+from common import screen_map_group, monster_group, landscape_group, obstacle_group, player_group, \
+    buttons_group, slots_group, items_group
+from inventory import Sword, Hood
 from landscape import Landscape
 from player import Player, Monster
-from settings import WIDTH, HEIGHT, FPS, SLOT_LEFT_HAND, SLOT_RIGHT_HAND, SLOT_ARMOR
+from settings import WIDTH, HEIGHT, FPS, SLOT_LEFT_HAND, SLOT_RIGHT_HAND, SLOT_ARMOR, BUTTON_TO_SLOT
 from utils import load_image
 
 
@@ -69,23 +69,23 @@ class Camera:
             self.apply(sprite)
 
 
-
-
 class Game:
     def __init__(self, screen):
         self.screen = screen
         self.landscape = Landscape()
         self.landscape.generate_level()
-        self.monsters = [Monster(3, 4)]
         self.player = Player(3, 5)
-        sword = Sword()
-        pot = SmallHealPotion()
-        armor = Hood()
-        self.player.ammunition.assign(sword, 1)
-        self.player.ammunition.assign(pot, 3)
-        self.monsters[0].ammunition.assign(armor, 2)
+        self.monsters = [Monster(3, 4, self)]
 
-        self.camera = Camera(self.player, all_sprites)
+        self.player.get_ammunition().assign(Sword(), SLOT_RIGHT_HAND)
+        self.player.get_ammunition().assign(Hood(), SLOT_ARMOR)
+
+        self.monsters[0].get_ammunition().assign(Hood(), SLOT_ARMOR)
+        self.monsters[0].get_ammunition().assign(Sword(), SLOT_RIGHT_HAND)
+        self.monsters[0].get_inventory().add_item(Hood())
+        self.monsters[0].get_inventory().add_item(Sword())
+
+        self.camera = Camera(self.player, screen_map_group)
         self.clock = pygame.time.Clock()
         self.running = False
 
@@ -98,11 +98,18 @@ class Game:
 
     def render(self):
         self.screen.fill(pygame.Color(0, 0, 0))
-        landscape_sprites.draw(self.screen)
+
+        landscape_group.draw(self.screen)
         obstacle_group.draw(self.screen)
         monster_group.draw(self.screen)
         player_group.draw(self.screen)
-        all_sprites.update(self.screen)
+
+        screen_map_group.update(self.screen)
+
+        slots_group.draw(self.screen)
+        items_group.draw(self.screen)
+        buttons_group.draw(self.screen)
+        items_group.update(self.screen)
         pygame.display.flip()
 
     def handle_events(self):
@@ -129,25 +136,27 @@ class Game:
                         if monster.rect.collidepoint(event.pos):
                             enemy = monster
                             button = event.button
-                    for item in inventory_hero_group:
-                        if item.rect.collidepoint(event.pos):
-                            self.player.handle_inventory_item_click(item, button)
-                    for item in ammunition_hero_group:
-                        if item.rect.collidepoint(event.pos):
-                            self.player.handle_ammunition_item_click(item, button)
+                    for slot in slots_group:
+                        if slot.rect.collidepoint(event.pos):
+                            slot.click()
+                    for btn in buttons_group:
+                        if btn.rect.collidepoint(event.pos):
+                            btn.click()
+
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_i:
-                    self.player.get_inventory().toggle_visibility()
+                    self.player.get_inventory().set_visibility(True, True)
                 if event.key == pygame.K_a:
-                    self.player.get_ammunition().toggle_visibility()
+                    self.player.get_ammunition().set_visibility(True)
         if enemy:
-            self.player.attack(enemy, button)
+            self.player.apply_or_loot(enemy, BUTTON_TO_SLOT[button])
         else:
             self.player.step(dx, dy)
             self.camera.follow()
 
-
-
-# TODO attack in move animation and not move animation
+# TODO universal load animation function
 # TODO FIX health bar animation
+# TODO MAKE SAVE
+# TODO MAKE NEWGAME LOAD BUTTONS
+# TODO MAKE GAME END TRIGGER ON EVENTS
 

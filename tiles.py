@@ -1,8 +1,9 @@
 import pygame
 
-from common import all_sprites, landscape_sprites, obstacle_group
-from inventory import Ammunition, Inventory, SmallHealPotion
-from settings import tile_width, tile_height, STEP, BUTTON_TO_SLOT
+from common import screen_map_group, landscape_group, obstacle_group
+from inventory import Ammunition, Inventory
+from settings import tile_width, tile_height, STEP, LOOT_RANGE
+from utils import calculate_sprite_range
 
 
 class Animation:
@@ -36,14 +37,14 @@ class Animation:
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, image, pos_x, pos_y, groups):
-        super().__init__(all_sprites, *groups)
+        super().__init__(screen_map_group, *groups)
         self.image = image
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
 
 class Background(Tile):
     def __init__(self, image, pos_x, pos_y):
-        super().__init__(image, pos_x, pos_y, [landscape_sprites])
+        super().__init__(image, pos_x, pos_y, [landscape_group])
 
 
 class Obstacle(Tile):
@@ -101,7 +102,7 @@ class Creature(Movable):
         self.health_points = self.max_health_points = max_health_points
         self.health_points = self.max_health_points
         self.ammunition = Ammunition(self)
-        self.inventory = Inventory(True)
+        self.inventory = Inventory(self)
 
     def get_inventory(self):
         return self.inventory
@@ -125,31 +126,49 @@ class Creature(Movable):
         self.inventory.update(screen)
         self.ammunition.update(screen)
 
-
     def recieve_damage(self, damage):
         clean_damage = self.ammunition.reduce_damage(damage)
         print(damage, "->", clean_damage)
         if clean_damage > 0:
             self.health_points -= min([clean_damage, self.health_points])
-        if not self.health_points:
-            self.kill()
 
-    def increase_hp(self, hp):
+    def recieve_heal(self, hp):
         self.health_points += hp
         self.health_points = min(self.health_points, self.max_health_points)
 
-    def attack(self, enemy, button):
+    def get_health_points(self):
+        return self.health_points
+
+    def step(self, dx, dy):
+        if self.health_points:
+            super().step(dx, dy)
+
+    def apply(self, creature, slot):
+        if not self.health_points:
+            return
+        if not creature.get_health_points():
+            return
         super().change_animation(0, 0, 1)
-        desired_slot = 0
-        if button in BUTTON_TO_SLOT.keys():
-            desired_slot = BUTTON_TO_SLOT[button]
-        self.ammunition.apply(desired_slot, self, enemy)
+        self.ammunition.apply(slot, self, creature)
 
-    def handle_inventory_item_click(self, item, button):
-        print("handle_inventory_item_click", item, button)
+    def can_apply(self, creature, slot):
+        if not self.health_points:
+            return False
+        if not creature.get_health_points():
+            return False
+        return self.ammunition.can_apply(slot, self, creature)
 
-    def handle_ammunition_item_click(self, item, button):
-        print("handle_ammunition_item_click", item, button)
+    def loot(self, creature):
+        if not self.health_points:
+            return
+        if calculate_sprite_range(self, creature) < LOOT_RANGE:
+            creature.get_inventory().set_visibility(True)
+
+    def apply_or_loot(self, enemy, slot):
+        if not enemy.get_health_points():
+            self.loot(enemy)
+        else:
+            self.apply(enemy, slot)
 
 
 

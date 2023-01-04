@@ -1,16 +1,27 @@
-from common import all_sprites, items_group, inventory_hero_group, ammunition_hero_group
-from settings import SIZE, WIDTH, HEIGHT
+from common import buttons_group, slots_group, items_group, selected_slot, right_side_menu_open
+from settings import WIDTH, HEIGHT, INVENTORY_DIMENTION, INVENTORY_ITEM_SIZE, INVENTORY_BORDER, AMMUNITION_SLOTS
 from random import randrange
 
 import pygame
 
 from settings import SLOT_ARMOR, SLOT_LEFT_HAND, SLOT_RIGHT_HAND, BUTTON_TO_SLOT, KEY_COLOR
-from utils import load_image
+from utils import load_image, calculate_sprite_range
+
+
+class Button(pygame.sprite.Sprite):
+    def __init__(self, image, method, x, y, groups):
+        super().__init__(*groups)
+        self.method = method
+        self.image = image
+        self.rect = self.image.get_rect().move(x, y)
+
+    def click(self):
+        self.method()
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, name, description, image, slot_type):
-        super().__init__(items_group)
+    def __init__(self, name, description, image, slot_type,):
+        super().__init__()
         self.name = name
         self.description = description
         self.image = image
@@ -18,143 +29,207 @@ class Item(pygame.sprite.Sprite):
         self.slot_type = slot_type
 
 
-    # def take_to_inventory(self):
+class Slot(pygame.sprite.Sprite):
+    def __init__(self, image, x, y, groups, type=None):
+        super().__init__(*groups)
+        self.image = image
+        self.rect = self.image.get_rect().move(x, y)
+        self.item = None
+        self.default_item = None
+        self.type = type
+
+    def assigned_item(self):
+        if self.item:
+            return self.item
+        else:
+            if self.default_item:
+                return self.default_item
+        return None
+
+    def assign(self, item):
+        if self.can_assign_item(item):
+            if self.item is None and self.default_item:
+                self.default_item.kill()
+            self.item = item
+
+    def can_assign_item(self, item):
+        if item is None:
+            return True
+        if self.type is None:
+            return True
+        return item.slot_type & self.type
+
+    def assign_default(self, item):
+        self.default_item = item
+
+    def click(self):
+        global selected_slot
+        if selected_slot:
+            if self.item:
+                i = self.item
+                si = selected_slot.item
+                if selected_slot.can_assign_item(i) and self.can_assign_item(si):
+                    selected_slot.assign(i)
+                    self.assign(si)
+                    selected_slot = None
+            else:
+                si = selected_slot.item
+                if self.can_assign_item(si):
+                    selected_slot.assign(None)
+                    self.assign(si)
+                    selected_slot = None
+        else:
+            selected_slot = self
 
 
 class Inventory:
-    def __init__(self, is_hero=False):
-        self.is_hero = is_hero
+    def __init__(self, creature):
+        self.creature = creature
+        self.is_left = False
         self.items = dict()
         self.is_visible = False
+        self.close_button = Button(load_image("close.png", KEY_COLOR), self.close, 0, 0, [])
+        self.slots = dict()
+        for i in range(INVENTORY_DIMENTION):
+            for j in range(INVENTORY_DIMENTION):
+                self.slots[i, j] = Slot(
+                    load_image("slot.png", resize=True, size=(INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2)), 0, 0, [])
 
-    def toggle_visibility(self):
-        self.is_visible ^= 1
+    def close(self):
+        global right_side_menu_open
+        if not self.is_left:
+            right_side_menu_open = None
+        self.is_visible = False
+
+    def set_visibility(self, is_visible, is_left=False):
+        global right_side_menu_open
+        if not is_left and is_visible:
+            if right_side_menu_open:
+                right_side_menu_open.close()
+            right_side_menu_open = self
+        self.is_left = is_left
+        self.is_visible = is_visible
 
     def add_item(self, item):
-        for i in range(5):
-            for j in range(5):
-                if (i, j) in self.items.keys():
+        for i in range(INVENTORY_DIMENTION):
+            for j in range(INVENTORY_DIMENTION):
+                slot_item = self.slots[i, j].assigned_item()
+                if slot_item:
                     continue
-                self.items[i, j] = item
+                self.slots[i, j].assign(item)
                 return True
         return False
 
     def update(self, screen):
+        global selected_slot
         if not self.is_visible:
-            inventory_hero_group.empty()
+            self.close_button.kill()
+            for slot in self.slots.values():
+                slot.kill()
+                if slot == selected_slot:
+                    selected_slot = None
+                item = slot.assigned_item()
+                if item:
+                    item.kill()
             return
-        if self.is_hero:
-            x = 0
-        else:
-            x = WIDTH // 2
+        x = 0 if self.is_left else WIDTH // 2
+        if buttons_group not in self.close_button.groups():
+            buttons_group.add(self.close_button)
         rect = pygame.Rect(x, 0, WIDTH // 2, HEIGHT)
         pygame.draw.rect(screen, (50, 50, 50), rect)
-        br = 10
-        item_size = WIDTH // 10
-        for i in range(5):
-            for j in range(5):
-                rect = pygame.Rect(br + x + item_size * j, br + (HEIGHT - item_size * 5) // 2 + item_size * i,
-                                   item_size - br * 2, item_size - br * 2)
-                pygame.draw.rect(screen, (100, 100, 100), rect)
-                if (i, j) in self.items.keys():
-                    item = self.items[i, j]
+
+        for i in range(INVENTORY_DIMENTION):
+            for j in range(INVENTORY_DIMENTION):
+                slot = self.slots[i, j]
+                if slots_group not in slot.groups():
+                    slots_group.add(slot)
+                rect = slot.rect
+                rect.x = INVENTORY_BORDER + x + INVENTORY_ITEM_SIZE * j
+                rect.y = INVENTORY_BORDER + (
+                            HEIGHT - INVENTORY_ITEM_SIZE * INVENTORY_DIMENTION) // 2 + INVENTORY_ITEM_SIZE * i
+                item = slot.assigned_item()
+                if item:
                     item.rect.x = rect.topleft[0]
                     item.rect.y = rect.topleft[1]
-                    inventory_hero_group.add(item)
-        inventory_hero_group.draw(screen)
-
+                    if items_group not in item.groups():
+                        items_group.add(item)
+        self.close_button.rect.x = x
 
 
 class Ammunition:
     def __init__(self, creature):
         self.creature = creature
         self.slots = dict()
-        self.slots[SLOT_ARMOR] = None
-        self.slots[SLOT_LEFT_HAND] = None
-        self.slots[SLOT_RIGHT_HAND] = None
-        self.default_slots = dict()
-        self.default_slots[SLOT_ARMOR] = None
-        self.default_slots[SLOT_LEFT_HAND] = None
-        self.default_slots[SLOT_RIGHT_HAND] = None
+        for k in AMMUNITION_SLOTS.keys():
+            v = AMMUNITION_SLOTS[k]
+            self.slots[k] = Slot(load_image("slot.png", resize=True, size=v[0]), v[1], v[2], [], k)
+        self.is_visible = False
+        self.close_button = Button(load_image("close.png", KEY_COLOR), self.close, WIDTH // 2, 0, [])
+
+    def close(self):
+        global right_side_menu_open
+        right_side_menu_open = None
         self.is_visible = False
 
-    def toggle_visibility(self):
-        self.is_visible ^= 1
+    def set_visibility(self, is_visible):
+        self.is_visible = is_visible
+        global right_side_menu_open
+        if is_visible:
+            if right_side_menu_open:
+                right_side_menu_open.close()
+            right_side_menu_open = self
 
     def assign_default(self, item, slot):
         if slot in self.slots.keys():
-            self.slots[slot] = item
-            self.default_slots = item
+            self.slots[slot].assign_default(item)
             return True
         return False
 
-    def assign(self, item, button):
-        desired_slot = 0
-        if button in BUTTON_TO_SLOT.keys():
-            desired_slot = BUTTON_TO_SLOT[button]
-        if item.slot_type & desired_slot:
-            self.slots[desired_slot] = item
-            return True
-        return False
-
-    def unassign(self, button):
-        desired_slot = 0
-        if button in BUTTON_TO_SLOT.keys():
-            desired_slot = BUTTON_TO_SLOT[button]
-        if desired_slot in self.slots.keys():
-            if desired_slot in self.default_slots.keys():
-                self.slots[desired_slot] = self.default_slots[desired_slot]
-            else:
-                self.slots[desired_slot] = None
-            return True
-        return False
+    def assign(self, item, slot):
+        self.slots[slot].assign(item)
 
     def reduce_damage(self, damage):
-        if self.slots[SLOT_ARMOR]:
-            reduced_damage = self.slots[SLOT_ARMOR].reduce_damage(damage)
+        if self.slots[SLOT_ARMOR].assigned_item():
+            reduced_damage = self.slots[SLOT_ARMOR].assigned_item().reduce_damage(damage)
             return reduced_damage
         return damage
 
     def apply(self, slot, actor, creature):
-        if slot in self.slots.keys() and self.slots[slot]:
-            self.slots[slot].apply(actor, creature)
+        if slot in self.slots.keys() and self.slots[slot].assigned_item():
+            self.slots[slot].assigned_item().apply(actor, creature)
+
+    def can_apply(self, slot, actor, creature):
+        if slot in self.slots.keys() and self.slots[slot].assigned_item():
+            return self.slots[slot].assigned_item().can_apply(actor, creature)
+        return False
 
     def update(self, screen):
+        global selected_slot
         if not self.is_visible:
-            ammunition_hero_group.empty()
+            self.close_button.kill()
+            for slot in self.slots.values():
+                slot.kill()
+                if slot == selected_slot:
+                    selected_slot = None
+                item = slot.assigned_item()
+                if item:
+                    item.kill()
             return
+        if buttons_group not in self.close_button.groups():
+            buttons_group.add(self.close_button)
         rect = pygame.Rect(WIDTH // 2, 0, WIDTH // 2, HEIGHT)
         pygame.draw.rect(screen, (50, 50, 50), rect)
-        br = 10
-        item_size = WIDTH // 10
-        rect_armor = pygame.Rect(WIDTH // 2 + WIDTH // 4 - item_size // 2, (HEIGHT) // 4,
-                           item_size - br * 2, item_size - br * 2)
 
-        rect_right_hand = pygame.Rect(WIDTH // 2 + WIDTH // 4 - item_size * 1.5 , (HEIGHT) // 2,
-                                 item_size - br * 2, item_size - br * 2)
-        rect_left_hand = pygame.Rect(WIDTH // 2 + WIDTH // 4 + item_size * 0.5, (HEIGHT) // 2,
-                                    item_size - br * 2, item_size - br * 2)
-        pygame.draw.rect(screen, (100, 100, 100), rect_armor)
-        pygame.draw.rect(screen, (100, 100, 100), rect_left_hand)
-        pygame.draw.rect(screen, (100, 100, 100), rect_right_hand)
-
-        if self.slots[SLOT_LEFT_HAND]:
-            item = self.slots[SLOT_LEFT_HAND]
-            item.rect.x = rect_left_hand.topleft[0]
-            item.rect.y = rect_left_hand.topleft[1]
-            ammunition_hero_group.add(item)
-        if self.slots[SLOT_RIGHT_HAND]:
-            item = self.slots[SLOT_RIGHT_HAND]
-            item.rect.x = rect_right_hand.topleft[0]
-            item.rect.y = rect_right_hand.topleft[1]
-            ammunition_hero_group.add(item)
-        if self.slots[SLOT_ARMOR]:
-            item = self.slots[SLOT_ARMOR]
-            item.rect.x = rect_armor.topleft[0]
-            item.rect.y = rect_armor.topleft[1]
-            ammunition_hero_group.add(item)
-
-        ammunition_hero_group.draw(screen)
+        for k in AMMUNITION_SLOTS.keys():
+            slot = self.slots[k]
+            if slots_group not in slot.groups():
+                slots_group.add(slot)
+            item = slot.assigned_item()
+            if item:
+                item.rect.x = slot.rect.topleft[0]
+                item.rect.y = slot.rect.topleft[1]
+                if items_group not in item.groups():
+                    items_group.add(item)
 
 
 class Weapon(Item):
@@ -164,13 +239,13 @@ class Weapon(Item):
         self.range = range
 
     def apply(self, actor, creature):
-        x1, y1, w, h = creature.rect
-        x1, y1 = x1 + w // 2, y1 + h // 2
-        x2, y2, w, h = actor.rect
-        x2, y2 = x2 + w // 2, y2 + h // 2
-        c = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
-        if c < self.range:
+        can_apply = self.can_apply(actor, creature)
+        if can_apply:
             creature.recieve_damage(randrange(*self.damage))
+        return can_apply
+
+    def can_apply(self, actor, creature):
+        return calculate_sprite_range(actor, creature) < self.range
 
 
 class Armor(Item):
@@ -189,30 +264,43 @@ class HealPotion(Item):
     def __init__(self, name, description, image, heal_points, slot_type):
         super().__init__(name, description, image, slot_type)
         self.heal_points = heal_points
+        self.range = 50
 
-    def apply(self, _, creature):
-        creature.increase_hp(self.heal_points)
+    def apply(self, actor, creature):
+        can_apply = self.can_apply(actor, creature)
+        print("CAN HEAL", can_apply)
+        if can_apply:
+            creature.recieve_heal(self.heal_points)
+        return can_apply
+
+    def can_apply(self, actor, creature):
+        return calculate_sprite_range(actor, creature) < self.range
 
 
 class SmallHealPotion(HealPotion):
     def __init__(self):
-        super().__init__("Small Heal Potion", "Small Heal Potion", load_image("shp.png", KEY_COLOR), 10, SLOT_LEFT_HAND | SLOT_RIGHT_HAND)
+        super().__init__("Small Heal Potion", "Small Heal Potion", load_image("shp.png", KEY_COLOR), 10,
+                         SLOT_LEFT_HAND | SLOT_RIGHT_HAND)
 
 
 class Hood(Armor):
-        def __init__(self):
-            super().__init__("Hood", "Hood description", load_image("hood.png", KEY_COLOR), 15, SLOT_ARMOR)
+    def __init__(self):
+        super().__init__("Hood", "Hood description", load_image("hood.png", KEY_COLOR), 15, SLOT_ARMOR)
+
 
 class Sword(Weapon):
-     def __init__(self):
-        super().__init__("Sword", "Sword description", load_image("sword.png", KEY_COLOR), (15, 20), 50, SLOT_LEFT_HAND)
+    def __init__(self):
+        super().__init__("Sword", "Sword description", load_image("sword.png", KEY_COLOR), (15, 30), 70,
+                         SLOT_RIGHT_HAND)
 
 
 class LeftHand(Weapon):
     def __init__(self):
-        super().__init__("Sword", "Sword description", load_image("left_hand.png", KEY_COLOR), (1, 2), 50, SLOT_LEFT_HAND)
+        super().__init__("Sword", "Sword description", load_image("left_hand.png", KEY_COLOR), (1, 2), 30,
+                         SLOT_LEFT_HAND)
 
 
 class RightHand(Weapon):
     def __init__(self):
-        super().__init__("Sword", "Sword description", load_image("right_hand.png", KEY_COLOR), (3, 4), 50, SLOT_RIGHT_HAND)
+        super().__init__("Sword", "Sword description", load_image("right_hand.png", KEY_COLOR), (3, 4), 30,
+                         SLOT_RIGHT_HAND)
