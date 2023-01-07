@@ -20,7 +20,7 @@ class Button(pygame.sprite.Sprite):
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, name, description, image, slot_type,):
+    def __init__(self, name, description, image, slot_type):
         super().__init__()
         self.name = name
         self.description = description
@@ -174,7 +174,7 @@ class Ammunition:
     def set_visibility(self, is_visible):
         self.is_visible = is_visible
         global right_side_menu_open
-        if is_visible:
+        if not self.is_visible and is_visible:
             if right_side_menu_open:
                 right_side_menu_open.close()
             right_side_menu_open = self
@@ -196,7 +196,10 @@ class Ammunition:
 
     def apply(self, slot, actor, creature):
         if slot in self.slots.keys() and self.slots[slot].assigned_item():
-            self.slots[slot].assigned_item().apply(actor, creature)
+            item = self.slots[slot].assigned_item()
+            if item.apply(actor, creature):
+                self.slots[slot].assign(None)
+                item.kill()
 
     def can_apply(self, slot, actor, creature):
         if slot in self.slots.keys() and self.slots[slot].assigned_item():
@@ -242,7 +245,7 @@ class Weapon(Item):
         can_apply = self.can_apply(actor, creature)
         if can_apply:
             creature.recieve_damage(randrange(*self.damage))
-        return can_apply
+        return False
 
     def can_apply(self, actor, creature):
         return calculate_sprite_range(actor, creature) < self.range
@@ -261,20 +264,29 @@ class Armor(Item):
 
 
 class HealPotion(Item):
-    def __init__(self, name, description, image, heal_points, slot_type):
+    def __init__(self, name, description, image, heal_points, slot_type, count=1):
         super().__init__(name, description, image, slot_type)
         self.heal_points = heal_points
         self.range = 50
+        self.count = count
 
     def apply(self, actor, creature):
         can_apply = self.can_apply(actor, creature)
-        print("CAN HEAL", can_apply)
         if can_apply:
             creature.recieve_heal(self.heal_points)
-        return can_apply
+            self.count = max([self.count - 1, 0])
+        return not self.count
 
     def can_apply(self, actor, creature):
         return calculate_sprite_range(actor, creature) < self.range
+
+    def update(self, screen):
+        font = pygame.font.Font(None, 30)
+        string_rendered = font.render(str(self.count), True, pygame.Color('white'))
+        intro_rect = string_rendered.get_rect()
+        intro_rect.bottom = self.rect.bottom
+        intro_rect.right = self.rect.right
+        screen.blit(string_rendered, intro_rect)
 
 
 class SmallHealPotion(HealPotion):

@@ -1,3 +1,4 @@
+import os
 import sys
 
 import pygame
@@ -6,8 +7,9 @@ from common import screen_map_group, monster_group, landscape_group, obstacle_gr
     buttons_group, slots_group, items_group
 from inventory import Sword, Hood
 from landscape import Landscape
-from player import Player, Monster
-from settings import WIDTH, HEIGHT, FPS, SLOT_LEFT_HAND, SLOT_RIGHT_HAND, SLOT_ARMOR, BUTTON_TO_SLOT
+from player import Player, Monster1, Monster2, Monster
+from settings import WIDTH, HEIGHT, FPS, SLOT_LEFT_HAND, SLOT_RIGHT_HAND, SLOT_ARMOR, BUTTON_TO_SLOT, DATA_DIR
+from tiles import Tile
 from utils import load_image
 
 
@@ -72,18 +74,13 @@ class Camera:
 class Game:
     def __init__(self, screen):
         self.screen = screen
-        self.landscape = Landscape()
-        self.landscape.generate_level()
-        self.player = Player(3, 5)
-        self.monsters = [Monster(3, 4, self), Monster(10, 20, self)]
 
+        self.player = Player(3, 5)
         self.player.get_ammunition().assign(Sword(), SLOT_RIGHT_HAND)
         self.player.get_ammunition().assign(Hood(), SLOT_ARMOR)
 
-        self.monsters[0].get_ammunition().assign(Hood(), SLOT_ARMOR)
-        self.monsters[0].get_ammunition().assign(Sword(), SLOT_RIGHT_HAND)
-        self.monsters[0].get_inventory().add_item(Hood())
-        self.monsters[0].get_inventory().add_item(Sword())
+        self.landscape = Landscape()
+        self.landscape.generate_level(self.player)
 
         self.camera = Camera(self.player, screen_map_group)
         self.clock = pygame.time.Clock()
@@ -154,12 +151,22 @@ class Game:
             self.player.step(dx, dy)
             self.camera.follow()
 
-# TODO universal load animation function
-# TODO player death animation
-# TODO FIX health bar animation
+# TODO FIX health bar animation BUG!!
+
+
+# TODO ITEM union of same type
+# TODO MOVE ASSIGNED ITEMS TO INVENTORY AFTER DEATH
+# TODO ITEM STACKS (LOW priority)
+
+
 # TODO MAKE SAVE
 # TODO MAKE NEWGAME LOAD BUTTONS
 # TODO LEVELS
-# TODO ANIMATED background
 # TODO MAKE GAME END TRIGGER ON EVENTS
+
+# TODO RANGE WEAPON
+
+# оружия с характеристиками и у каких мобов будут
+# 3 уровня
+# сценарии
 
