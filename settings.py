@@ -3,7 +3,7 @@ SIZE = WIDTH, HEIGHT = 1280, 720
 STEP = 10
 tile_width = tile_height = 50
 
-KEY_COLOR = (0xff, 0x5c, 0xf9)
+KEY_COLOR = -1
 
 VECTORS_TO_DIRECTION = {
     (1, 0): "R",

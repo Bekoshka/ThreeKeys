@@ -21,12 +21,12 @@ class Forest(Obstacle):
 
 class Box(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('box.png'), pos_x, pos_y)
+        super().__init__(load_image('wall.png'), pos_x, pos_y)
 
 
 class Rock(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('rock.png', color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=True), pos_x, pos_y)
+        super().__init__(load_image('rock.png', color_key=-1, resize=True), pos_x, pos_y)
 
 
 landscape_dict = {
