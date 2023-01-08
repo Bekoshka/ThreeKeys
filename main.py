@@ -8,5 +8,7 @@ pygame.init()
 
 screen = pygame.display.set_mode(SIZE)
 
-StartScreen(screen).run()
-Game(screen).run()
+save = None
+while True:
+    StartScreen(screen).run()
+    Game(screen).run()

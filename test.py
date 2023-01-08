@@ -33,4 +33,4 @@ from utils import load_image
 
 
 # make_dirs("player", 10)
-load_animation("player")
+# load_animation("player")

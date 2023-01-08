@@ -1,9 +1,15 @@
 import pygame
+import smokesignal
 
 from common import screen_map_group, landscape_group, obstacle_group
 from inventory import Ammunition, Inventory
-from settings import tile_width, tile_height, STEP, LOOT_RANGE, ANIMATION_MOVE, ANIMATION_ATTACK, ANIMATION_DEATH
+from settings import STEP, LOOT_RANGE, EVENT_MONSTER_DEAD, EVENT_DAMAGE_RECIEVED
 from utils import calculate_sprite_range
+
+
+ANIMATION_MOVE = "move"
+ANIMATION_ATTACK = "attack-sword"
+ANIMATION_DEATH = "death"
 
 
 class Tile(pygame.sprite.Sprite):
@@ -94,6 +100,10 @@ class Creature(Movable):
         self.health_points = self.max_health_points
         self.ammunition = Ammunition(self)
         self.inventory = Inventory(self)
+        self.dead = False
+
+    def is_dead(self):
+        return self.dead
 
     def get_inventory(self):
         return self.inventory
@@ -114,16 +124,19 @@ class Creature(Movable):
         super().update(screen)
         self.inventory.update(screen)
         self.ammunition.update(screen)
-        if self.health_points:
+        if not self.is_dead():
             self.render_health(screen)
 
     def recieve_damage(self, damage):
         clean_damage = self.ammunition.reduce_damage(damage)
-        print(damage, "->", clean_damage)
+        smokesignal.emit(EVENT_DAMAGE_RECIEVED, type(self).__name__, damage, clean_damage)
         if clean_damage > 0:
             self.health_points -= min([clean_damage, self.health_points])
         if not self.health_points:
+            self.dead = True
             self.change_animation(ANIMATION_DEATH)
+            self.ammunition.drop_to_inventory(self.inventory)
+            smokesignal.emit(EVENT_MONSTER_DEAD, type(self).__name__)
 
     def recieve_heal(self, hp):
         self.health_points += hp
@@ -133,32 +146,28 @@ class Creature(Movable):
         return self.health_points
 
     def step(self, dx, dy):
-        if self.health_points:
+        if not self.is_dead():
             super().step(dx, dy)
 
     def apply(self, creature, slot):
-        if not self.health_points:
-            return
-        if not creature.get_health_points():
+        if self.is_dead() or creature.is_dead():
             return
         super().change_animation("_".join([ANIMATION_ATTACK, "0", "-1"]))
         self.ammunition.apply(slot, self, creature)
 
     def can_apply(self, creature, slot):
-        if not self.health_points:
-            return False
-        if not creature.get_health_points():
-            return False
+        if self.is_dead() or creature.is_dead():
+            return
         return self.ammunition.can_apply(slot, self, creature)
 
     def loot(self, creature):
-        if not self.health_points:
+        if self.is_dead():
             return
         if calculate_sprite_range(self, creature) < LOOT_RANGE:
-            creature.get_inventory().set_visibility(True)
+            creature.get_inventory().open()
 
     def apply_or_loot(self, enemy, slot):
-        if not enemy.get_health_points():
+        if enemy.is_dead():
             self.loot(enemy)
         else:
             self.apply(enemy, slot)

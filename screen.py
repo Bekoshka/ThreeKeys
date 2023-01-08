@@ -4,10 +4,11 @@ import sys
 import pygame
 
 from common import screen_map_group, monster_group, landscape_group, obstacle_group, player_group, \
-    buttons_group, slots_group, items_group
-from inventory import Sword, Hood
-from landscape import Landscape
-from player import Player, Monster1, Monster2, Monster
+    buttons_group, slots_group, items_group, init_common
+from events import ScenarioLevel1
+from items import Sword, Hood
+from creatures import Player, Monster1, Monster2, Monster
+from levels import Landscape
 from settings import WIDTH, HEIGHT, FPS, SLOT_LEFT_HAND, SLOT_RIGHT_HAND, SLOT_ARMOR, BUTTON_TO_SLOT, DATA_DIR
 from tiles import Tile
 from utils import load_image
@@ -17,9 +18,9 @@ class StartScreen:
     def __init__(self, screen):
         self.screen = screen
         self.intro_text = ["ЗАСТАВКА", "",
-                      "Правила игры",
-                      "Если в правилах несколько строк,",
-                      "приходится выводить их построчно"]
+                           "Правила игры",
+                           "Если в правилах несколько строк,",
+                           "приходится выводить их построчно"]
 
     def run(self):
         fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
@@ -40,9 +41,8 @@ class StartScreen:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
-                elif event.type == pygame.KEYDOWN or \
-                        event.type == pygame.MOUSEBUTTONDOWN:
-                    return  # начинаем игру
+                elif event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
+                    return
 
     def terminate(self):
         pygame.quit()
@@ -73,17 +73,15 @@ class Camera:
 
 class Game:
     def __init__(self, screen):
+        init_common()
+        self.cs = ScenarioLevel1()
         self.screen = screen
-
-        self.player = Player(3, 5)
-        self.player.get_ammunition().assign(Sword(), SLOT_RIGHT_HAND)
-        self.player.get_ammunition().assign(Hood(), SLOT_ARMOR)
-
-        self.landscape = Landscape()
-        self.landscape.generate_level(self.player)
-
+        self.player = Landscape("1").generate()
         self.camera = Camera(self.player, screen_map_group)
         self.clock = pygame.time.Clock()
+        self.running = False
+
+    def stop(self):
         self.running = False
 
     def run(self):
@@ -92,6 +90,7 @@ class Game:
             self.handle_events()
             self.render()
             self.clock.tick(FPS)
+        return self.cs.is_complete()
 
     def render(self):
         self.screen.fill(pygame.Color(0, 0, 0))
@@ -114,6 +113,7 @@ class Game:
         enemy = None
         button = 0
         keys = pygame.key.get_pressed()
+        mods = pygame.key.get_mods()
         if keys[pygame.K_LEFT]:
             dx -= 1
         if keys[pygame.K_RIGHT]:
@@ -135,38 +135,34 @@ class Game:
                             button = event.button
                     for slot in slots_group:
                         if slot.rect.collidepoint(event.pos):
-                            slot.click()
+                            slot.click(mods & pygame.KMOD_SHIFT, mods & pygame.KMOD_CTRL)
                     for btn in buttons_group:
                         if btn.rect.collidepoint(event.pos):
                             btn.click()
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_i:
-                    self.player.get_inventory().set_visibility(True, True)
+                    self.player.get_inventory().open(True)
                 if event.key == pygame.K_a:
-                    self.player.get_ammunition().set_visibility(True)
+                    self.player.get_ammunition().open()
+                if event.key == pygame.K_ESCAPE:
+                    self.stop()
+
         if enemy:
             self.player.apply_or_loot(enemy, BUTTON_TO_SLOT[button])
         else:
             self.player.step(dx, dy)
             self.camera.follow()
 
-# TODO FIX health bar animation BUG!!
-
-
-# TODO ITEM union of same type
-# TODO MOVE ASSIGNED ITEMS TO INVENTORY AFTER DEATH
-# TODO ITEM STACKS (LOW priority)
-
-
-# TODO MAKE SAVE
-# TODO MAKE NEWGAME LOAD BUTTONS
 # TODO LEVELS
 # TODO MAKE GAME END TRIGGER ON EVENTS
+# TODO SCORE
+# TODO SCORE SCREEN
 
-# TODO RANGE WEAPON
+# TODO SHOW ITEM DESCRIPTION ON HOVER
 
-# оружия с характеристиками и у каких мобов будут
-# 3 уровня
-# сценарии
+# TODO FIX health bar animation BUG!!
 
+# TODO MAKE SAVE - LOW(PRIO)
+# TODO MAKE NEWGAME LOAD BUTTONS - LOW(PRIO)
+# TODO RANGE WEAPON - LOW(PRIO)
