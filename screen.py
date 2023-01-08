@@ -17,18 +17,17 @@ from utils import load_image
 class StartScreen:
     def __init__(self, screen):
         self.screen = screen
-        self.intro_text = ["ЗАСТАВКА", "",
-                           "Правила игры",
-                           "Если в правилах несколько строк,",
-                           "приходится выводить их построчно"]
+        self.intro_text = ["Открыть инвентарь- I",
+                           "Надетые вещи- A",
+                           "Нажмите ЛКМ, чтобы продолжить"]
 
     def run(self):
         fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
         self.screen.blit(fon, (0, 0))
         font = pygame.font.Font(None, 30)
-        text_coord = 50
+        text_coord = 100
         for line in self.intro_text:
-            string_rendered = font.render(line, True, pygame.Color('white'))
+            string_rendered = font.render(line, True, pygame.Color('black'))
             intro_rect = string_rendered.get_rect()
             text_coord += 10
             intro_rect.top = text_coord
