@@ -6,7 +6,7 @@ from utils import load_image, load_animations
 
 class Grass(Background):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('grass2.png'), pos_x, pos_y)
+        super().__init__(load_image('grass3.png'), pos_x, pos_y)
 
 
 class Sand(Background):
@@ -27,6 +27,11 @@ class Forest2(AnimatedObstacle):
 class Forest3(AnimatedObstacle):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_animations("forest3", loop=True), "default", pos_x, pos_y)
+
+
+class Forest4(AnimatedObstacle):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_animations("forest4", loop=True), "default", pos_x, pos_y)
 
 
 class Box(Obstacle):

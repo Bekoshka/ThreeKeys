@@ -9,6 +9,8 @@ pygame.init()
 screen = pygame.display.set_mode(SIZE)
 
 save = None
+menu = StartScreen(screen)
+game = Game(screen)
 while True:
-    StartScreen(screen).run()
-    Game(screen).run()
+    menu.run()
+    game.run()

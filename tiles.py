@@ -13,10 +13,13 @@ ANIMATION_DEATH = "death"
 
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, image, pos_x, pos_y, groups):
+    def __init__(self, image, x, y, groups):
         super().__init__(screen_map_group, *groups)
         self.image = image
-        self.rect = self.image.get_rect().move(pos_x, pos_y)
+        self.rect = self.image.get_rect().move(x, y)
+
+    def set_position(self, x, y):
+        self.rect = self.rect.move(int(x), int(y))
 
 
 class AnimatedTile(Tile):

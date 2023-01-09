@@ -4,3 +4,4 @@ Rock 340 560
 Forest1 600 0
 Forest2 800 400
 Forest3 900 800
+Forest4 200 200

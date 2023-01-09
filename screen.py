@@ -4,8 +4,8 @@ import sys
 import pygame
 
 from common import screen_map_group, monster_group, landscape_group, obstacle_group, player_group, \
-    buttons_group, slots_group, items_group, init_common
-from events import ScenarioLevel1
+    buttons_group, slots_group, items_group
+from events import ScenarioLevel1, ScoreHandler
 from items import Sword, Hood
 from creatures import Player, Monster1, Monster2, Monster
 from levels import Landscape
@@ -22,7 +22,7 @@ class StartScreen:
                            "Нажмите ЛКМ, чтобы продолжить"]
 
     def run(self):
-        fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+        fon = pygame.transform.scale(load_image('mount.png'), (WIDTH, HEIGHT))
         self.screen.blit(fon, (0, 0))
         font = pygame.font.Font(None, 30)
         text_coord = 100
@@ -72,13 +72,32 @@ class Camera:
 
 class Game:
     def __init__(self, screen):
-        init_common()
-        self.cs = ScenarioLevel1()
         self.screen = screen
-        self.player = Landscape("1").generate()
+        self.player = Player(3, 5)
+        self.player.get_ammunition().assign(Sword(), SLOT_RIGHT_HAND)
+        self.player.get_ammunition().assign(Hood(), SLOT_ARMOR)
+        self.levels = [1, 2]
+        self.current_level = 0
+        self.score_handler = ScoreHandler(self.levels[self.current_level])
+        self.landscape = Landscape("1", self.player)
+
         self.camera = Camera(self.player, screen_map_group)
         self.clock = pygame.time.Clock()
+        self.complete = False
         self.running = False
+
+    def is_complete(self):
+        return self.complete
+
+    def next_level(self):
+        self.current_level += 1
+        if self.current_level >= len(self.levels):
+            self.complete = True
+            self.stop()
+            return
+        self.landscape.clean()
+        self.score_handler = ScoreHandler(self.levels[self.current_level])
+        self.landscape = Landscape(self.levels[self.current_level], self.player)
 
     def stop(self):
         self.running = False
@@ -89,7 +108,6 @@ class Game:
             self.handle_events()
             self.render()
             self.clock.tick(FPS)
-        return self.cs.is_complete()
 
     def render(self):
         self.screen.fill(pygame.Color(0, 0, 0))
@@ -146,6 +164,10 @@ class Game:
                     self.player.get_ammunition().open()
                 if event.key == pygame.K_ESCAPE:
                     self.stop()
+                if event.key == pygame.K_p:
+                    self.landscape.clean()
+                if event.key == pygame.K_l:
+                    self.next_level()
 
         if enemy:
             self.player.apply_or_loot(enemy, BUTTON_TO_SLOT[button])
@@ -157,9 +179,9 @@ class Game:
 # TODO MAKE GAME END TRIGGER ON EVENTS
 # TODO SCORE
 # TODO SCORE SCREEN
+# TODO DO NOT STACK WEAPON and ARMOR
 
 # TODO SHOW ITEM DESCRIPTION ON HOVER
-
 # TODO FIX health bar animation BUG!!
 
 # TODO MAKE SAVE - LOW(PRIO)

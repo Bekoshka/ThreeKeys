@@ -2,8 +2,8 @@ import pygame
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, image, method, x, y, groups):
-        super().__init__(*groups)
+    def __init__(self, image, method, x, y):
+        super().__init__()
         self.method = method
         self.image = image
         self.rect = self.image.get_rect().move(x, y)
