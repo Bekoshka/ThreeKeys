@@ -1,22 +1,13 @@
+import os
+
 FPS = 120
 SIZE = WIDTH, HEIGHT = 1280, 720
-STEP = 10
-tile_width = tile_height = 50
+STEP = 15
+tile_width = tile_height = 100
 
 KEY_COLOR = (0xff, 0x5c, 0xf9)
 
-VECTORS_TO_DIRECTION = {
-    (1, 0): "R",
-    (-1, 0): "L",
-    (0, -1): "U",
-    (0, 1): "D",
-    (1, -1): "UR",
-    (-1, -1): "UL",
-    (1, 1): "DR",
-    (-1, 1): "DL",
-    (0, 0): "A"
-}
-
+SLOT_NONE = 0
 SLOT_ARMOR = 1
 SLOT_LEFT_HAND = 2
 SLOT_RIGHT_HAND = 4
@@ -27,20 +18,13 @@ BUTTON_TO_SLOT = {
     1: SLOT_RIGHT_HAND
 }
 
-SCREEN_MAP = 0
-SCREEN_AMMUNITION = 1
-SCREEN_BARTER = 2
-
-INVENTORY_DIMENTION = 5
-INVENTORY_BORDER = 10
-INVENTORY_ITEM_SIZE = WIDTH // 10
-AMMUNITION_SLOTS = {
-    SLOT_ARMOR: (INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2,
-                 WIDTH // 2 + WIDTH // 4 - INVENTORY_ITEM_SIZE // 2, HEIGHT // 4),
-    SLOT_RIGHT_HAND: (INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2,
-                      WIDTH // 2 + WIDTH // 4 - INVENTORY_ITEM_SIZE * 1.5, HEIGHT // 2),
-    SLOT_LEFT_HAND: (INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2,
-                     WIDTH // 2 + WIDTH // 4 + INVENTORY_ITEM_SIZE * 0.5, HEIGHT // 2)
-}
-
 LOOT_RANGE = 50
+
+DATA_DIR = "data"
+LEVEL_DIR = os.path.join(DATA_DIR, "levels")
+
+EVENT_MONSTER_DEAD = 1
+EVENT_DAMAGE_RECIEVED = 2
+EVENT_BOTTLE_USED = 3
+EVENT_DAMAGE_GIVEN = 4
+EVENT_ITEM_ASSIGNED = 5

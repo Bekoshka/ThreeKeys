@@ -1,0 +1,9 @@
+Player 0 0
+Monster1 -100 0
+Monster2 100 500
+Monster1 10 200
+Monster2 1000 500
+Monster1 1000 100
+Monster2 100 700
+Monster1 100 1000
+Monster2 1500 1500
