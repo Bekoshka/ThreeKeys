@@ -1,0 +1,10 @@
+Rock 300 400
+Rock 320 140
+Rock 340 260
+Forest1 600 0
+Forest1 650 0
+Forest1 700 0
+Forest1 740 0
+Forest2 800 400
+Forest3 900 800
+Forest4 200 200
