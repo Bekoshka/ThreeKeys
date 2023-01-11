@@ -122,27 +122,28 @@ class SmallHealPotion(HealPotion):
 
 class Hood(Armor):
     def __init__(self):
-        super().__init__("Hood description", load_image("hood.png", KEY_COLOR), 15, SLOT_ARMOR)
+        super().__init__("Теплый капюшон. Не даёт много защиты.", load_image("hood.png", KEY_COLOR), 15, SLOT_ARMOR)
 
 
 class Sword(Weapon):
     def __init__(self):
-        super().__init__("Sword description", load_image("sword.png", KEY_COLOR), (15, 90), 70,
+        super().__init__("Старый добрый ржавый меч.", load_image("sword.png", KEY_COLOR), (15, 90), 70,
                          SLOT_RIGHT_HAND)
 
 
 class LeftHand(Weapon):
     def __init__(self):
-        super().__init__("Sword description", load_image("left_hand.png", KEY_COLOR), (1, 2), 30,
+        super().__init__("Твоя левая рука.", load_image("left_hand.png", KEY_COLOR), (1, 2), 30,
                          SLOT_LEFT_HAND)
 
 
 class RightHand(Weapon):
     def __init__(self):
-        super().__init__("Sword description", load_image("right_hand.png", KEY_COLOR), (3, 4), 30,
+        super().__init__("Твоя правая рука.", load_image("right_hand.png", KEY_COLOR), (3, 4), 30,
                          SLOT_RIGHT_HAND)
 
 
 class Gold(Item):
-    def __init__(self,  count):
-        super().__init__("Gold description", load_image("gold.png", KEY_COLOR), SLOT_NONE, count)
+    def __init__(self, count):
+        super().__init__("Золото. Приятный бонус, но ты здесь не ради него.", load_image("gold.png", KEY_COLOR),
+                         SLOT_NONE, count)
