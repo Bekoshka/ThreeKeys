@@ -27,14 +27,20 @@ AMMUNITION_SLOTS = {
 
 
 class Slot(pygame.sprite.Sprite):
-    def __init__(self, creature, image, x, y, type=None):
+    def __init__(self, id, creature, images, x=0, y=0, type=None):
         super().__init__()
+        self.id = id
         self.creature = creature
-        self.image = image
+        self.images = images
+        self.image = self.images[0]
         self.rect = self.image.get_rect().move(x, y)
         self.item = None
         self.default_item = None
         self.type = type
+
+    def update(self, _):
+        global selected_slot
+        self.image = self.images[self == selected_slot]
 
     def assigned_item(self):
         if self.item:
@@ -44,6 +50,9 @@ class Slot(pygame.sprite.Sprite):
                 return self.default_item
         return None
 
+    def can_drop(self):
+        return bool(self.item)
+
     def assign(self, item):
         if self.can_assign_item(item):
             if self.item is None and self.default_item:
@@ -52,7 +61,7 @@ class Slot(pygame.sprite.Sprite):
             count = 0
             if item:
                 count = item.get_count()
-            smokesignal.emit(EVENT_ITEM_ASSIGNED, type(self.creature).__name__, type(item).__name__, count)
+            smokesignal.emit(EVENT_ITEM_ASSIGNED, type(self.creature).__name__, self.id, type(item).__name__, count)
 
     def can_assign_item(self, item):
         if item is None:
@@ -64,49 +73,26 @@ class Slot(pygame.sprite.Sprite):
     def assign_default(self, item):
         self.default_item = item
 
-    def exchange(self):
-        pass
-
     def click(self, union=False, divide=False):
-        print(union, divide)
         global selected_slot
         if selected_slot:
-            if not union and not divide:
-                # if self.item:
+            if not (union or divide):
                 i = self.item
                 si = selected_slot.item
                 if selected_slot.can_assign_item(i) and self.can_assign_item(si):
                     selected_slot.assign(i)
                     self.assign(si)
                     selected_slot = None
-                # else:
-                #     si = selected_slot.item
-                #     if self.can_assign_item(si):
-                #         selected_slot.assign(None)
-                #         self.assign(si)
-                #         selected_slot = None
-            elif union and not divide:
-                if self.item:
-                    si = selected_slot.item
-                    if si:
-                        if si.transfer(self.item, True):
-                            si.kill()
-                            selected_slot.assign(None)
-                selected_slot = None
-            elif not union and divide:
-                if self.item:
-                    si = selected_slot.item
-                    if si:
-                        if si.transfer(self.item):
-                            si.kill()
-                            selected_slot.assign(None)
-                else:
-                    si = selected_slot.item
-                    if si:
-                        other = si.split()
-                        if self.can_assign_item(other):
-                            self.assign(other)
-
+            elif union ^ divide:
+                i = self.item
+                si = selected_slot.item
+                if si:
+                    if self.can_assign_item(si):
+                        si, i = si.transfer(i, union)
+                        selected_slot.assign(si)
+                        self.assign(i)
+                if union:
+                    selected_slot = None
         else:
             selected_slot = self
 
@@ -117,13 +103,15 @@ class Inventory:
         self.is_left = False
         self.items = dict()
         self.is_visible = False
-        self.close_button = Button(load_image("close.png", KEY_COLOR), self.close, 0, 0)
+        self.close_button = Button(load_image("close.png", KEY_COLOR), self.close)
         self.slots = dict()
+        images = [
+            load_image("slot.png", resize=True, size=(INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2)),
+            load_image("slot_.png", resize=True, size=(INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2))
+        ]
         for i in range(INVENTORY_DIMENTION):
             for j in range(INVENTORY_DIMENTION):
-                self.slots[i, j] = Slot(creature,
-                                        load_image("slot.png", resize=True,
-                                                   size=(INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2)), 0, 0)
+                self.slots[i, j] = Slot((i, j), creature, images)
 
     def close(self):
         global right_side_menu_open
@@ -179,8 +167,8 @@ class Inventory:
                         HEIGHT - INVENTORY_ITEM_SIZE * INVENTORY_DIMENTION) // 2 + INVENTORY_ITEM_SIZE * i
                 item = slot.assigned_item()
                 if item:
-                    item.rect.x = rect.topleft[0]
-                    item.rect.y = rect.topleft[1]
+                    item.rect.centerx = rect.centerx
+                    item.rect.centery = rect.centery
                     if items_group not in item.groups():
                         items_group.add(item)
         self.close_button.rect.x = x
@@ -192,9 +180,14 @@ class Ammunition:
         self.slots = dict()
         for k in AMMUNITION_SLOTS.keys():
             v = AMMUNITION_SLOTS[k]
-            self.slots[k] = Slot(creature, load_image("slot.png", resize=True, size=v[0]), v[1], v[2], k)
+            self.slots[k] = Slot(k, creature,
+                                 [
+                                     load_image("slot.png", resize=True, size=v[0]),
+                                     load_image("slot_.png", resize=True, size=v[0]),
+                                 ],
+                                 v[1], v[2], k)
         self.is_visible = False
-        self.close_button = Button(load_image("close.png", KEY_COLOR), self.close, WIDTH // 2, 0)
+        self.close_button = Button(load_image("close.png", KEY_COLOR), self.close, WIDTH // 2)
 
     def close(self):
         global right_side_menu_open
@@ -219,8 +212,9 @@ class Ammunition:
 
     def drop_to_inventory(self, inventory):
         for k in self.slots.keys():
-            inventory.add_item(self.slots[k].assigned_item())
-            self.slots[k].assign(None)
+            if self.slots[k].can_drop():
+                inventory.add_item(self.slots[k].assigned_item())
+                self.slots[k].assign(None)
 
     def reduce_damage(self, damage):
         if self.slots[SLOT_ARMOR].assigned_item():
@@ -229,15 +223,16 @@ class Ammunition:
         return damage
 
     def apply(self, slot, actor, creature):
-        if slot in self.slots.keys() and self.slots[slot].assigned_item():
-            item = self.slots[slot].assigned_item()
+        item = self.slots[slot].assigned_item()
+        if slot in self.slots.keys() and item:
             if item.apply(actor, creature):
                 self.slots[slot].assign(None)
                 item.kill()
 
     def can_apply(self, slot, actor, creature):
-        if slot in self.slots.keys() and self.slots[slot].assigned_item():
-            return self.slots[slot].assigned_item().can_apply(actor, creature)
+        item = self.slots[slot].assigned_item()
+        if slot in self.slots.keys() and item:
+            return item.can_apply(actor, creature)
         return False
 
     def update(self, screen):
@@ -263,7 +258,7 @@ class Ammunition:
                 slots_group.add(slot)
             item = slot.assigned_item()
             if item:
-                item.rect.x = slot.rect.topleft[0]
-                item.rect.y = slot.rect.topleft[1]
+                item.rect.centerx = slot.rect.centerx
+                item.rect.centery = slot.rect.centery
                 if items_group not in item.groups():
                     items_group.add(item)

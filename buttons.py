@@ -2,7 +2,7 @@ import pygame
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, image, method, x, y):
+    def __init__(self, image, method, x=0, y=0):
         super().__init__()
         self.method = method
         self.image = image

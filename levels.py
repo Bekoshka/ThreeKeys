@@ -66,6 +66,5 @@ class Landscape:
                 if issubclass(cls, Player):
                     player.set_position(*params)
                 elif issubclass(cls, Tile):
-                    print(*params, player)
                     result.append(cls(*params, player))
         return result

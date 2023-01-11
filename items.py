@@ -11,10 +11,11 @@ from utils import load_image, calculate_sprite_range
 class Item(pygame.sprite.Sprite):
     cls_name = "Item"
 
-    def __init__(self, description, image, slot_type, count=1):
+    def __init__(self, description, image, slot_type, count=1, stackable=True):
         if type(self).__name__ == self.cls_name:
             raise SystemExit("It is abstract class: " + self.cls_name)
         super().__init__()
+        self.stackable = stackable
         self.description = description
         self.image = image
         self.rect = self.image.get_rect().move(0, 0)
@@ -39,20 +40,20 @@ class Item(pygame.sprite.Sprite):
             intro_rect.right = self.rect.right
             screen.blit(string_rendered, intro_rect)
 
-    def split(self):
-        other = None
-        if self.count > 1:
-            other = globals()[type(self).__name__]()
-            other.count = 1
-            self.count -= 1
-        return other
-
     def transfer(self, other, all=False):
-        if type(self).__name__ == type(other).__name__ and self.count > 0:
+        if self.count > 0 and self.stackable:
             amount = self.count if all else 1
-            other.count += amount
-            self.count -= amount
-        return self.count == 0
+            if type(self).__name__ == type(other).__name__ and self.count > 0:
+                other.count += amount
+                self.count -= amount
+            elif self and not other:
+                other = globals()[type(self).__name__]()
+                other.count = amount
+                self.count -= amount
+        if self.count == 0:
+            self.kill()
+            return None, other
+        return self, other
 
 
 class Weapon(Item):
@@ -61,7 +62,7 @@ class Weapon(Item):
     def __init__(self, description, image, damage, range, slot_type):
         if type(self).__name__ == self.cls_name:
             raise SystemExit("It is abstract class: " + self.cls_name)
-        super().__init__(description, image, slot_type)
+        super().__init__(description, image, slot_type, stackable=False)
         self.damage = damage
         self.range = range
 
@@ -69,8 +70,9 @@ class Weapon(Item):
         can_apply = self.can_apply(actor, creature)
         if can_apply:
             damage = randrange(*self.damage)
+            smokesignal.emit(EVENT_DAMAGE_GIVEN, type(actor).__name__, type(creature).__name__, type(self).__name__,
+                             damage)
             creature.recieve_damage(damage)
-            smokesignal.emit(EVENT_DAMAGE_GIVEN, type(actor).__name__, type(self).__name__, damage)
         return False
 
     def can_apply(self, actor, creature):
@@ -83,7 +85,7 @@ class Armor(Item):
     def __init__(self, description, image, absorption, slot_type):
         if type(self).__name__ == self.cls_name:
             raise SystemExit("It is abstract class: " + self.cls_name)
-        super().__init__(description, image, slot_type)
+        super().__init__(description, image, slot_type, stackable=False)
         self.absorption = absorption
 
     def reduce_damage(self, damage):
@@ -115,9 +117,9 @@ class HealPotion(Item):
 
 
 class SmallHealPotion(HealPotion):
-    def __init__(self):
+    def __init__(self, count=1):
         super().__init__("Small Heal Potion description", load_image("shp.png", KEY_COLOR), 10,
-                         SLOT_LEFT_HAND | SLOT_RIGHT_HAND, 5)
+                         SLOT_LEFT_HAND | SLOT_RIGHT_HAND, int(count))
 
 
 class Hood(Armor):
@@ -144,5 +146,5 @@ class RightHand(Weapon):
 
 
 class Gold(Item):
-    def __init__(self,  count):
-        super().__init__("Gold description", load_image("gold.png", KEY_COLOR), SLOT_NONE, count)
+    def __init__(self, count=0):
+        super().__init__("Gold description", load_image("gold.png", KEY_COLOR), SLOT_NONE, int(count))

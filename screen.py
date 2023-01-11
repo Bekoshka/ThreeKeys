@@ -119,6 +119,7 @@ class Game:
 
         screen_map_group.update(self.screen)
 
+        slots_group.update(self.screen)
         slots_group.draw(self.screen)
         items_group.draw(self.screen)
         buttons_group.draw(self.screen)
@@ -177,9 +178,7 @@ class Game:
 
 # TODO LEVELS
 # TODO MAKE GAME END TRIGGER ON EVENTS
-# TODO SCORE
 # TODO SCORE SCREEN
-# TODO DO NOT STACK WEAPON and ARMOR
 
 # TODO SHOW ITEM DESCRIPTION ON HOVER
 # TODO FIX health bar animation BUG!!

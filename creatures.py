@@ -12,8 +12,7 @@ from utils import load_animations
 class Player(Creature):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_animations("player"), 100, pos_x, pos_y, [player_group, monster_group])
-        for i in range(7):
-            super().get_inventory().add_item(SmallHealPotion())
+        super().get_inventory().add_item(SmallHealPotion(7))
         super().get_inventory().add_item(Sword())
         self.get_ammunition().assign_default(LeftHand(), SLOT_LEFT_HAND)
         self.get_ammunition().assign_default(RightHand(), SLOT_RIGHT_HAND)
@@ -32,9 +31,7 @@ class Monster0(Monster):
         super().__init__(pos_x, pos_y, game)
         self.get_inventory().add_item(Hood())
         self.get_inventory().add_item(Sword())
-        self.get_inventory().add_item(SmallHealPotion())
-        self.get_inventory().add_item(SmallHealPotion())
-        self.get_inventory().add_item(SmallHealPotion())
+        self.get_inventory().add_item(SmallHealPotion(3))
 
 
 class Monster1(Monster):
@@ -53,7 +50,4 @@ class Monster2(Monster):
         self.get_ammunition().assign(Sword(), SLOT_RIGHT_HAND)
         self.get_inventory().add_item(Hood())
         self.get_inventory().add_item(Sword())
-        self.get_inventory().add_item(SmallHealPotion())
-        self.get_inventory().add_item(SmallHealPotion())
-
-
+        self.get_inventory().add_item(SmallHealPotion(2))

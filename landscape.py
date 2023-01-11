@@ -6,7 +6,7 @@ from utils import load_image, load_animations
 
 class Grass(Background):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('grass3.png'), pos_x, pos_y)
+        super().__init__(load_image('grass4.png'), pos_x, pos_y)
 
 
 class Sand(Background):
