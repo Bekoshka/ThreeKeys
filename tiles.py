@@ -103,7 +103,7 @@ class Creature(Movable):
         self.health_points = self.max_health_points
         self.ammunition = Ammunition(self)
         self.inventory = Inventory(self)
-        self.dead = False
+        self.dead = self.health_points == 0
 
     def is_dead(self):
         return self.dead
@@ -115,20 +115,20 @@ class Creature(Movable):
         return self.ammunition
 
     def render_health(self, screen):
-        rect = pygame.Rect(0, 0, 50, 7)
-        rect.midbottom = self.rect.centerx, self.rect.top - self.rect.height // 5
-        pygame.draw.rect(screen, (255, 0, 0), (*rect.bottomleft, *rect.size))
-        pygame.draw.rect(screen, (0, 0, 0), (*rect.bottomleft, *rect.size), 1)
-        pos = (rect.bottomleft[0] + 1, rect.bottomleft[1] + 1)
-        size = (round((rect.size[0] - 2) * self.health_points / self.max_health_points), rect.size[1] - 2)
-        pygame.draw.rect(screen, (0, 255, 0), (*pos, *size))
+        if not self.is_dead():
+            rect = pygame.Rect(0, 0, 50, 7)
+            rect.midbottom = self.rect.centerx, self.rect.top - self.rect.height // 5
+            pygame.draw.rect(screen, (255, 0, 0), (*rect.bottomleft, *rect.size))
+            pygame.draw.rect(screen, (0, 0, 0), (*rect.bottomleft, *rect.size), 1)
+            pos = (rect.bottomleft[0] + 1, rect.bottomleft[1] + 1)
+            size = (round((rect.size[0] - 2) * self.health_points / self.max_health_points), rect.size[1] - 2)
+            pygame.draw.rect(screen, (0, 255, 0), (*pos, *size))
 
     def update(self, screen):
         super().update(screen)
         self.inventory.update(screen)
         self.ammunition.update(screen)
-        if not self.is_dead():
-            self.render_health(screen)
+        self.render_health(screen)
 
     def recieve_damage(self, damage):
         clean_damage = self.ammunition.reduce_damage(damage)

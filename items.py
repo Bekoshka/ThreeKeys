@@ -4,7 +4,7 @@ import pygame
 import smokesignal
 
 from settings import SLOT_LEFT_HAND, SLOT_RIGHT_HAND, KEY_COLOR, SLOT_ARMOR, SLOT_NONE, EVENT_BOTTLE_USED, \
-    EVENT_DAMAGE_GIVEN
+    EVENT_DAMAGE_GIVEN, EVENT_DOOR_OPENED
 from utils import load_image, calculate_sprite_range
 
 
@@ -98,10 +98,10 @@ class Armor(Item):
 class HealPotion(Item):
     cls_name = "HealPotion"
 
-    def __init__(self, description, image, heal_points, slot_type, count):
+    def __init__(self, description, image, heal_points, count):
         if type(self).__name__ == self.cls_name:
             raise SystemExit("It is abstract class: " + self.cls_name)
-        super().__init__(description, image, slot_type, count)
+        super().__init__(description, image, SLOT_LEFT_HAND | SLOT_RIGHT_HAND, count)
         self.heal_points = heal_points
         self.range = 50
 
@@ -116,10 +116,28 @@ class HealPotion(Item):
         return self.count and calculate_sprite_range(actor, creature) < self.range
 
 
+class Key(Item):
+    cls_name = "Key"
+
+    def __init__(self, description, image):
+        if type(self).__name__ == self.cls_name:
+            raise SystemExit("It is abstract class: " + self.cls_name)
+        super().__init__(description, image, SLOT_LEFT_HAND | SLOT_RIGHT_HAND, stackable=False)
+        self.range = 50
+
+    def apply(self, actor, door):
+        if self.can_apply(actor, door):
+            door.open(self)
+            smokesignal.emit(EVENT_DOOR_OPENED, type(door).__name__, type(self).__name__)
+        return self.is_empty()
+
+    def can_apply(self, actor, door):
+        return calculate_sprite_range(actor, door) < self.range
+
+
 class SmallHealPotion(HealPotion):
     def __init__(self, count=1):
-        super().__init__("Small Heal Potion description", load_image("shp.png", KEY_COLOR), 10,
-                         SLOT_LEFT_HAND | SLOT_RIGHT_HAND, int(count))
+        super().__init__("Small Heal Potion description", load_image("shp.png", KEY_COLOR), 10, int(count))
 
 
 class Hood(Armor):
@@ -130,6 +148,12 @@ class Hood(Armor):
 class Sword(Weapon):
     def __init__(self):
         super().__init__("Sword description", load_image("sword.png", KEY_COLOR), (15, 90), 70,
+                         SLOT_RIGHT_HAND)
+
+
+class Axe(Weapon):
+    def __init__(self):
+        super().__init__("AXE description", load_image("axe.png", KEY_COLOR), (20, 100), 70,
                          SLOT_RIGHT_HAND)
 
 
@@ -148,3 +172,8 @@ class RightHand(Weapon):
 class Gold(Item):
     def __init__(self, count=0):
         super().__init__("Gold description", load_image("gold.png", KEY_COLOR), SLOT_NONE, int(count))
+
+
+class Key1(Key):
+    def __init__(self):
+        super().__init__("Key", load_image("key.png", KEY_COLOR))

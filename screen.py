@@ -6,7 +6,7 @@ import pygame
 from common import screen_map_group, monster_group, landscape_group, obstacle_group, player_group, \
     buttons_group, slots_group, items_group
 from events import ScenarioLevel1, ScoreHandler
-from items import Sword, Hood
+from items import Sword, Hood, Axe
 from creatures import Player, Monster1, Monster2, Monster
 from levels import Landscape
 from settings import WIDTH, HEIGHT, FPS, SLOT_LEFT_HAND, SLOT_RIGHT_HAND, SLOT_ARMOR, BUTTON_TO_SLOT, DATA_DIR
@@ -74,7 +74,7 @@ class Game:
     def __init__(self, screen):
         self.screen = screen
         self.player = Player(3, 5)
-        self.player.get_ammunition().assign(Sword(), SLOT_RIGHT_HAND)
+        self.player.get_ammunition().assign(Axe(), SLOT_RIGHT_HAND)
         self.player.get_ammunition().assign(Hood(), SLOT_ARMOR)
         self.levels = [1, 2]
         self.current_level = 0
@@ -179,6 +179,11 @@ class Game:
 # TODO LEVELS
 # TODO MAKE GAME END TRIGGER ON EVENTS
 # TODO SCORE SCREEN
+
+# ITEMS ATTACK SPEED
+# KEY
+# Trigger Portal
+
 
 # TODO SHOW ITEM DESCRIPTION ON HOVER
 # TODO FIX health bar animation BUG!!
