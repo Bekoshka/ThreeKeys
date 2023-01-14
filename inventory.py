@@ -73,29 +73,32 @@ class Slot(pygame.sprite.Sprite):
     def assign_default(self, item):
         self.default_item = item
 
-    def click(self, union=False, divide=False):
+    def handle_click(self, button, union=False, divide=False):
         global selected_slot
-        if selected_slot:
-            if not (union or divide):
-                i = self.item
-                si = selected_slot.item
-                if selected_slot.can_assign_item(i) and self.can_assign_item(si):
-                    selected_slot.assign(i)
-                    self.assign(si)
-                    selected_slot = None
-            elif union ^ divide:
-                i = self.item
-                si = selected_slot.item
-                if si:
-                    if self.can_assign_item(si):
-                        si, i = si.transfer(i, union)
-                        selected_slot.assign(si)
-                        self.assign(i)
-                if union:
-                    selected_slot = None
-        else:
-            selected_slot = self
-
+        if button == 1:
+            if selected_slot:
+                if not (union or divide):
+                    i = self.item
+                    si = selected_slot.item
+                    if selected_slot.can_assign_item(i) and self.can_assign_item(si):
+                        selected_slot.assign(i)
+                        self.assign(si)
+                        selected_slot = None
+                elif union ^ divide:
+                    i = self.item
+                    si = selected_slot.item
+                    if si:
+                        if self.can_assign_item(si):
+                            si, i = si.transfer(i, union)
+                            selected_slot.assign(si)
+                            self.assign(i)
+                    if union:
+                        selected_slot = None
+            else:
+                selected_slot = self
+        elif button == 3:
+            if self.item:
+                self.item.apply(self.creature, self.creature)
 
 class Inventory:
     def __init__(self, creature):
@@ -166,6 +169,10 @@ class Inventory:
                 rect.y = INVENTORY_BORDER + (
                         HEIGHT - INVENTORY_ITEM_SIZE * INVENTORY_DIMENTION) // 2 + INVENTORY_ITEM_SIZE * i
                 item = slot.assigned_item()
+                if item and item.is_empty():
+                    slot.assign(None)
+                    item.kill()
+                    item = None
                 if item:
                     item.rect.centerx = rect.centerx
                     item.rect.centery = rect.centery
@@ -188,6 +195,12 @@ class Ammunition:
                                  v[1], v[2], k)
         self.is_visible = False
         self.close_button = Button(load_image("close.png", KEY_COLOR), self.close, WIDTH // 2)
+
+    def get_slot_animation_type(self, slot):
+        item = self.slots[slot].assigned_item()
+        if item:
+            return item.get_animation_type()
+        return None
 
     def close(self):
         global right_side_menu_open
@@ -222,18 +235,25 @@ class Ammunition:
             return reduced_damage
         return damage
 
-    def apply(self, slot, actor, creature):
-        item = self.slots[slot].assigned_item()
-        if slot in self.slots.keys() and item:
-            if item.apply(actor, creature):
-                self.slots[slot].assign(None)
-                item.kill()
+    def get_slot(self, slot):
+        if slot in self.slots.keys():
+            return self.slots[slot]
+        return None
 
-    def can_apply(self, slot, actor, creature):
-        item = self.slots[slot].assigned_item()
-        if slot in self.slots.keys() and item:
-            return item.can_apply(actor, creature)
-        return False
+    # def apply(self, slot, actor, creature):
+    #     if slot in self.slots.keys():
+    #         item = self.slots[slot].assigned_item()
+    #         if item:
+    #             if item.apply(actor, creature):
+    #                 self.slots[slot].assign(None)
+    #                 item.kill()
+    #
+    # def can_apply(self, slot, actor, creature):
+    #     if slot in self.slots.keys():
+    #         item = self.slots[slot].assigned_item()
+    #         if item:
+    #             return item.can_apply(actor, creature)
+    #     return False
 
     def update(self, screen):
         global selected_slot
@@ -257,6 +277,10 @@ class Ammunition:
             if slots_group not in slot.groups():
                 slots_group.add(slot)
             item = slot.assigned_item()
+            if item and item.is_empty():
+                slot.assign(None)
+                item.kill()
+                item = None
             if item:
                 item.rect.centerx = slot.rect.centerx
                 item.rect.centery = slot.rect.centery

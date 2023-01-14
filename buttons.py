@@ -8,5 +8,5 @@ class Button(pygame.sprite.Sprite):
         self.image = image
         self.rect = self.image.get_rect().move(x, y)
 
-    def click(self):
+    def handle_click(self):
         self.method()

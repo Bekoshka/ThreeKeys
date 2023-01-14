@@ -2,7 +2,7 @@ from random import randrange
 
 from ai import AI
 from common import player_group, monster_group
-from items import SmallHealPotion, Sword, LeftHand, RightHand, Hood, Gold, Axe, Key, Key1
+from items import SmallHealPotion, Sword, LeftHand, RightHand, Hood, Gold, Axe, YellowKey, BrownKey
 from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, SLOT_ARMOR
 from tiles import Creature
 
@@ -16,6 +16,8 @@ class Player(Creature):
         super().get_inventory().add_item(Sword())
         self.get_ammunition().assign_default(LeftHand(), SLOT_LEFT_HAND)
         self.get_ammunition().assign_default(RightHand(), SLOT_RIGHT_HAND)
+        self.get_ammunition().assign(Axe(), SLOT_RIGHT_HAND)
+        self.get_ammunition().assign(Hood(), SLOT_ARMOR)
 
 
 class Chest(Creature):
@@ -24,7 +26,8 @@ class Chest(Creature):
         super().get_inventory().add_item(SmallHealPotion(7))
         super().get_inventory().add_item(Sword())
         super().get_inventory().add_item(Sword())
-        super().get_inventory().add_item(Key1())
+        super().get_inventory().add_item(YellowKey())
+        super().get_inventory().add_item(BrownKey())
 
 
 class Monster(AI):
@@ -65,6 +68,14 @@ class Monster2(Monster):
 class Zombie(AI):
     def __init__(self, pos_x, pos_y, enemy):
         super().__init__(load_animations("zombie"), 100, int(pos_x), int(pos_y), [monster_group], enemy)
+        self.get_ammunition().assign_default(LeftHand(), SLOT_LEFT_HAND)
+        self.get_ammunition().assign_default(RightHand(), SLOT_RIGHT_HAND)
+        self.get_inventory().add_item(Gold(randrange(10, 100)))
+
+
+class Skeleton(AI):
+    def __init__(self, pos_x, pos_y, enemy):
+        super().__init__(load_animations("skeleton"), 100, int(pos_x), int(pos_y), [monster_group], enemy)
         self.get_ammunition().assign_default(LeftHand(), SLOT_LEFT_HAND)
         self.get_ammunition().assign_default(RightHand(), SLOT_RIGHT_HAND)
         self.get_inventory().add_item(Gold(randrange(10, 100)))

@@ -1,6 +1,6 @@
 import pygame
 
-from tiles import Background, Obstacle, AnimatedObstacle
+from tiles import Background, Obstacle, AnimatedObstacle, Trigger
 from utils import load_image, load_animations
 
 
@@ -43,5 +43,14 @@ class Rock(Obstacle):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_image('rock.png', color_key=pygame.Color(0xff, 0x5c, 0xf9)), pos_x, pos_y)
 
+
+class YellowPortal(Trigger):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('box.png'), pos_x, pos_y)
+
+
+class BrownPortal(Trigger):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('box.png'), pos_x, pos_y)
 
 

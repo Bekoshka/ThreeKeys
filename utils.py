@@ -1,3 +1,5 @@
+import sqlite3
+
 import pygame
 import os
 
@@ -60,3 +62,23 @@ def calculate_sprite_range(a, b):
     x2, y2, w, h = b.rect
     x2, y2 = x2 + w // 2, y2 + h // 2
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+
+
+DB_FILE = "db.sqlite"
+
+
+class Connection:
+    def __init__(self, debug=False):
+        self.con = sqlite3.connect(os.path.join(DATA_DIR, DB_FILE))
+        self.con.cursor().execute("PRAGMA foreign_keys = on")
+        if debug:
+            self.con.set_trace_callback(print)
+
+    def cursor(self):
+        return self.con.cursor()
+
+    def commit(self):
+        self.con.commit()
+
+    def rollback(self):
+        self.con.rollback()

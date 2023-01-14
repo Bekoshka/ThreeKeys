@@ -27,13 +27,8 @@ class AI(Creature):
             self.logic_tick_counter += 1
 
     def attack(self):
-        if self.can_apply(self.enemy, SLOT_RIGHT_HAND):
-            super().apply(self.enemy, SLOT_RIGHT_HAND)
-        elif self.can_apply(self.enemy, SLOT_LEFT_HAND):
+        if not super().apply(self.enemy, SLOT_RIGHT_HAND):
             super().apply(self.enemy, SLOT_LEFT_HAND)
-
-    def can_attack(self):
-        return self.can_apply(self.enemy, SLOT_RIGHT_HAND) or self.can_apply(self.enemy, SLOT_LEFT_HAND)
 
     def move_random(self):
         dx = choice([-1, 0, 1])

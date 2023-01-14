@@ -1,10 +1,6 @@
 Player 0 0
 Monster1 -100 0
 Zombie 100 500
-Monster1 10 200
-Monster2 1000 500
-Monster1 1000 100
-Monster2 100 700
-Monster1 100 1000
 Zombie 100 100
 Chest 50 50
+Skeleton 200 50

@@ -4,7 +4,7 @@ import pygame
 import smokesignal
 
 from settings import SLOT_LEFT_HAND, SLOT_RIGHT_HAND, KEY_COLOR, SLOT_ARMOR, SLOT_NONE, EVENT_BOTTLE_USED, \
-    EVENT_DAMAGE_GIVEN, EVENT_DOOR_OPENED
+    EVENT_DAMAGE_GIVEN, ANIMATION_ATTACK
 from utils import load_image, calculate_sprite_range
 
 
@@ -55,6 +55,15 @@ class Item(pygame.sprite.Sprite):
             return None, other
         return self, other
 
+    def apply(self, actor, creature):
+        pass
+
+    def can_apply(self, actor, creature):
+        pass
+
+    def get_animation_type(self):
+        return None
+
 
 class Weapon(Item):
     cls_name = "Weapon"
@@ -67,16 +76,18 @@ class Weapon(Item):
         self.range = range
 
     def apply(self, actor, creature):
-        can_apply = self.can_apply(actor, creature)
-        if can_apply:
+        if self.can_apply(actor, creature):
             damage = randrange(*self.damage)
             smokesignal.emit(EVENT_DAMAGE_GIVEN, type(actor).__name__, type(creature).__name__, type(self).__name__,
                              damage)
             creature.recieve_damage(damage)
-        return False
 
     def can_apply(self, actor, creature):
-        return calculate_sprite_range(actor, creature) < self.range
+        return hasattr(creature, 'recieve_damage') and callable(getattr(creature, 'recieve_damage')) \
+               and not creature.is_dead() and calculate_sprite_range(actor, creature) < self.range
+
+    def get_animation_type(self):
+        return ANIMATION_ATTACK
 
 
 class Armor(Item):
@@ -110,10 +121,10 @@ class HealPotion(Item):
             creature.recieve_heal(self.heal_points)
             self.reduce_amount()
             smokesignal.emit(EVENT_BOTTLE_USED, type(creature).__name__, type(self).__name__, self.heal_points)
-        return self.is_empty()
 
     def can_apply(self, actor, creature):
-        return self.count and calculate_sprite_range(actor, creature) < self.range
+        return hasattr(creature, 'recieve_heal') and callable(getattr(creature, 'recieve_heal')) \
+               and not creature.is_dead() and self.count and calculate_sprite_range(actor, creature) < self.range
 
 
 class Key(Item):
@@ -125,14 +136,13 @@ class Key(Item):
         super().__init__(description, image, SLOT_LEFT_HAND | SLOT_RIGHT_HAND, stackable=False)
         self.range = 50
 
-    def apply(self, actor, door):
-        if self.can_apply(actor, door):
-            door.open(self)
-            smokesignal.emit(EVENT_DOOR_OPENED, type(door).__name__, type(self).__name__)
-        return self.is_empty()
+    def apply(self, actor, trigger):
+        if self.can_apply(actor, trigger):
+            trigger.run(self)
 
-    def can_apply(self, actor, door):
-        return calculate_sprite_range(actor, door) < self.range
+    def can_apply(self, actor, trigger):
+        return hasattr(trigger, 'run') and callable(getattr(trigger, 'run')) \
+               and calculate_sprite_range(actor, trigger) < self.range
 
 
 class SmallHealPotion(HealPotion):
@@ -174,6 +184,11 @@ class Gold(Item):
         super().__init__("Gold description", load_image("gold.png", KEY_COLOR), SLOT_NONE, int(count))
 
 
-class Key1(Key):
+class YellowKey(Key):
     def __init__(self):
-        super().__init__("Key", load_image("key.png", KEY_COLOR))
+        super().__init__("Yellow key", load_image("yellow_key.png", KEY_COLOR))
+
+
+class BrownKey(Key):
+    def __init__(self):
+        super().__init__("Brown key", load_image("key.png", KEY_COLOR))

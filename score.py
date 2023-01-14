@@ -1,33 +1,13 @@
-import os
-import sqlite3
-
-from settings import DATA_DIR
 import datetime
 
-DB_FILE = "db.sqlite"
-
-
-class Connection:
-    def __init__(self, debug=False):
-        self.con = sqlite3.connect(os.path.join(DATA_DIR, DB_FILE))
-        self.con.cursor().execute("PRAGMA foreign_keys = on")
-        if debug:
-            self.con.set_trace_callback(print)
-
-    def cursor(self):
-        return self.con.cursor()
-
-    def commit(self):
-        self.con.commit()
-
-    def rollback(self):
-        self.con.rollback()
+from utils import Connection
 
 
 class Score:
-    def __init__(self, id=None, level=0, kills=0, damage_given=0, damage_recieved=0, damage_absorbed=0,
+    def __init__(self, id=None, game_id=None, level=0, kills=0, damage_given=0, damage_recieved=0, damage_absorbed=0,
                  bottles_used=0, gold=0, time_start=datetime.datetime.now(), total_time=None):
         self.id = id
+        self.game_id = game_id
         self.level = level
         self.kills = kills
         self.damage_given = damage_given
@@ -48,6 +28,7 @@ class Score:
         c.execute(
             """CREATE TABLE IF NOT EXISTS scores (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            game_id INTEGER NOT NULL,
             level INTEGER NOT NULL,
             kills INTEGER NOT NULL,
             damage_given INTEGER NOT NULL,
@@ -56,7 +37,8 @@ class Score:
             bottles_used INTEGER NOT NULL,
             gold INTEGER NOT NULL,
             time_start DATETIME NOT NULL,
-            total_time DATETIME
+            total_time DATETIME,
+            FOREIGN KEY (game_id) REFERENCES games(id)
             )""")
 
     @staticmethod
@@ -64,7 +46,7 @@ class Score:
         out = []
         con = Connection()
         c = con.cursor()
-        c.execute("""SELECT id, level, kills, damage_given, damage_recieved, damage_absorbed, bottles_used,
+        c.execute("""SELECT id, game_id, level, kills, damage_given, damage_recieved, damage_absorbed, bottles_used,
         gold, time_start, total_time FROM scores ORDER BY id ASC""")
 
         for i in c.fetchall():
@@ -76,8 +58,8 @@ class Score:
         out = None
         con = Connection()
         c = con.cursor()
-        c.execute("SELECT id, level, kills, damage_given, damage_recieved, damage_absorbed, bottles_used, gold, time_start, total_time "
-                  "FROM scores WHERE id = ? ORDER BY id", (id,))
+        c.execute("SELECT id, game_id, level, kills, damage_given, damage_recieved, damage_absorbed, bottles_used,"
+                  "gold, time_start, total_time FROM scores WHERE id = ?", (id,))
 
         res = c.fetchall()
         if len(res):
@@ -94,20 +76,21 @@ class Score:
         c = con.cursor()
         if score.id is None:
             c.execute(
-                'INSERT INTO scores (level, kills, damage_given, damage_recieved, damage_absorbed, bottles_used, gold, '
-                'time_start, total_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
-                (score.level, score.kills, score.damage_given, score.damage_recieved, score.damage_absorbed,
+                'INSERT INTO scores (game_id, level, kills, damage_given, damage_recieved, damage_absorbed,'
+                'bottles_used, gold, time_start, total_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
+                (score.game_id, score.level, score.kills, score.damage_given, score.damage_recieved, score.damage_absorbed,
                  score.bottles_used, score.gold, score.time_start, score.total_time))
             r = c.fetchone()
             score.id = r[0]
         else:
             c.execute("""UPDATE scores
-                                    SET level = ?, kills = ?, damage_given = ?, damage_recieved = ?, 
+                                    SET game_id = ?, level = ?, kills = ?, damage_given = ?, damage_recieved = ?, 
                                     damage_absorbed = ?, bottles_used = ?, gold = ?, time_start = ?, total_time = ?
                                     WHERE id = ?
                                     """,
-                      (score.level, score.kills, score.damage_given, score.damage_recieved, score.damage_absorbed,
-                       score.bottles_used, score.gold, score.time_start, score.total_time, score.id))
+                      (score.game_id, score.level, score.kills, score.damage_given, score.damage_recieved,
+                       score.damage_absorbed, score.bottles_used, score.gold, score.time_start, score.total_time,
+                       score.id))
         if auto_commit:
             con.commit()
 
