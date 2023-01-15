@@ -5,7 +5,7 @@ SIZE = WIDTH, HEIGHT = 1280, 720
 STEP = 15
 tile_width = tile_height = 100
 
-KEY_COLOR = (0xff, 0x5c, 0xf9)
+KEY_COLOR = -1
 
 SLOT_NONE = 0
 SLOT_ARMOR = 1
