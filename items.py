@@ -149,14 +149,13 @@ class Key(Item):
 class SmallHealPotion(HealPotion):
     def __init__(self, count=1):
         super().__init__(
-            "Small Heal Potion description\nasdkfj kjasdkj ak akjdfaskj kj\n"
-            "dfaskj dfask fkkjkj kj akj\kk dfaskj kj kj kj ",
+            "Small Heal Potion description",
             load_image("shp.png", KEY_COLOR), 10, int(count))
 
 
 class Hood(Armor):
     def __init__(self):
-        super().__init__("Теплый капюшон. Не даёт много защиты.", load_image("hood.png", KEY_COLOR), 15, SLOT_ARMOR)
+        super().__init__("Теплый капюшон. Не\nдаёт много защиты.", load_image("hood.png", KEY_COLOR), 15, SLOT_ARMOR)
 
 
 class Sword(Weapon):
@@ -187,3 +186,13 @@ class Gold(Item):
     def __init__(self, count=0):
         super().__init__("Золото. Приятный бонус,\nно ты здесь не ради него", load_image("gold.png", KEY_COLOR),
                          SLOT_NONE, int(count))
+
+
+class YellowKey(Key):
+    def __init__(self):
+        super().__init__("Yellow key", load_image("yellow_key.png", KEY_COLOR))
+
+
+class BrownKey(Key):
+    def __init__(self):
+        super().__init__("Brown key", load_image("key.png", KEY_COLOR))

@@ -6,7 +6,7 @@ from settings import SIZE, GAME_PAUSED, GAME_FAILED, GAME_COMPLETED, MENU_SCORE,
 
 def main_loop():
     pygame.init()
-    screen = pygame.display.set_mode(SIZE, pygame.FULLSCREEN)
+    screen = pygame.display.set_mode(SIZE)#, pygame.FULLSCREEN)
 
     start = StartScreen(screen)
     fail = FailScreen(screen)
