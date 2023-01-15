@@ -1,11 +1,76 @@
-import datetime
+from datetime import datetime
 
 from utils import Connection
 
 
+class GameScore:
+    def __init__(self, id=None, kills=0, damage_given=0, damage_recieved=0, damage_absorbed=0,
+                 bottles_used=0, gold=0, time_start=None, score=0):
+        self.id = id
+        self.time_start = time_start
+        self.score = score
+        self.kills = kills
+        self.damage_given = damage_given
+        self.damage_recieved = damage_recieved
+        self.damage_absorbed = damage_absorbed
+        self.bottles_used = bottles_used
+        self.gold = gold
+
+    def __repr__(self):
+        return f"<GameScore ({self.time_start}, {self.score})>"
+
+    def __str__(self):
+        return f"""|{self.id:4d}|{datetime.fromisoformat(self.time_start).strftime("%Y-%m-%d %H-%M-%S")}|""" + \
+               f"""{self.score:6d}|{self.kills:3d}|{self.damage_given:6d}|{self.damage_recieved:6d}|""" + \
+               f"""{self.damage_absorbed:6d}|{self.bottles_used:3d}|{self.gold:6d}|"""
+
+    @staticmethod
+    def title():
+        return f"""|Game|     Start time    |Score |KLS|DAMAGE|DMG_RV|DMG_BL|BTL| GOLD |"""
+
+    @staticmethod
+    def get(limit=10):
+        out = []
+        con = Connection()
+        c = con.cursor()
+        c.execute("""
+            SELECT 
+                id,
+                kills,
+                damage_given,
+                damage_recieved,
+                damage_absorbed,
+                bottles_used,
+                gold,
+                time_start,
+                CASE WHEN (kills * 150 + damage_given - damage_recieved + gold) < 0 
+                THEN 0 
+                ELSE (kills * 150 + damage_given - damage_recieved + gold) 
+                END AS score
+            FROM (
+                SELECT 
+                    game_id AS id,
+                    SUM(kills) AS kills,
+                    SUM(damage_given) AS damage_given,
+                    SUM(damage_recieved) AS damage_recieved, 
+                    SUM(damage_absorbed) AS damage_absorbed,
+                    SUM(bottles_used) AS bottles_used,
+                    SUM(gold) AS gold,
+                    MIN(time_start) AS time_start
+                FROM scores 
+                GROUP BY game_id
+            )
+            ORDER BY score DESC LIMIT ?
+        """, (limit,))
+
+        for i in c.fetchall():
+            out.append(GameScore(*i))
+        return out
+
+
 class Score:
     def __init__(self, id=None, game_id=None, level=0, kills=0, damage_given=0, damage_recieved=0, damage_absorbed=0,
-                 bottles_used=0, gold=0, time_start=datetime.datetime.now(), total_time=None):
+                 bottles_used=0, gold=0, time_start=None):
         self.id = id
         self.game_id = game_id
         self.level = level
@@ -16,7 +81,6 @@ class Score:
         self.bottles_used = bottles_used
         self.gold = gold
         self.time_start = time_start
-        self.total_time = total_time
 
     def __repr__(self):
         return f"Score {self.id}"
@@ -37,7 +101,6 @@ class Score:
             bottles_used INTEGER NOT NULL,
             gold INTEGER NOT NULL,
             time_start DATETIME NOT NULL,
-            total_time DATETIME,
             FOREIGN KEY (game_id) REFERENCES games(id)
             )""")
 
@@ -47,7 +110,7 @@ class Score:
         con = Connection()
         c = con.cursor()
         c.execute("""SELECT id, game_id, level, kills, damage_given, damage_recieved, damage_absorbed, bottles_used,
-        gold, time_start, total_time FROM scores ORDER BY id ASC""")
+        gold, time_start FROM scores ORDER BY id ASC""")
 
         for i in c.fetchall():
             out.append(Score(*i))
@@ -59,7 +122,7 @@ class Score:
         con = Connection()
         c = con.cursor()
         c.execute("SELECT id, game_id, level, kills, damage_given, damage_recieved, damage_absorbed, bottles_used,"
-                  "gold, time_start, total_time FROM scores WHERE id = ?", (id,))
+                  "gold, time_start FROM scores WHERE id = ?", (id,))
 
         res = c.fetchall()
         if len(res):
@@ -77,20 +140,19 @@ class Score:
         if score.id is None:
             c.execute(
                 'INSERT INTO scores (game_id, level, kills, damage_given, damage_recieved, damage_absorbed,'
-                'bottles_used, gold, time_start, total_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
+                'bottles_used, gold, time_start) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
                 (score.game_id, score.level, score.kills, score.damage_given, score.damage_recieved, score.damage_absorbed,
-                 score.bottles_used, score.gold, score.time_start, score.total_time))
+                 score.bottles_used, score.gold, score.time_start))
             r = c.fetchone()
             score.id = r[0]
         else:
             c.execute("""UPDATE scores
                                     SET game_id = ?, level = ?, kills = ?, damage_given = ?, damage_recieved = ?, 
-                                    damage_absorbed = ?, bottles_used = ?, gold = ?, time_start = ?, total_time = ?
+                                    damage_absorbed = ?, bottles_used = ?, gold = ?, time_start = ?
                                     WHERE id = ?
                                     """,
                       (score.game_id, score.level, score.kills, score.damage_given, score.damage_recieved,
-                       score.damage_absorbed, score.bottles_used, score.gold, score.time_start, score.total_time,
-                       score.id))
+                       score.damage_absorbed, score.bottles_used, score.gold, score.time_start, score.id))
         if auto_commit:
             con.commit()
 
@@ -108,4 +170,3 @@ class Score:
 
 
 Score.init_db()
-

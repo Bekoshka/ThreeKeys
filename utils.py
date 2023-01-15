@@ -82,3 +82,29 @@ class Connection:
 
     def rollback(self):
         self.con.rollback()
+
+
+def get_vector(x1, y1, x2, y2):
+    dx = 0
+    dy = 0
+    if x2 > x1:
+        dx += 1
+    if x2 < x1:
+        dx -= 1
+    if y2 > y1:
+        dy += 1
+    if y2 < y1:
+        dy -= 1
+    return (dx, dy)
+
+
+class Mouse():
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+
+    def get_pos(self):
+        return self.x, self.y
+
+    def set_pos(self, pos):
+        self.x, self.y = pos

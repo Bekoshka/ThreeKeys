@@ -52,5 +52,3 @@ class YellowPortal(Trigger):
 class BrownPortal(Trigger):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_image('box.png'), pos_x, pos_y)
-
-

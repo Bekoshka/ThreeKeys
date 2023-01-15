@@ -21,6 +21,7 @@ class Item(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(0, 0)
         self.slot_type = slot_type
         self.count = count
+        self.__delay = 0
 
     def reduce_amount(self):
         self.count = max([self.count - 1, 0])
@@ -147,7 +148,10 @@ class Key(Item):
 
 class SmallHealPotion(HealPotion):
     def __init__(self, count=1):
-        super().__init__("Small Heal Potion description", load_image("shp.png", KEY_COLOR), 10, int(count))
+        super().__init__(
+            "Small Heal Potion description\nasdkfj kjasdkj ak akjdfaskj kj\n"
+            "dfaskj dfask fkkjkj kj akj\kk dfaskj kj kj kj ",
+            load_image("shp.png", KEY_COLOR), 10, int(count))
 
 
 class Hood(Armor):
@@ -169,13 +173,13 @@ class Axe(Weapon):
 
 class LeftHand(Weapon):
     def __init__(self):
-        super().__init__("Sword description", load_image("left_hand.png", KEY_COLOR), (1, 2), 30,
+        super().__init__("Left fist description", load_image("left_hand.png", KEY_COLOR), (1, 2), 30,
                          SLOT_LEFT_HAND)
 
 
 class RightHand(Weapon):
     def __init__(self):
-        super().__init__("Sword description", load_image("right_hand.png", KEY_COLOR), (3, 4), 30,
+        super().__init__("Right fist description", load_image("right_hand.png", KEY_COLOR), (3, 4), 30,
                          SLOT_RIGHT_HAND)
 
 

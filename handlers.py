@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import smokesignal
 
 from creatures import Player
@@ -62,7 +64,7 @@ class ScoreHandler(DefaultHandler):
     def __init__(self, level, game_id):
         super().__init__()
         self.__gold = dict()
-        self.__score = Score(level=level, game_id=game_id)
+        self.__score = Score(level=level, game_id=game_id, time_start=datetime.now())
         Score.add(self.__score)
         self._register(EVENT_MONSTER_DEAD, self.__monster_dead)
         self._register(EVENT_DAMAGE_RECIEVED, self.__damage_recieved)
@@ -71,7 +73,7 @@ class ScoreHandler(DefaultHandler):
         self._register(EVENT_ITEM_ASSIGNED, self.__item_assigned)
 
     def __monster_dead(self, creature):
-        print(creature, "is dead", self)
+        print(creature, "is dead")
         if creature != Player.__name__:
             self.__score.kills += 1
             Score.add(self.__score)

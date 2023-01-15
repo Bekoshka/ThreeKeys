@@ -1,28 +1,25 @@
-import json
-
-import smokesignal
-
 from items import *
 from buttons import Button
-from common import buttons_group, slots_group, items_group, selected_slot, right_side_menu_open
-from settings import WIDTH, HEIGHT, SLOT_RIGHT_HAND, SLOT_LEFT_HAND, EVENT_BOTTLE_USED, EVENT_ITEM_ASSIGNED
-from random import randrange
+from common import buttons_group, slots_group, items_group, mouse
+
+from settings import WIDTH, HEIGHT, SLOT_RIGHT_HAND, SLOT_LEFT_HAND, EVENT_ITEM_ASSIGNED
 
 import pygame
 
 from settings import SLOT_ARMOR, KEY_COLOR
-from utils import load_image, calculate_sprite_range
+from utils import load_image
+
+selected_slot = None
+right_side_menu_open = None
+description_slot = None
 
 INVENTORY_DIMENTION = 5
 INVENTORY_BORDER = 10
 INVENTORY_ITEM_SIZE = WIDTH // 10
 AMMUNITION_SLOTS = {
-    SLOT_ARMOR: (INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2,
-                 WIDTH // 2 + WIDTH // 4 - INVENTORY_ITEM_SIZE // 2, HEIGHT // 4),
-    SLOT_RIGHT_HAND: (INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2,
-                      WIDTH // 2 + WIDTH // 4 - INVENTORY_ITEM_SIZE * 1.5, HEIGHT // 2),
-    SLOT_LEFT_HAND: (INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2,
-                     WIDTH // 2 + WIDTH // 4 + INVENTORY_ITEM_SIZE * 0.5, HEIGHT // 2)
+    SLOT_ARMOR: (WIDTH // 2 + WIDTH // 4 - INVENTORY_ITEM_SIZE // 2, HEIGHT // 4),
+    SLOT_RIGHT_HAND: (WIDTH // 2 + WIDTH // 4 - INVENTORY_ITEM_SIZE * 1.5, HEIGHT // 2),
+    SLOT_LEFT_HAND: (WIDTH // 2 + WIDTH // 4 + INVENTORY_ITEM_SIZE * 0.5, HEIGHT // 2)
 }
 
 
@@ -75,6 +72,8 @@ class Slot(pygame.sprite.Sprite):
 
     def handle_click(self, button, union=False, divide=False):
         global selected_slot
+        global description_slot
+        x, y = mouse.get_pos()
         if button == 1:
             if selected_slot:
                 if not (union or divide):
@@ -96,31 +95,70 @@ class Slot(pygame.sprite.Sprite):
                         selected_slot = None
             else:
                 selected_slot = self
+        elif button == 2:
+            description_slot = (self, x, y)
         elif button == 3:
             if self.item:
                 self.item.apply(self.creature, self.creature)
 
-class Inventory:
-    def __init__(self, creature):
-        self.creature = creature
-        self.is_left = False
-        self.items = dict()
-        self.is_visible = False
+    @staticmethod
+    def clean_description():
+        global description_slot
+        description_slot = None
+
+    @staticmethod
+    def render_description(screen):
+        global description_slot
+        if description_slot:
+            slot, x, y = description_slot
+            item = slot.assigned_item()
+            if item:
+                blits = []
+                max_width = 0
+                max_height = 0
+                for i, text in enumerate(item.description.split('\n')):
+                    bg_color = pygame.Color('white')
+                    image = pygame.font.Font(None, 30).render(text, True, pygame.Color('black'), bg_color)
+                    rect = image.get_rect()
+                    rect.topleft = x, 20 + y + i * rect.height
+                    max_width = max([max_width, rect.width])
+                    max_height = max([max_height, rect.height])
+                    blits.append((image, rect))
+                r = (x, 20 + y, max_width, max_height * len(blits))
+                pygame.draw.rect(screen, bg_color, pygame.Rect(*r))
+                for i in blits:
+                    screen.blit(*i)
+
+
+class Container:
+    def __init__(self, is_left):
         self.close_button = Button(load_image("close.png", KEY_COLOR), self.close)
-        self.slots = dict()
+        self.__slots = dict()
+        self.__is_left = is_left
+        self.__is_visible = False
+
+    def _get_slot_keys(self):
+        return self.__slots
+
+    def _get_slot(self, slot):
+        return self.__slots[slot]
+
+    def _add_slot(self, name, creature, x=0, y=0, type=None):
         images = [
             load_image("slot.png", resize=True, size=(INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2)),
             load_image("slot_.png", resize=True, size=(INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2))
         ]
-        for i in range(INVENTORY_DIMENTION):
-            for j in range(INVENTORY_DIMENTION):
-                self.slots[i, j] = Slot((i, j), creature, images)
+        self.__slots[name] = Slot(name, creature, images, x, y, type)
+
+    def clean(self):
+        self.close()
+        self._clean()
 
     def close(self):
         global right_side_menu_open
-        if not self.is_left:
+        if not self.__is_left:
             right_side_menu_open = None
-        self.is_visible = False
+        self.__is_visible = False
 
     def open(self, is_left=False):
         global right_side_menu_open
@@ -128,161 +166,112 @@ class Inventory:
             if right_side_menu_open:
                 right_side_menu_open.close()
             right_side_menu_open = self
-        self.is_left = is_left
-        self.is_visible = True
+        self.__is_left = is_left
+        self.__is_visible = True
 
-    def add_item(self, item):
-        for i in range(INVENTORY_DIMENTION):
-            for j in range(INVENTORY_DIMENTION):
-                slot_item = self.slots[i, j].assigned_item()
-                if slot_item:
-                    continue
-                self.slots[i, j].assign(item)
-                return True
-        return False
-
-    def update(self, screen):
+    def _clean(self):
         global selected_slot
-        if not self.is_visible:
-            self.close_button.kill()
-            for slot in self.slots.values():
-                slot.kill()
-                if slot == selected_slot:
-                    selected_slot = None
-                item = slot.assigned_item()
-                if item:
-                    item.kill()
-            return
-        x = 0 if self.is_left else WIDTH // 2
-        if buttons_group not in self.close_button.groups():
-            buttons_group.add(self.close_button)
-        rect = pygame.Rect(x, 0, WIDTH // 2, HEIGHT)
-        pygame.draw.rect(screen, (50, 50, 50), rect)
-
-        for i in range(INVENTORY_DIMENTION):
-            for j in range(INVENTORY_DIMENTION):
-                slot = self.slots[i, j]
-                if slots_group not in slot.groups():
-                    slots_group.add(slot)
-                rect = slot.rect
-                rect.x = INVENTORY_BORDER + x + INVENTORY_ITEM_SIZE * j
-                rect.y = INVENTORY_BORDER + (
-                        HEIGHT - INVENTORY_ITEM_SIZE * INVENTORY_DIMENTION) // 2 + INVENTORY_ITEM_SIZE * i
-                item = slot.assigned_item()
-                if item and item.is_empty():
-                    slot.assign(None)
-                    item.kill()
-                    item = None
-                if item:
-                    item.rect.centerx = rect.centerx
-                    item.rect.centery = rect.centery
-                    if items_group not in item.groups():
-                        items_group.add(item)
-        self.close_button.rect.x = x
-
-
-class Ammunition:
-    def __init__(self, creature):
-        self.creature = creature
-        self.slots = dict()
-        for k in AMMUNITION_SLOTS.keys():
-            v = AMMUNITION_SLOTS[k]
-            self.slots[k] = Slot(k, creature,
-                                 [
-                                     load_image("slot.png", resize=True, size=v[0]),
-                                     load_image("slot_.png", resize=True, size=v[0]),
-                                 ],
-                                 v[1], v[2], k)
-        self.is_visible = False
-        self.close_button = Button(load_image("close.png", KEY_COLOR), self.close, WIDTH // 2)
+        self.close_button.kill()
+        for slot in self.__slots.values():
+            slot.kill()
+            if slot == selected_slot:
+                selected_slot = None
+            item = slot.assigned_item()
+            if item:
+                item.kill()
 
     def get_slot_animation_type(self, slot):
-        item = self.slots[slot].assigned_item()
+        item = self.__slots[slot].assigned_item()
         if item:
             return item.get_animation_type()
         return None
 
-    def close(self):
-        global right_side_menu_open
-        right_side_menu_open = None
-        self.is_visible = False
-
-    def open(self):
-        global right_side_menu_open
-        if right_side_menu_open:
-            right_side_menu_open.close()
-        right_side_menu_open = self
-        self.is_visible = True
-
-    def assign_default(self, item, slot):
-        if slot in self.slots.keys():
-            self.slots[slot].assign_default(item)
-            return True
-        return False
-
-    def assign(self, item, slot):
-        self.slots[slot].assign(item)
-
-    def drop_to_inventory(self, inventory):
-        for k in self.slots.keys():
-            if self.slots[k].can_drop():
-                inventory.add_item(self.slots[k].assigned_item())
-                self.slots[k].assign(None)
-
-    def reduce_damage(self, damage):
-        if self.slots[SLOT_ARMOR].assigned_item():
-            reduced_damage = self.slots[SLOT_ARMOR].assigned_item().reduce_damage(damage)
-            return reduced_damage
-        return damage
-
-    def get_slot(self, slot):
-        if slot in self.slots.keys():
-            return self.slots[slot]
-        return None
-
-    # def apply(self, slot, actor, creature):
-    #     if slot in self.slots.keys():
-    #         item = self.slots[slot].assigned_item()
-    #         if item:
-    #             if item.apply(actor, creature):
-    #                 self.slots[slot].assign(None)
-    #                 item.kill()
-    #
-    # def can_apply(self, slot, actor, creature):
-    #     if slot in self.slots.keys():
-    #         item = self.slots[slot].assigned_item()
-    #         if item:
-    #             return item.can_apply(actor, creature)
-    #     return False
-
     def update(self, screen):
         global selected_slot
-        if not self.is_visible:
-            self.close_button.kill()
-            for slot in self.slots.values():
-                slot.kill()
-                if slot == selected_slot:
-                    selected_slot = None
-                item = slot.assigned_item()
-                if item:
-                    item.kill()
+        if not self.__is_visible:
+            self._clean()
             return
+        x = 0 if self.__is_left else WIDTH // 2
+        pygame.draw.rect(screen, (50, 50, 50), pygame.Rect(x, 0, WIDTH // 2, HEIGHT))
+
         if buttons_group not in self.close_button.groups():
             buttons_group.add(self.close_button)
-        rect = pygame.Rect(WIDTH // 2, 0, WIDTH // 2, HEIGHT)
-        pygame.draw.rect(screen, (50, 50, 50), rect)
+        self.close_button.rect.x = x
 
-        for k in AMMUNITION_SLOTS.keys():
-            slot = self.slots[k]
+        for k in self.__slots.keys():
+            slot = self.__slots[k]
             if slots_group not in slot.groups():
                 slots_group.add(slot)
+            rect = slot.rect
+            if isinstance(k, tuple):
+                i, j = k
+                rect.x = INVENTORY_BORDER + x + INVENTORY_ITEM_SIZE * j
+                rect.y = INVENTORY_BORDER + (
+                        HEIGHT - INVENTORY_ITEM_SIZE * INVENTORY_DIMENTION) // 2 + INVENTORY_ITEM_SIZE * i
             item = slot.assigned_item()
             if item and item.is_empty():
                 slot.assign(None)
                 item.kill()
                 item = None
             if item:
-                item.rect.centerx = slot.rect.centerx
-                item.rect.centery = slot.rect.centery
+                item.rect.centerx = rect.centerx
+                item.rect.centery = rect.centery
                 if items_group not in item.groups():
                     items_group.add(item)
+
+    def get_slot_by_name(self, slot):
+        if slot in self.__slots.keys():
+            return self.__slots[slot]
+        return None
+
+
+class Inventory(Container):
+    def __init__(self, creature):
+        super().__init__(False)
+        self.creature = creature
+        for i in range(INVENTORY_DIMENTION):
+            for j in range(INVENTORY_DIMENTION):
+                self._add_slot((i, j), creature)
+
+    def add_item(self, item):
+        for i in range(INVENTORY_DIMENTION):
+            for j in range(INVENTORY_DIMENTION):
+                slot = self._get_slot((i, j))
+                slot_item = slot.assigned_item()
+                if slot_item:
+                    continue
+                slot.assign(item)
+                return True
+        return False
+
+
+class Ammunition(Container):
+    def __init__(self, creature):
+        super().__init__(False)
+        self.creature = creature
+        for k in AMMUNITION_SLOTS.keys():
+            x, y = AMMUNITION_SLOTS[k]
+            self._add_slot(k, creature, x, y, k)
+
+    def assign_default(self, item, slot):
+        if slot in self._get_slot_keys():
+            self._get_slot(slot).assign_default(item)
+            return True
+        return False
+
+    def assign(self, item, slot):
+        self._get_slot(slot).assign(item)
+
+    def drop_to_inventory(self, inventory):
+        for k in self._get_slot_keys():
+            slot = self._get_slot(k)
+            if slot.can_drop():
+                inventory.add_item(slot.assigned_item())
+                slot.assign(None)
+
+    def reduce_damage(self, damage):
+        slot = self._get_slot(SLOT_ARMOR)
+        if slot.assigned_item():
+            reduced_damage = slot.assigned_item().reduce_damage(damage)
+            return reduced_damage
+        return damage

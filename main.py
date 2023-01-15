@@ -1,37 +1,42 @@
 import pygame
 
-from screen import StartScreen, GameScreen, FailScreen, WinScreen
-from settings import SIZE, GAME_PAUSED, GAME_FAILED, GAME_COMPLETED
+from screen import StartScreen, GameScreen, FailScreen, WinScreen, ScoreTableScreen, MenuScreen
+from settings import SIZE, GAME_PAUSED, GAME_FAILED, GAME_COMPLETED, MENU_SCORE, MENU_NEW_GAME
 
-pygame.init()
-# pygame.key.set_repeat(200, 70)
 
-screen = pygame.display.set_mode(SIZE)
+def main_loop():
+    pygame.init()
+    screen = pygame.display.set_mode(SIZE, pygame.FULLSCREEN)
 
-menu = StartScreen(screen)
-fail = FailScreen(screen)
-win = WinScreen(screen)
-game = GameScreen(screen)
-while True:
+    start = StartScreen(screen)
+    fail = FailScreen(screen)
+    win = WinScreen(screen)
+    game = None
+    menu = MenuScreen(screen)
+    start.run()
     while True:
-        menu.run()
-        game.run()
-        status = game.get_status()
-        if status == GAME_PAUSED:
-            continue
-        break
-    if status == GAME_FAILED:
-        fail.run()
-    elif status == GAME_COMPLETED:
-        win.run()
-    game.clean()
-    game = GameScreen(screen)
+        while True:
+            menu.run(bool(game))
+            status = menu.get_status()
+            if status == MENU_SCORE:
+                ScoreTableScreen(screen).run()
+                continue
+            elif status == MENU_NEW_GAME:
+                if game:
+                    game.exit()
+                game = GameScreen(screen)
+            game.run()
+            status = game.get_status()
+            if status == GAME_PAUSED:
+                continue
+            break
+        if status == GAME_FAILED:
+            fail.run()
+        elif status == GAME_COMPLETED:
+            win.run()
+        game.exit()
+        game = None
 
 
-
-
-
-# GAME_RUNNING = 0
-# GAME_PAUSED = 1
-# GAME_FAILED = 2
-# GAME_COMPLETED = 3
+if __name__ == '__main__':
+    main_loop()

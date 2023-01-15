@@ -1,6 +1,7 @@
-Player 0 0
+Player -100 -100
 Monster1 -100 0
 Zombie 100 500
 Zombie 100 100
 Chest 50 50
 Skeleton 200 50
+Scorpion 200 200

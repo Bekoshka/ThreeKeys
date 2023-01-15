@@ -15,12 +15,15 @@ LANDSCAPES = {
 
 class Level:
     def __init__(self, level, player, game):
+        self.game = game
         self.background = self.load_background(level)
         self.objects = self.load_objects(level)
         self.creatures = self.load_creatures(level, player)
         self.handlers = self.load_handlers(level, game)
 
     def clean(self):
+        for i in self.creatures:
+            i.clean()
         for i in self.background + self.objects + self.creatures:
             i.kill()
         self.background = []

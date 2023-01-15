@@ -3,12 +3,16 @@ from itertools import chain
 
 import pygame
 
-from common import screen_map_group, landscape_group, obstacle_group, player_group, \
-    buttons_group, slots_group, items_group, corpse_group
+from buttons import Button
+from common import screen_map_group, landscape_group, obstacle_group, buttons_group, slots_group, items_group, \
+    corpse_group, mouse
 from game import Game
 from creatures import Player
+from inventory import Slot
 from levels import Level
-from settings import WIDTH, HEIGHT, FPS, GAME_COMPLETED, GAME_FAILED, GAME_PAUSED, GAME_RUNNING
+from score import GameScore
+from settings import WIDTH, HEIGHT, FPS, GAME_COMPLETED, GAME_FAILED, GAME_PAUSED, GAME_RUNNING, KEY_COLOR, MENU_NONE, \
+    MENU_NEW_GAME, MENU_CONTINUE, MENU_SCORE
 from utils import load_image
 
 
@@ -23,6 +27,13 @@ class Screen:
         fon = pygame.transform.scale(background, (WIDTH, HEIGHT))
         self.screen.blit(fon, (0, 0))
 
+    def _render_title(self, text):
+        font = pygame.font.Font(None, 50)
+        string_rendered = font.render(text, True, pygame.Color('WHITE'))
+        intro_rect = string_rendered.get_rect()
+        intro_rect.center = WIDTH // 2, 50
+        self.screen.blit(string_rendered, intro_rect)
+
     def _render_central_string(self, text):
         font = pygame.font.Font(None, 50)
         string_rendered = font.render(text, True, pygame.Color('black'), pygame.Color('white'))
@@ -30,11 +41,12 @@ class Screen:
         intro_rect.center = WIDTH // 2, HEIGHT // 2
         self.screen.blit(string_rendered, intro_rect)
 
-    def _render_text(self, text):
-        font = pygame.font.Font(None, 30)
+    def _render_text(self, text, font=None, color=pygame.Color('black')):
+        if not font:
+            font = pygame.font.Font(None, 30)
         text_coord = 100
         for line in text:
-            string_rendered = font.render(line, True, pygame.Color('black'))
+            string_rendered = font.render(line, True, color)
             intro_rect = string_rendered.get_rect()
             text_coord += 10
             intro_rect.top = text_coord
@@ -81,6 +93,94 @@ class StartScreen(Screen):
     def _render(self):
         self._render_background(self.background)
         self._render_text(self.text)
+        pygame.display.flip()
+
+    def _handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self._terminate()
+            elif event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
+                self.stop()
+
+
+class MenuScreen(Screen):
+    def __init__(self, screen):
+        super().__init__(screen)
+        self.menu_buttons_group = pygame.sprite.Group()
+        self.status = MENU_NONE
+        self.initialized = False
+
+    def get_status(self):
+        return self.status
+
+    def __init(self, game_exist):
+        if not self.initialized:
+            buttons = [
+                ("new_game.png", self.new_game),
+                ("continue_game.png", self.continue_game),
+                ("score_game.png", self.score_game),
+                ("exit_game.png", self._terminate)
+            ]
+            if not game_exist:
+                del buttons[1]
+            pos = 100
+            border = (HEIGHT - len(buttons) * pos) // 2
+            for i, v in enumerate(buttons):
+                button = Button(load_image(v[0], KEY_COLOR), v[1])
+                button.rect.midtop = (WIDTH // 2, border + pos * i)
+                self.menu_buttons_group.add(button)
+                self.initialized = True
+
+    def run(self, game_exist):
+        self.__init(game_exist)
+        super().run()
+
+    def _render(self):
+        self.screen.fill(pygame.Color(0, 0, 0))
+        self.menu_buttons_group.draw(self.screen)
+        pygame.display.flip()
+
+    def __clean(self):
+        self.menu_buttons_group.empty()
+        self.initialized = False
+
+    def new_game(self):
+        self.status = MENU_NEW_GAME
+        self.stop()
+
+    def continue_game(self):
+        self.status = MENU_CONTINUE
+        self.stop()
+
+    def score_game(self):
+        self.status = MENU_SCORE
+        self.stop()
+
+    def stop(self):
+        super().stop()
+        self.__clean()
+
+    def _handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self._terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for btn in self.menu_buttons_group:
+                    if btn.rect.collidepoint(event.pos):
+                        btn.handle_click()
+
+
+class ScoreTableScreen(Screen):
+    def __init__(self, screen):
+        super().__init__(screen)
+        self.game_scores = GameScore.get()
+
+    def _render(self):
+        self.screen.fill(pygame.Color(0, 0, 0))
+        self._render_title("SCORE")
+        lines = [GameScore.title()] + self.game_scores
+        self._render_text(map(lambda x: str(x), lines), font=pygame.font.SysFont("monospace", 30),
+                          color=pygame.Color("white"))
         pygame.display.flip()
 
     def _handle_events(self):
@@ -195,6 +295,12 @@ class GameScreen(Screen):
     def clean(self):
         self.level.clean()
 
+    def exit(self):
+        self.clean()
+        self.player.kill()
+        self.player.clean()
+        self.stop()
+
     def next_level(self):
         self.level_complete = False
         self.current_level += 1
@@ -209,10 +315,8 @@ class GameScreen(Screen):
         self.screen.fill(pygame.Color(0, 0, 0))
 
         landscape_group.draw(self.screen)
-        obstacle_group.draw(self.screen)
         corpse_group.draw(self.screen)
-        # monster_group.draw(self.screen)
-        player_group.draw(self.screen)
+        obstacle_group.draw(self.screen)
 
         screen_map_group.update(self.screen)
 
@@ -221,6 +325,8 @@ class GameScreen(Screen):
         items_group.draw(self.screen)
         buttons_group.draw(self.screen)
         items_group.update(self.screen)
+
+        Slot.render_description(self.screen)
 
         self.__render_message()
 
@@ -232,16 +338,9 @@ class GameScreen(Screen):
         elif self.level_complete:
             self._render_central_string("LEVEL COMPLETE")
 
-    # def render_level_complete(self):
-    #     if self.level_complete:
-    #         font = pygame.font.Font(None, 50)
-    #         for line in ["LEVEL COMPLETE"]:
-    #             string_rendered = font.render(line, True, pygame.Color('black'), pygame.Color('white'))
-    #             intro_rect = string_rendered.get_rect()
-    #             intro_rect.center = WIDTH // 2, HEIGHT // 2
-    #             self.screen.blit(string_rendered, intro_rect)
-
     def _handle_events(self):
+        mouse.set_pos(pygame.mouse.get_pos())
+
         dx, dy = 0, 0
         object = None
         button = 0
@@ -261,7 +360,7 @@ class GameScreen(Screen):
                 self.running = False
                 return
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button in [1, 3]:
+                if event.button in [1, 2, 3]:
                     button = event.button
                     for obstacle in chain(obstacle_group, corpse_group):
                         if obstacle.rect.collidepoint(event.pos):
@@ -272,6 +371,9 @@ class GameScreen(Screen):
                     for btn in buttons_group:
                         if btn.rect.collidepoint(event.pos):
                             btn.handle_click()
+            if event.type == pygame.MOUSEBUTTONUP:
+                if event.button  == 2:
+                    Slot.clean_description()
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_i:
@@ -287,22 +389,13 @@ class GameScreen(Screen):
             self.player.step(dx, dy)
             self.camera.follow()
 
-
-# TODO MENU SCREEN
-# TODO SCORE SCREEN
-# TODO NO LEVEL COMPLETE TIME IN SCORE
-
 # TODO Weapon ATTACK SPEED
-# TODO Weapon ATTACH TO VECTOR(ROTATE on mouse)
-# TODO HEAL ANIMATION
-# TODO MAKE CHEST NOT CREATURE
+# TODO Fix Gold
 
 # TODO REFACTOR TO PRIVATE VARS
 
-
-
-# TODO SHOW ITEM DESCRIPTION ON MOUSE3
-# TODO FIX health bar animation BUG!!
+# TODO COMMON -> GAME SCREEN ?
+# TODO MAKE CHEST NOT CREATURE ?
 
 # TODO MAKE SAVE - LOW(PRIO)
 # TODO MAKE NEWGAME LOAD BUTTONS - LOW(PRIO)

@@ -1,11 +1,11 @@
 import pygame
 import smokesignal
 
-from common import screen_map_group, landscape_group, obstacle_group, corpse_group
+from common import screen_map_group, landscape_group, obstacle_group, corpse_group, mouse
 from inventory import Ammunition, Inventory
 from settings import STEP, LOOT_RANGE, EVENT_MONSTER_DEAD, EVENT_DAMAGE_RECIEVED, EVENT_TRIGGER_RUN, ANIMATION_MOVE, \
     ANIMATION_DEATH, BUTTON_TO_SLOT
-from utils import calculate_sprite_range
+from utils import calculate_sprite_range, get_vector
 
 
 class Tile(pygame.sprite.Sprite):
@@ -60,15 +60,15 @@ class Obstacle(Tile):
 
 
 class Movable(AnimatedTile):
-    def __init__(self, animations, pos_x, pos_y, groups):
+    def __init__(self, animations, pos_x, pos_y):
         self.speed = STEP
-        self.move_vector = (0, -1)
+        self.__move_vector = (0, -1)
         start_animation_name = "_".join([ANIMATION_MOVE, "0", "-1"])
-        super().__init__(animations, start_animation_name, pos_x, pos_y, [obstacle_group] + groups)
+        super().__init__(animations, start_animation_name, pos_x, pos_y, [obstacle_group])
 
     def step(self, dx, dy):
         if dx or dy:
-            self.move_vector = (dx, dy)
+            self.__move_vector = (dx, dy)
             self.change_animation("_".join([ANIMATION_MOVE, str(dx), str(dy)]))
 
     def step_part(self, dx, dy):
@@ -86,7 +86,7 @@ class Movable(AnimatedTile):
 
     def animation_tick(self, animation):
         if animation.name.startswith("move"):
-            dx, dy = self.move_vector
+            dx, dy = self.__move_vector
             if dx != 0 and dy != 0:
                 step = int(((self.speed ** 2) // 2) ** 0.5)
             else:
@@ -97,13 +97,17 @@ class Movable(AnimatedTile):
 
 
 class Creature(Movable):
-    def __init__(self, animations, max_health_points, pos_x, pos_y, groups):
-        super().__init__(animations, pos_x, pos_y, groups)
+    def __init__(self, animations, max_health_points, pos_x, pos_y):
+        super().__init__(animations, pos_x, pos_y)
         self.health_points = self.max_health_points = max_health_points
         self.health_points = self.max_health_points
         self.ammunition = Ammunition(self)
         self.inventory = Inventory(self)
         self.dead = self.health_points == 0
+
+    def clean(self):
+        self.ammunition.clean()
+        self.inventory.clean()
 
     def is_dead(self):
         return self.dead
@@ -125,10 +129,10 @@ class Creature(Movable):
             pygame.draw.rect(screen, (0, 255, 0), (*pos, *size))
 
     def update(self, screen):
+        self.render_health(screen)
         super().update(screen)
         self.inventory.update(screen)
         self.ammunition.update(screen)
-        self.render_health(screen)
 
     def recieve_damage(self, damage):
         clean_damage = self.ammunition.reduce_damage(damage)
@@ -159,9 +163,9 @@ class Creature(Movable):
         if can_apply:
             animation_type = self.ammunition.get_slot_animation_type(slot)
             if animation_type:
-                super().change_animation("_".join([animation_type, "0", "-1"]))
-            # self.ammunition.apply(slot, self, creature)
-            slot_object = self.ammunition.get_slot(slot)
+                vector = [str(x) for x in get_vector(self.rect.x, self.rect.y, *mouse.get_pos())]
+                super().change_animation("_".join([animation_type, *vector]))
+            slot_object = self.ammunition.get_slot_by_name(slot)
             if slot_object:
                 item = slot_object.assigned_item()
                 if item:
@@ -171,7 +175,7 @@ class Creature(Movable):
     def __can_apply(self, creature, slot):
         if self.is_dead():
             return
-        slot_object = self.ammunition.get_slot(slot)
+        slot_object = self.ammunition.get_slot_by_name(slot)
         if slot_object:
             item = slot_object.assigned_item()
             if item:
@@ -197,14 +201,3 @@ class Trigger(Obstacle):
 
     def run(self, key):
         smokesignal.emit(EVENT_TRIGGER_RUN, type(self).__name__, type(key).__name__)
-
-
-
-
-
-
-
-
-
-
-

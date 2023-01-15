@@ -2,12 +2,12 @@ from random import choice
 
 from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND
 from tiles import Creature
-from utils import calculate_sprite_range
+from utils import calculate_sprite_range, get_vector
 
 
 class AI(Creature):
-    def __init__(self, animations, max_health_points, pos_x, pos_y, groups, enemy):
-        super().__init__(animations, max_health_points, pos_x, pos_y, groups)
+    def __init__(self, animations, max_health_points, pos_x, pos_y, enemy):
+        super().__init__(animations, max_health_points, pos_x, pos_y)
         self.spawn_point = self.rect.center
         self.logic_tick_counter = 0
         self.logic_mod = 10
@@ -39,16 +39,4 @@ class AI(Creature):
         pass
 
     def move_to_player(self):
-        x2, y2 = self.enemy.rect.center
-        x1, y1 = self.rect.center
-        dx = 0
-        dy = 0
-        if x2 > x1:
-            dx += 1
-        if x2 < x1:
-            dx -= 1
-        if y2 > y1:
-            dy += 1
-        if y2 < y1:
-            dy -= 1
-        self.step(dx, dy)
+        self.step(*get_vector(*self.rect.center, *self.enemy.rect.center))
