@@ -4,8 +4,9 @@ from itertools import chain
 import pygame
 
 from buttons import Button
-from common import screen_map_group, landscape_group, obstacle_group, buttons_group, slots_group, items_group, \
-    corpse_group, mouse
+from common import landscape_group, obstacle_group, buttons_group, slots_group, items_group, \
+    corpse_group, mouse, creature_group, animated_obstacle_group
+from camera import camera
 from game import Game
 from creatures import Player
 from inventory import Slot
@@ -88,7 +89,7 @@ class StartScreen(Screen):
             "Надетые вещи- A",
             "Нажмите ЛКМ, чтобы продолжить"
         ]
-        self.background = load_image('mount.png')
+        self.background = load_image('fon.jpg')
 
     def _render(self):
         self._render_background(self.background)
@@ -224,28 +225,6 @@ class WinScreen(CentralTextScreen):
         super().__init__(screen, "Congratulations!")
 
 
-class Camera:
-    def __init__(self, focus, other):
-        self.focus = focus
-        self.other = other
-        self.dx = 0
-        self.dy = 0
-        self.follow()
-
-    def apply(self, obj):
-        obj.rect.x += self.dx
-        obj.rect.y += self.dy
-
-    def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
-
-    def follow(self):
-        self.update(self.focus)
-        for sprite in self.other:
-            self.apply(sprite)
-
-
 class DelayedRunner:
     def __init__(self, wait, callback):
         self.tick_counter = 0
@@ -269,7 +248,7 @@ class GameScreen(Screen):
 
         self.level = Level(self.levels[self.current_level], self.player, self)
 
-        self.camera = Camera(self.player, screen_map_group)
+        camera.focus = self.player
         self.level_complete = False
         self.game_complete = False
         self.player_dead = False
@@ -318,7 +297,8 @@ class GameScreen(Screen):
         corpse_group.draw(self.screen)
         obstacle_group.draw(self.screen)
 
-        screen_map_group.update(self.screen)
+        animated_obstacle_group.update(self.screen)
+        creature_group.update(self.screen)
 
         slots_group.update(self.screen)
         slots_group.draw(self.screen)
@@ -363,7 +343,7 @@ class GameScreen(Screen):
                 if event.button in [1, 2, 3]:
                     button = event.button
                     for obstacle in chain(obstacle_group, corpse_group):
-                        if obstacle.rect.collidepoint(event.pos):
+                        if camera.translate(obstacle.rect).collidepoint(event.pos):
                             object = obstacle
                     for slot in slots_group:
                         if slot.rect.collidepoint(event.pos):
@@ -387,17 +367,16 @@ class GameScreen(Screen):
             self.player.handle_click(object, button)
         else:
             self.player.step(dx, dy)
-            self.camera.follow()
+            camera.follow()
+
 
 # TODO Weapon ATTACK SPEED
 # TODO Fix Gold
 
 # TODO REFACTOR TO PRIVATE VARS
 # TODO REFACTOR DATA DIR STRUCT
+# TODO OPTIMIZE OUT
 
-
-# TODO COMMON -> GAME SCREEN ?
-# TODO MAKE CHEST NOT CREATURE ?
 
 # TODO MAKE SAVE - LOW(PRIO)
 # TODO MAKE NEWGAME LOAD BUTTONS - LOW(PRIO)

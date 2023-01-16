@@ -12,12 +12,18 @@ LANDSCAPES = {
     "#": Sand
 }
 
+OBJECTS = {
+    "!": Beton,
+    "@": Forest,
+    "%": Cactus
+}
+
 
 class Level:
     def __init__(self, level, player, game):
         self.game = game
         self.background = self.load_background(level)
-        self.objects = self.load_objects(level)
+        self.objects = self.load_objects(level) + self.load_objects_map(level)
         self.creatures = self.load_creatures(level, player)
         self.handlers = self.load_handlers(level, game)
 
@@ -35,16 +41,25 @@ class Level:
 
     @staticmethod
     def load_background(level):
+        return Level.load_helper(level, LANDSCAPES, 'background.txt')
+
+    @staticmethod
+    def load_objects_map(level):
+        return Level.load_helper(level, OBJECTS, 'obstacles.txt')
+
+    @staticmethod
+    def load_helper(level, dict_var, file):
         result = []
-        with open(os.path.join(LEVEL_DIR, str(level), 'background.txt'), 'r') as mapFile:
+        with open(os.path.join(LEVEL_DIR, str(level), file), 'r') as mapFile:
             level_map = [line.strip() for line in mapFile]
         max_width = max(map(len, level_map))
         landscape = list(map(lambda x: x.ljust(max_width, '.'), level_map))
         for y in range(len(landscape)):
             for x in range(len(landscape[y])):
                 t = landscape[y][x]
-                if t in LANDSCAPES.keys():
-                    result.append(LANDSCAPES[t](tile_width * x, tile_height * y))
+                if t in dict_var.keys():
+                    element = dict_var[t](tile_width * x, tile_height * y)
+                    result.append(element)
         return result
 
     @staticmethod

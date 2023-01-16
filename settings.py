@@ -1,6 +1,6 @@
 import os
 
-FPS = 120
+FPS = 60
 SIZE = WIDTH, HEIGHT = 1280, 720
 STEP = 15
 tile_width = tile_height = 100
