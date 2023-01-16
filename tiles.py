@@ -1,15 +1,11 @@
 import pygame
 import smokesignal
 
-from common import screen_map_group, landscape_group, obstacle_group
+from common import screen_map_group, landscape_group, obstacle_group, corpse_group, mouse
 from inventory import Ammunition, Inventory
-from settings import STEP, LOOT_RANGE, EVENT_MONSTER_DEAD, EVENT_DAMAGE_RECIEVED
-from utils import calculate_sprite_range
-
-
-ANIMATION_MOVE = "move"
-ANIMATION_ATTACK = "attack-sword"
-ANIMATION_DEATH = "death"
+from settings import STEP, LOOT_RANGE, EVENT_MONSTER_DEAD, EVENT_DAMAGE_RECIEVED, EVENT_TRIGGER_RUN, ANIMATION_MOVE, \
+    ANIMATION_DEATH, BUTTON_TO_SLOT
+from utils import calculate_sprite_range, get_vector
 
 
 class Tile(pygame.sprite.Sprite):
@@ -64,29 +60,33 @@ class Obstacle(Tile):
 
 
 class Movable(AnimatedTile):
-    def __init__(self, animations, pos_x, pos_y, groups):
+    def __init__(self, animations, pos_x, pos_y):
         self.speed = STEP
-        self.move_vector = (0, -1)
+        self.__move_vector = (0, -1)
         start_animation_name = "_".join([ANIMATION_MOVE, "0", "-1"])
-        super().__init__(animations, start_animation_name, pos_x, pos_y, groups)
+        super().__init__(animations, start_animation_name, pos_x, pos_y, [obstacle_group])
 
     def step(self, dx, dy):
         if dx or dy:
-            self.move_vector = (dx, dy)
+            self.__move_vector = (dx, dy)
             self.change_animation("_".join([ANIMATION_MOVE, str(dx), str(dy)]))
 
     def step_part(self, dx, dy):
         x, y = self.rect.x, self.rect.y
         self.rect.x += dx
         self.rect.y += dy
-        if pygame.sprite.spritecollide(self, obstacle_group, False, pygame.sprite.collide_mask):
+
+        obstacle_group.remove(self)
+        collides = pygame.sprite.spritecollide(self, obstacle_group, False, pygame.sprite.collide_mask)
+        obstacle_group.add(self)
+        if collides:
             self.rect.x, self.rect.y = x, y
             return False
         return True
 
     def animation_tick(self, animation):
         if animation.name.startswith("move"):
-            dx, dy = self.move_vector
+            dx, dy = self.__move_vector
             if dx != 0 and dy != 0:
                 step = int(((self.speed ** 2) // 2) ** 0.5)
             else:
@@ -97,13 +97,17 @@ class Movable(AnimatedTile):
 
 
 class Creature(Movable):
-    def __init__(self, animations, max_health_points, pos_x, pos_y, groups):
-        super().__init__(animations, pos_x, pos_y, groups)
+    def __init__(self, animations, max_health_points, pos_x, pos_y):
+        super().__init__(animations, pos_x, pos_y)
         self.health_points = self.max_health_points = max_health_points
         self.health_points = self.max_health_points
         self.ammunition = Ammunition(self)
         self.inventory = Inventory(self)
-        self.dead = False
+        self.dead = self.health_points == 0
+
+    def clean(self):
+        self.ammunition.clean()
+        self.inventory.clean()
 
     def is_dead(self):
         return self.dead
@@ -115,20 +119,20 @@ class Creature(Movable):
         return self.ammunition
 
     def render_health(self, screen):
-        rect = pygame.Rect(0, 0, 50, 7)
-        rect.midbottom = self.rect.centerx, self.rect.top - self.rect.height // 5
-        pygame.draw.rect(screen, (255, 0, 0), (*rect.bottomleft, *rect.size))
-        pygame.draw.rect(screen, (0, 0, 0), (*rect.bottomleft, *rect.size), 1)
-        pos = (rect.bottomleft[0] + 1, rect.bottomleft[1] + 1)
-        size = (round((rect.size[0] - 2) * self.health_points / self.max_health_points), rect.size[1] - 2)
-        pygame.draw.rect(screen, (0, 255, 0), (*pos, *size))
+        if not self.is_dead():
+            rect = pygame.Rect(0, 0, 50, 7)
+            rect.midbottom = self.rect.centerx, self.rect.top - self.rect.height // 5
+            pygame.draw.rect(screen, (255, 0, 0), (*rect.bottomleft, *rect.size))
+            pygame.draw.rect(screen, (0, 0, 0), (*rect.bottomleft, *rect.size), 1)
+            pos = (rect.bottomleft[0] + 1, rect.bottomleft[1] + 1)
+            size = (round((rect.size[0] - 2) * self.health_points / self.max_health_points), rect.size[1] - 2)
+            pygame.draw.rect(screen, (0, 255, 0), (*pos, *size))
 
     def update(self, screen):
+        self.render_health(screen)
         super().update(screen)
         self.inventory.update(screen)
         self.ammunition.update(screen)
-        if not self.is_dead():
-            self.render_health(screen)
 
     def recieve_damage(self, damage):
         clean_damage = self.ammunition.reduce_damage(damage)
@@ -138,6 +142,8 @@ class Creature(Movable):
         if not self.health_points:
             self.dead = True
             self.change_animation(ANIMATION_DEATH)
+            corpse_group.add(self)
+            obstacle_group.remove(self)
             self.ammunition.drop_to_inventory(self.inventory)
             smokesignal.emit(EVENT_MONSTER_DEAD, type(self).__name__)
 
@@ -153,15 +159,28 @@ class Creature(Movable):
             super().step(dx, dy)
 
     def apply(self, creature, slot):
-        if self.is_dead() or creature.is_dead():
-            return
-        super().change_animation("_".join([ANIMATION_ATTACK, "0", "-1"]))
-        self.ammunition.apply(slot, self, creature)
+        can_apply = self.__can_apply(creature, slot)
+        if can_apply:
+            animation_type = self.ammunition.get_slot_animation_type(slot)
+            if animation_type:
+                vector = [str(x) for x in get_vector(self.rect.x, self.rect.y, *mouse.get_pos())]
+                super().change_animation("_".join([animation_type, *vector]))
+            slot_object = self.ammunition.get_slot_by_name(slot)
+            if slot_object:
+                item = slot_object.assigned_item()
+                if item:
+                    item.apply(self, creature)
+        return can_apply
 
-    def can_apply(self, creature, slot):
-        if self.is_dead() or creature.is_dead():
+    def __can_apply(self, creature, slot):
+        if self.is_dead():
             return
-        return self.ammunition.can_apply(slot, self, creature)
+        slot_object = self.ammunition.get_slot_by_name(slot)
+        if slot_object:
+            item = slot_object.assigned_item()
+            if item:
+                return item.can_apply(self, creature)
+        return False
 
     def loot(self, creature):
         if self.is_dead():
@@ -169,22 +188,16 @@ class Creature(Movable):
         if calculate_sprite_range(self, creature) < LOOT_RANGE:
             creature.get_inventory().open()
 
-    def apply_or_loot(self, enemy, slot):
-        if enemy.is_dead():
+    def handle_click(self, enemy, button):
+        if issubclass(enemy.__class__, Creature) and enemy.is_dead():
             self.loot(enemy)
         else:
-            self.apply(enemy, slot)
+            self.apply(enemy, BUTTON_TO_SLOT[button])
 
 
+class Trigger(Obstacle):
+    def __init__(self, image, pos_x, pos_y):
+        super().__init__(image, pos_x, pos_y)
 
-
-
-
-
-
-
-
-
-
-
-
+    def run(self, key):
+        smokesignal.emit(EVENT_TRIGGER_RUN, type(self).__name__, type(key).__name__)
