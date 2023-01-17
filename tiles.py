@@ -1,7 +1,8 @@
 import pygame
 import smokesignal
 
-from common import screen_map_group, landscape_group, obstacle_group, corpse_group, mouse
+from camera import camera
+from common import landscape_group, obstacle_group, corpse_group, mouse, creature_group, animated_obstacle_group
 from inventory import Ammunition, Inventory
 from settings import STEP, LOOT_RANGE, EVENT_MONSTER_DEAD, EVENT_DAMAGE_RECIEVED, EVENT_TRIGGER_RUN, ANIMATION_MOVE, \
     ANIMATION_DEATH, BUTTON_TO_SLOT
@@ -10,7 +11,7 @@ from utils import calculate_sprite_range, get_vector
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, image, x, y, groups):
-        super().__init__(screen_map_group, *groups)
+        super().__init__(*groups)
         self.image = image
         self.rect = self.image.get_rect().move(x, y)
 
@@ -50,7 +51,8 @@ class Background(Tile):
 
 class AnimatedObstacle(AnimatedTile):
     def __init__(self, animations, start_animation_name, pos_x, pos_y):
-        super().__init__(animations, start_animation_name, int(pos_x), int(pos_y), [obstacle_group])
+        super().__init__(animations, start_animation_name, int(pos_x), int(pos_y),
+                         [animated_obstacle_group, obstacle_group])
         self.get_animation().start()
 
 
@@ -60,11 +62,11 @@ class Obstacle(Tile):
 
 
 class Movable(AnimatedTile):
-    def __init__(self, animations, pos_x, pos_y):
+    def __init__(self, animations, pos_x, pos_y, groups=[]):
         self.speed = STEP
         self.__move_vector = (0, -1)
         start_animation_name = "_".join([ANIMATION_MOVE, "0", "-1"])
-        super().__init__(animations, start_animation_name, pos_x, pos_y, [obstacle_group])
+        super().__init__(animations, start_animation_name, pos_x, pos_y, groups + [obstacle_group])
 
     def step(self, dx, dy):
         if dx or dy:
@@ -77,7 +79,7 @@ class Movable(AnimatedTile):
         self.rect.y += dy
 
         obstacle_group.remove(self)
-        collides = pygame.sprite.spritecollide(self, obstacle_group, False, pygame.sprite.collide_mask)
+        collides = pygame.sprite.spritecollide(self, obstacle_group.filtered_copy(), False, pygame.sprite.collide_mask)
         obstacle_group.add(self)
         if collides:
             self.rect.x, self.rect.y = x, y
@@ -98,7 +100,7 @@ class Movable(AnimatedTile):
 
 class Creature(Movable):
     def __init__(self, animations, max_health_points, pos_x, pos_y):
-        super().__init__(animations, pos_x, pos_y)
+        super().__init__(animations, pos_x, pos_y, [creature_group])
         self.health_points = self.max_health_points = max_health_points
         self.health_points = self.max_health_points
         self.ammunition = Ammunition(self)
@@ -121,7 +123,8 @@ class Creature(Movable):
     def render_health(self, screen):
         if not self.is_dead():
             rect = pygame.Rect(0, 0, 50, 7)
-            rect.midbottom = self.rect.centerx, self.rect.top - self.rect.height // 5
+            rect_t = camera.translate(self.rect)
+            rect.midbottom = rect_t.centerx, rect_t.top - rect_t.height // 5
             pygame.draw.rect(screen, (255, 0, 0), (*rect.bottomleft, *rect.size))
             pygame.draw.rect(screen, (0, 0, 0), (*rect.bottomleft, *rect.size), 1)
             pos = (rect.bottomleft[0] + 1, rect.bottomleft[1] + 1)

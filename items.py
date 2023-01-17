@@ -135,7 +135,7 @@ class Key(Item):
         if type(self).__name__ == self.cls_name:
             raise SystemExit("It is abstract class: " + self.cls_name)
         super().__init__(description, image, SLOT_LEFT_HAND | SLOT_RIGHT_HAND, stackable=False)
-        self.range = 50
+        self.range = 500
 
     def apply(self, actor, trigger):
         if self.can_apply(actor, trigger):

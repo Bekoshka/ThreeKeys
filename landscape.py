@@ -16,7 +16,17 @@ class Sand(Background):
 
 class Forest(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('forest2.png', color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=True), pos_x, pos_y)
+        super().__init__(load_image('pine.png', color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=False), pos_x, pos_y)
+
+
+class Cactus(Obstacle):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('cactus.png', color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=True), pos_x, pos_y)
+
+
+class Beton(Obstacle):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image("beton.jpg", color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=True), pos_x, pos_y)
 
 
 class Forest1(AnimatedObstacle):
@@ -56,4 +66,4 @@ class YellowPortal(Trigger):
 
 class BrownPortal(Trigger):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('wall.png'), pos_x, pos_y)
+        super().__init__(load_image('portal_1.png', color_key=pygame.Color(0xff, 0x5c, 0xf9)), pos_x, pos_y)
