@@ -5,8 +5,9 @@ import pygame
 
 from buttons import Button
 from common import landscape_group, obstacle_group, buttons_group, slots_group, items_group, \
-    corpse_group, mouse, creature_group, animated_obstacle_group
+    corpse_group, mouse, creature_group, animated_obstacle_group, tick_counter
 from camera import camera
+from delay import DelayedRunner
 from game import Game
 from creatures import Player
 from inventory import Slot
@@ -68,7 +69,7 @@ class Screen:
 
     def __handle_runners(self):
         for runner in self.delayedRunners:
-            runner.update()
+            runner.check()
 
     def _handle_events(self):
         pass
@@ -93,7 +94,7 @@ class StartScreen(Screen):
 
     def _render(self):
         self._render_background(self.background)
-        self._render_text(self.text)
+        # self._render_text(self.text)
         pygame.display.flip()
 
     def _handle_events(self):
@@ -225,16 +226,7 @@ class WinScreen(CentralTextScreen):
         super().__init__(screen, "Congratulations!")
 
 
-class DelayedRunner:
-    def __init__(self, wait, callback):
-        self.tick_counter = 0
-        self.wait = wait
-        self.callback = callback
 
-    def update(self):
-        self.tick_counter += 1
-        if self.tick_counter == self.wait:
-            self.callback()
 
 
 class GameScreen(Screen):
@@ -310,6 +302,8 @@ class GameScreen(Screen):
 
         self.__render_message()
 
+        tick_counter.next()
+
         pygame.display.flip()
 
     def __render_message(self):
@@ -326,13 +320,13 @@ class GameScreen(Screen):
         button = 0
         keys = pygame.key.get_pressed()
         mods = pygame.key.get_mods()
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_a]:
             dx -= 1
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_d]:
             dx += 1
-        if keys[pygame.K_UP]:
+        if keys[pygame.K_w]:
             dy -= 1
-        if keys[pygame.K_DOWN]:
+        if keys[pygame.K_s]:
             dy += 1
 
         for event in pygame.event.get():
@@ -356,9 +350,9 @@ class GameScreen(Screen):
                     Slot.clean_description()
 
             if event.type == pygame.KEYUP:
-                if event.key == pygame.K_i:
+                if event.key == pygame.K_e:
                     self.player.get_inventory().open(True)
-                if event.key == pygame.K_a:
+                if event.key == pygame.K_q:
                     self.player.get_ammunition().open()
                 if event.key == pygame.K_ESCAPE:
                     self.stop()
@@ -370,6 +364,7 @@ class GameScreen(Screen):
             camera.follow()
 
 
+#TODO ANIM global ticker
 # TODO Weapon ATTACK SPEED
 # TODO Fix Gold
 

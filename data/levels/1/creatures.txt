@@ -1,6 +1,1 @@
-Player 600 600
-Zombie 100 500
-Zombie 100 100
-Chest 300 300
-Skeleton 200 50
-Scorpion 200 200
+Player 1000 1000

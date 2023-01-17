@@ -1,7 +1,7 @@
 from random import randrange
 
 from ai import AI
-from items import SmallHealPotion, Sword, LeftHand, RightHand, Hood, Gold, Axe, YellowKey, BrownKey
+from items import SmallHealPotion, Sword, LeftHand, RightHand, Hood, Gold, Axe, YellowKey, BrownKey, Pitchfork
 from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, SLOT_ARMOR
 from tiles import Creature
 
@@ -11,15 +11,34 @@ from utils import load_animations
 class Player(Creature):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_animations("player"), 100, pos_x, pos_y)
-        super().get_inventory().add_item(SmallHealPotion(7))
-        super().get_inventory().add_item(Sword())
+        super().get_inventory().add_item(SmallHealPotion(10))
+        super().get_inventory().add_item(Pitchfork())
         self.get_ammunition().assign_default(LeftHand(), SLOT_LEFT_HAND)
         self.get_ammunition().assign_default(RightHand(), SLOT_RIGHT_HAND)
-        self.get_ammunition().assign(Axe(), SLOT_RIGHT_HAND)
         self.get_ammunition().assign(Hood(), SLOT_ARMOR)
 
 
 class Chest(Creature):
+    def __init__(self, pos_x, pos_y, _=None):
+        super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y))
+        super().get_inventory().add_item(SmallHealPotion(7))
+        super().get_inventory().add_item(Sword())
+        super().get_inventory().add_item(Sword())
+        super().get_inventory().add_item(YellowKey())
+        super().get_inventory().add_item(BrownKey())
+
+
+class Chest2(Creature):
+    def __init__(self, pos_x, pos_y, _=None):
+        super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y))
+        super().get_inventory().add_item(SmallHealPotion(7))
+        super().get_inventory().add_item(Sword())
+        super().get_inventory().add_item(Sword())
+        super().get_inventory().add_item(YellowKey())
+        super().get_inventory().add_item(BrownKey())
+
+
+class Chest3(Creature):
     def __init__(self, pos_x, pos_y, _=None):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y))
         super().get_inventory().add_item(SmallHealPotion(7))

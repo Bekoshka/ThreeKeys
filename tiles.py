@@ -73,7 +73,7 @@ class Movable(AnimatedTile):
             self.__move_vector = (dx, dy)
             self.change_animation("_".join([ANIMATION_MOVE, str(dx), str(dy)]))
 
-    def step_part(self, dx, dy):
+    def try_step(self, dx, dy):
         x, y = self.rect.x, self.rect.y
         self.rect.x += dx
         self.rect.y += dy
@@ -93,9 +93,7 @@ class Movable(AnimatedTile):
                 step = int(((self.speed ** 2) // 2) ** 0.5)
             else:
                 step = self.speed
-            for i in range(step):
-                if self.step_part(abs(dx * step - i) * dx, abs(dy * step - i) * dy):
-                    break
+            self.try_step(abs(dx * step) * dx, abs(dy * step) * dy)
 
 
 class Creature(Movable):

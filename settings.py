@@ -1,6 +1,6 @@
 import os
 
-FPS = 60
+FPS = 30
 SIZE = WIDTH, HEIGHT = 1280, 720
 STEP = 15
 tile_width = tile_height = 100
@@ -43,3 +43,5 @@ MENU_NONE = 0
 MENU_NEW_GAME = 1
 MENU_CONTINUE = 2
 MENU_SCORE = 3
+
+AGGRESSIVE_RANGE = 200

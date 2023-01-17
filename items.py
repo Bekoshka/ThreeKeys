@@ -153,6 +153,13 @@ class SmallHealPotion(HealPotion):
             load_image("shp.png", KEY_COLOR), 10, int(count))
 
 
+class BigHealPotion(HealPotion):
+    def __init__(self, count=1):
+        super().__init__(
+            "Small Heal Potion description",
+            load_image("shp.png", KEY_COLOR), 30, int(count))
+
+
 class Hood(Armor):
     def __init__(self):
         super().__init__("Теплый капюшон. Не\nдаёт много защиты.", load_image("hood.png", KEY_COLOR), 15, SLOT_ARMOR)
@@ -160,13 +167,55 @@ class Hood(Armor):
 
 class Sword(Weapon):
     def __init__(self):
-        super().__init__("Старый добрый ржавый меч.", load_image("sword.png", KEY_COLOR), (15, 90), 70,
+        super().__init__("Старый добрый железный меч.", load_image("sword.png", KEY_COLOR), (50, 60), 80,
+                         SLOT_RIGHT_HAND)
+
+
+class Mace(Weapon):
+    def __init__(self):
+        super().__init__("Мощная и неуклюжая булава, сделана на совесть", load_image("mace.png", KEY_COLOR), (60, 90), 60,
+                         SLOT_RIGHT_HAND)
+
+
+class Braid(Weapon):
+    def __init__(self):
+        super().__init__("Что в мультиках, что и здесь, всё равно забирает жизни.", load_image("braid.png", KEY_COLOR), (60, 70), 100,
+                         SLOT_RIGHT_HAND)
+
+
+class Sword1(Weapon):
+    def __init__(self):
+        super().__init__("Свежий и качественный стальной меч", load_image("sword1.png", KEY_COLOR), (80, 90), 80,
+                         SLOT_RIGHT_HAND)
+
+
+class Sledgehammer(Weapon):
+    def __init__(self):
+        super().__init__("Кувалда, что тут ещё сказать, мощно и громоздко", load_image("sledgehammer.png", KEY_COLOR), (110, 130), 130,
+                         SLOT_RIGHT_HAND)
+
+
+class Pitchfork(Weapon):
+    def __init__(self):
+        super().__init__("Всё таки для огрода подходит лучше.", load_image("pitchfork.png", KEY_COLOR), (35, 45), 45,
+                         SLOT_RIGHT_HAND)
+
+
+class Spear(Weapon):
+    def __init__(self):
+        super().__init__("Бьёт далеко, но урона не хватает.", load_image("spear.png", KEY_COLOR), (60, 67), 130,
                          SLOT_RIGHT_HAND)
 
 
 class Axe(Weapon):
     def __init__(self):
-        super().__init__("AXE description", load_image("axe.png", KEY_COLOR), (20, 100), 70,
+        super().__init__("Старый топор для рубки дров.", load_image("axe.png", KEY_COLOR), (70, 80), 100,
+                         SLOT_RIGHT_HAND)
+
+
+class Axe1(Weapon):
+    def __init__(self):
+        super().__init__("Новенький стальной меч.", load_image("axe1.png", KEY_COLOR), (80, 96), 110,
                          SLOT_RIGHT_HAND)
 
 

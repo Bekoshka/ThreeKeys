@@ -1,4 +1,0 @@
-Rock 300 500
-Rock 320 540
-Rock 340 560
-BrownPortal 150 100
