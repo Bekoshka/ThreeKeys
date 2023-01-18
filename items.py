@@ -113,18 +113,18 @@ class HealPotion(Item):
         if type(self).__name__ == self.cls_name:
             raise SystemExit("It is abstract class: " + self.cls_name)
         super().__init__(description, image, SLOT_LEFT_HAND | SLOT_RIGHT_HAND, count)
-        self.heal_points = heal_points
-        self.range = 50
+        self.__heal_points = heal_points
+        self.__range = 50
 
     def apply(self, actor, creature):
         if self.can_apply(actor, creature):
-            creature.recieve_heal(self.heal_points)
+            creature.recieve_heal(self.__heal_points)
             self.reduce_amount()
-            smokesignal.emit(EVENT_BOTTLE_USED, creature, self)
+            smokesignal.emit(EVENT_BOTTLE_USED, actor, creature, self)
 
     def can_apply(self, actor, creature):
         return hasattr(creature, 'recieve_heal') and callable(getattr(creature, 'recieve_heal')) \
-               and not creature.is_dead() and self.count and calculate_sprite_range(actor, creature) < self.range
+               and not creature.is_dead() and calculate_sprite_range(actor, creature) < self.__range
 
 
 class Key(Item):

@@ -117,9 +117,9 @@ class ScoreHandler(DefaultHandler):
             self.__score.damage_given += damage
             Score.add(self.__score)
 
-    def __bottle_used(self, actor, bottle):
-        print(type(actor).__name__, "used a bottle", type(bottle).__name__, "that is able to replinish")
-        if type(actor).__name__ == Player.__name__:
+    def __bottle_used(self, actor, creature, bottle):
+        print(type(creature).__name__, "used a bottle", type(bottle).__name__, "that is able to replinish")
+        if type(creature).__name__ == Player.__name__:
             self.__score.bottles_used += 1
             Score.add(self.__score)
 

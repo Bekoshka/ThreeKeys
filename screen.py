@@ -368,4 +368,7 @@ class GameScreen(Screen):
 
 # TODO step, ai_mod, aggr_range
 
+
 # TODO REFACTOR TO PRIVATE VARS
+
+# TODO apply, heal, -> item and handle in event ?
