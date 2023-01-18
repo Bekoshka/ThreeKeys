@@ -10,7 +10,7 @@ class AI(Creature):
     def __init__(self, animations, max_health_points, pos_x, pos_y, enemy):
         super().__init__(animations, max_health_points, pos_x, pos_y)
         self.spawn_point = self.rect.center
-        self.logic_mod = 10
+        self.logic_mod = 3
         self.enemy = enemy
 
     def update(self, screen):

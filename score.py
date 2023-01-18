@@ -69,7 +69,7 @@ class GameScore:
 
 
 class Score:
-    def __init__(self, id=None, game_id=None, level=0, kills=0, damage_given=0, damage_recieved=0, damage_absorbed=0,
+    def __init__(self, id=None, game_id=None, level="", kills=0, damage_given=0, damage_recieved=0, damage_absorbed=0,
                  bottles_used=0, gold=0, time_start=None):
         self.id = id
         self.game_id = game_id
@@ -93,7 +93,7 @@ class Score:
             """CREATE TABLE IF NOT EXISTS scores (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             game_id INTEGER NOT NULL,
-            level INTEGER NOT NULL,
+            level TEXT NOT NULL,
             kills INTEGER NOT NULL,
             damage_given INTEGER NOT NULL,
             damage_recieved INTEGER NOT NULL,

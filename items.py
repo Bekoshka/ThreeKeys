@@ -139,10 +139,10 @@ class Key(Item):
 
     def apply(self, actor, trigger):
         if self.can_apply(actor, trigger):
-            trigger.run(self)
+            trigger.run_trigger(self)
 
     def can_apply(self, actor, trigger):
-        return hasattr(trigger, 'run') and callable(getattr(trigger, 'run')) \
+        return hasattr(trigger, 'run_trigger') and callable(getattr(trigger, 'run_trigger')) \
                and calculate_sprite_range(actor, trigger) < self.range
 
 
@@ -150,24 +150,30 @@ class SmallHealPotion(HealPotion):
     def __init__(self, count=1):
         super().__init__(
             "Small Heal Potion description",
-            load_image("shp.png", KEY_COLOR), 10, int(count))
+            load_image("shp.png", KEY_COLOR), 25, int(count))
 
 
 class BigHealPotion(HealPotion):
     def __init__(self, count=1):
         super().__init__(
             "Small Heal Potion description",
-            load_image("shp.png", KEY_COLOR), 30, int(count))
+            load_image("big_bottle.png", KEY_COLOR), 50, int(count))
 
 
 class Hood(Armor):
     def __init__(self):
-        super().__init__("Теплый капюшон. Не\nдаёт много защиты.", load_image("hood.png", KEY_COLOR), 15, SLOT_ARMOR)
+        super().__init__("Теплый капюшон. Не\nдаёт много защиты.", load_image("hood.png", KEY_COLOR), 1125, SLOT_ARMOR)
 
 
 class Sword(Weapon):
     def __init__(self):
         super().__init__("Старый добрый железный меч.", load_image("sword.png", KEY_COLOR), (50, 60), 80,
+                         SLOT_RIGHT_HAND)
+
+
+class SkeletonSword(Weapon):
+    def __init__(self):
+        super().__init__("Старый добрый железный меч.", load_image("sword.png", KEY_COLOR), (45, 50), 45,
                          SLOT_RIGHT_HAND)
 
 
@@ -180,6 +186,12 @@ class Mace(Weapon):
 class Braid(Weapon):
     def __init__(self):
         super().__init__("Что в мультиках, что и здесь, всё равно забирает жизни.", load_image("braid.png", KEY_COLOR), (60, 70), 100,
+                         SLOT_RIGHT_HAND)
+
+
+class Knucle(Weapon):
+    def __init__(self):
+        super().__init__("Откуда он здесь?", load_image("knucle.png", KEY_COLOR), (50, 60), 50,
                          SLOT_RIGHT_HAND)
 
 
@@ -222,6 +234,18 @@ class Axe1(Weapon):
 class LeftHand(Weapon):
     def __init__(self):
         super().__init__("Твоя левая рука", load_image("left_hand.png", KEY_COLOR), (1, 2), 30,
+                         SLOT_LEFT_HAND)
+
+
+class Leftclaw(Weapon):
+    def __init__(self):
+        super().__init__("Его левая рука", load_image("left_hand.png", KEY_COLOR), (30, 45), 45,
+                         SLOT_LEFT_HAND)
+
+
+class Rightclaw(Weapon):
+    def __init__(self):
+        super().__init__("Его правая рука", load_image("left_hand.png", KEY_COLOR), (30, 38), 45,
                          SLOT_LEFT_HAND)
 
 

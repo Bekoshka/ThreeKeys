@@ -2,9 +2,9 @@ from datetime import datetime
 
 import smokesignal
 
-from creatures import Player
+from creatures import Player, ClosedChest
 from items import Gold, BrownKey, YellowKey
-from landscape import BrownPortal, YellowPortal
+from landscape import BrownPortal, YellowPortal, Box
 from score import Score
 from settings import EVENT_MONSTER_DEAD, EVENT_DAMAGE_RECIEVED, EVENT_BOTTLE_USED, EVENT_DAMAGE_GIVEN, \
     EVENT_ITEM_ASSIGNED, EVENT_TRIGGER_RUN
@@ -34,30 +34,56 @@ class DeathHandler(DefaultHandler):
 
 
 class TriggerHandler(DefaultHandler):
-    def __init__(self, game):
+    def __init__(self, trigger_name, key_name, game):
         super().__init__()
         self.__game = game
+        self.__trigger_name = trigger_name
+        self.__key_name = key_name
         self._register(EVENT_TRIGGER_RUN, self._trigger_run)
 
     def _trigger_run(self, trigger, key):
-        print(trigger, "run by", key)
+        print(type(self).__name__, "handled", type(trigger).__name__, "run by", type(key).__name__)
 
     def _get_game(self):
         return self.__game
 
+    def _get_trigger_name(self):
+        return self.__trigger_name
 
-class BrownPortalHandler(TriggerHandler):
+    def _get_key_name(self):
+        return self.__key_name
+
+
+class NextLevelHandler(TriggerHandler):
     def _trigger_run(self, trigger, key):
         super()._trigger_run(trigger, key)
-        if trigger == BrownPortal.__name__ and key == BrownKey.__name__:
+        if type(trigger).__name__ == self._get_trigger_name() and type(key).__name__ == self._get_key_name():
             self._get_game().next_level_delayed()
 
 
-class YellowHandler(TriggerHandler):
+class OpenChestHandler(TriggerHandler):
     def _trigger_run(self, trigger, key):
         super()._trigger_run(trigger, key)
-        if trigger == YellowPortal.__name__ and key == YellowKey.__name__:
-            self._get_game().next_level_delayed()
+        if type(trigger).__name__ == self._get_trigger_name() and type(key).__name__ == self._get_key_name():
+            trigger.set_lootable(True)
+
+
+class DisappearHandler(TriggerHandler):
+    def _trigger_run(self, trigger, key):
+        super()._trigger_run(trigger, key)
+        if type(trigger).__name__ == self._get_trigger_name() and type(key).__name__ == self._get_key_name():
+            trigger.kill()
+
+
+class MoveToHandler(TriggerHandler):
+    def __init__(self, trigger_name, key_name, x, y, game):
+        super().__init__(trigger_name, key_name, game)
+        self.pos = (x, y)
+
+    def _trigger_run(self, trigger, key):
+        super()._trigger_run(trigger, key)
+        if type(trigger).__name__ == self._get_trigger_name() and type(key).__name__ == self._get_key_name():
+            self._get_game().get_player().set_position(*self.pos)
 
 
 class ScoreHandler(DefaultHandler):

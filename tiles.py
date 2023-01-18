@@ -19,7 +19,15 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.rect.move(int(x), int(y))
 
 
-class AnimatedTile(Tile):
+class Trigger(Tile):
+    def __init__(self, image, x, y, groups):
+        super().__init__(image, x, y, groups)
+
+    def run_trigger(self, key):
+        smokesignal.emit(EVENT_TRIGGER_RUN, self, key)
+
+
+class AnimatedTile(Trigger):
     def __init__(self, animations, start_animation_name, pos_x, pos_y, groups):
         self.animations = animations
         self.animation = animations[start_animation_name]
@@ -56,7 +64,7 @@ class AnimatedObstacle(AnimatedTile):
         self.get_animation().start()
 
 
-class Obstacle(Tile):
+class Obstacle(Trigger):
     def __init__(self, image, pos_x, pos_y):
         super().__init__(image, int(pos_x), int(pos_y), [obstacle_group])
 
@@ -97,20 +105,24 @@ class Movable(AnimatedTile):
 
 
 class Creature(Movable):
-    def __init__(self, animations, max_health_points, pos_x, pos_y):
+    def __init__(self, animations, max_health_points, pos_x, pos_y, lootable=False):
         super().__init__(animations, pos_x, pos_y, [creature_group])
         self.health_points = self.max_health_points = max_health_points
         self.health_points = self.max_health_points
         self.ammunition = Ammunition(self)
         self.inventory = Inventory(self)
-        self.dead = self.health_points == 0
+        self.__dead = self.health_points == 0
+        self.__lootable = lootable
+
+    def set_lootable(self, lootable):
+        self.__lootable = lootable
 
     def clean(self):
         self.ammunition.clean()
         self.inventory.clean()
 
     def is_dead(self):
-        return self.dead
+        return self.__dead
 
     def get_inventory(self):
         return self.inventory
@@ -119,7 +131,7 @@ class Creature(Movable):
         return self.ammunition
 
     def render_health(self, screen):
-        if not self.is_dead():
+        if not self.__dead:
             rect = pygame.Rect(0, 0, 50, 7)
             rect_t = camera.translate(self.rect)
             rect.midbottom = rect_t.centerx, rect_t.top - rect_t.height // 5
@@ -141,7 +153,8 @@ class Creature(Movable):
         if clean_damage > 0:
             self.health_points -= min([clean_damage, self.health_points])
         if not self.health_points:
-            self.dead = True
+            self.__dead = True
+            self.__lootable = True
             self.change_animation(ANIMATION_DEATH)
             corpse_group.add(self)
             obstacle_group.remove(self)
@@ -156,7 +169,7 @@ class Creature(Movable):
         return self.health_points
 
     def step(self, dx, dy):
-        if not self.is_dead():
+        if not self.__dead:
             super().step(dx, dy)
 
     def apply(self, creature, slot):
@@ -174,8 +187,8 @@ class Creature(Movable):
         return can_apply
 
     def __can_apply(self, creature, slot):
-        if self.is_dead():
-            return
+        if self.__dead:
+            return False
         slot_object = self.ammunition.get_slot_by_name(slot)
         if slot_object:
             item = slot_object.assigned_item()
@@ -183,22 +196,16 @@ class Creature(Movable):
                 return item.can_apply(self, creature)
         return False
 
-    def loot(self, creature):
-        if self.is_dead():
-            return
-        if calculate_sprite_range(self, creature) < LOOT_RANGE:
+    def get_loot(self, creature):
+        if self.__can_loot(creature):
             creature.get_inventory().open()
 
-    def handle_click(self, enemy, button):
-        if issubclass(enemy.__class__, Creature) and enemy.is_dead():
-            self.loot(enemy)
-        else:
-            self.apply(enemy, BUTTON_TO_SLOT[button])
+    def __can_loot(self, creature):
+        return not self.__dead and hasattr(creature, 'get_loot') and callable(getattr(creature, 'get_loot')) \
+               and creature.__lootable and calculate_sprite_range(self, creature) < LOOT_RANGE
 
-
-class Trigger(Obstacle):
-    def __init__(self, image, pos_x, pos_y):
-        super().__init__(image, pos_x, pos_y)
-
-    def run(self, key):
-        smokesignal.emit(EVENT_TRIGGER_RUN, type(self).__name__, type(key).__name__)
+    def handle_click(self, obstacle, button):
+        if button == 2:
+            self.get_loot(obstacle)
+        elif button in (1, 3):
+            self.apply(obstacle, BUTTON_TO_SLOT[button])

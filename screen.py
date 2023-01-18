@@ -15,7 +15,7 @@ from levels import Level
 from score import GameScore
 from settings import WIDTH, HEIGHT, FPS, GAME_COMPLETED, GAME_FAILED, GAME_PAUSED, GAME_RUNNING, KEY_COLOR, MENU_NONE, \
     MENU_NEW_GAME, MENU_CONTINUE, MENU_SCORE
-from utils import load_image
+from utils import load_image, load_level_list
 
 
 class Screen:
@@ -226,14 +226,11 @@ class WinScreen(CentralTextScreen):
         super().__init__(screen, "Congratulations!")
 
 
-
-
-
 class GameScreen(Screen):
     def __init__(self, screen):
         super().__init__(screen)
         self.player = Player(3, 5)
-        self.levels = [1, 2]
+        self.levels = load_level_list()
         self.game = Game()
         Game.add(self.game)
         self.current_level = 0
@@ -244,6 +241,9 @@ class GameScreen(Screen):
         self.level_complete = False
         self.game_complete = False
         self.player_dead = False
+
+    def get_player(self):
+        return self.player
 
     def get_status(self):
         if self.player_dead:
@@ -346,7 +346,7 @@ class GameScreen(Screen):
                         if btn.rect.collidepoint(event.pos):
                             btn.handle_click()
             if event.type == pygame.MOUSEBUTTONUP:
-                if event.button  == 2:
+                if event.button == 2:
                     Slot.clean_description()
 
             if event.type == pygame.KEYUP:
@@ -364,15 +364,10 @@ class GameScreen(Screen):
             camera.follow()
 
 
-#TODO ANIM global ticker
-# TODO Weapon ATTACK SPEED
+# TODO ANIM global ticker
 # TODO Fix Gold
+# TODO step, ai_mod, aggr_range
+
 
 # TODO REFACTOR TO PRIVATE VARS
 # TODO REFACTOR DATA DIR STRUCT
-# TODO OPTIMIZE OUT
-
-
-# TODO MAKE SAVE - LOW(PRIO)
-# TODO MAKE NEWGAME LOAD BUTTONS - LOW(PRIO)
-# TODO RANGE WEAPON - LOW(PRIO)

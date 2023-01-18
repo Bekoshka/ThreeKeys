@@ -4,8 +4,7 @@ import pygame
 import os
 
 from animation import Animation
-from settings import tile_width, DATA_DIR, KEY_COLOR
-
+from settings import tile_width, DATA_DIR, KEY_COLOR, LEVEL_DIR
 
 CACHE = dict()
 
@@ -55,6 +54,10 @@ def load_animations(resource, loop=False):
                                          color_key=KEY_COLOR))
         animations[name] = Animation(name, images, int(mod), loop)
     return animations
+
+
+def load_level_list():
+    return next(os.walk(LEVEL_DIR))[1]
 
 
 def calculate_sprite_range(a, b):

@@ -2,7 +2,7 @@ import os
 
 FPS = 30
 SIZE = WIDTH, HEIGHT = 1280, 720
-STEP = 15
+STEP = 20
 tile_width = tile_height = 100
 
 KEY_COLOR = 0xff5cf9
@@ -18,7 +18,7 @@ BUTTON_TO_SLOT = {
     1: SLOT_RIGHT_HAND
 }
 
-LOOT_RANGE = 50
+LOOT_RANGE = 100
 
 DATA_DIR = "data"
 LEVEL_DIR = os.path.join(DATA_DIR, "levels")

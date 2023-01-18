@@ -8,6 +8,7 @@ from tiles import Obstacle, AnimatedObstacle, Tile
 
 
 LANDSCAPES = {
+    ",": Snow,
     ".": Grass,
     "#": Sand,
     "r": Road,
@@ -16,22 +17,42 @@ LANDSCAPES = {
     "F": Road4,
     "g": Road5,
     "G": Road6,
-    "h": Road7
+    "h": Road7,
+    "j": SnowRoad1,
+    "J": SnowRoad2,
+    "k": SnowRoad3,
+    "K": SnowRoad4,
+    "l": SnowRoad5,
+    "L": SnowRoad6,
+    "i": Rotate1,
+    "I": Rotate2,
+    "o": Rotate3,
+    "O": Rotate4,
 }
 
 OBJECTS = {
     "!": Beton,
-    "s": Forest,
+    "s": Pine,
     "%": Cactus,
     "c": Rock,
-    "w": Forest2
+    "w": Forest2,
+    "x": SnowPine,
+    "q": SnowTree
 }
 
 CREATURES = {
     "z": Zombie,
     "q": Skeleton,
     "d": Scorpion,
-    "C": Chest
+    "C": Chest,
+    "0": Chest2,
+    "1": Chest3,
+    "2": Chest4,
+    "3": Chest5,
+    "4": Chest6,
+    "5": Chest7,
+    "6": Chest8
+
 }
 
 

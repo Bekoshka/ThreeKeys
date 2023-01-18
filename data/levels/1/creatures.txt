@@ -1,1 +1,5 @@
-Player 1000 1000
+Player 11000 11000
+ClosedChest 11050 11050
+Chest 11200 11000
+Chest 1100 1100
+Zombie 11100 11000
