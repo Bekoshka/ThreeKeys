@@ -48,17 +48,28 @@ class GameScore:
                 ELSE (kills * 150 + damage_given - damage_recieved + gold) 
                 END AS score
             FROM (
-                SELECT 
-                    game_id AS id,
-                    SUM(kills) AS kills,
-                    SUM(damage_given) AS damage_given,
-                    SUM(damage_recieved) AS damage_recieved, 
-                    SUM(damage_absorbed) AS damage_absorbed,
-                    SUM(bottles_used) AS bottles_used,
-                    SUM(gold) AS gold,
-                    MIN(time_start) AS time_start
-                FROM scores 
-                GROUP BY game_id
+                SELECT
+                    id,
+                    kills,
+                    damage_given,
+                    damage_recieved,
+                    damage_absorbed,
+                    bottles_used,
+                    (SELECT gold FROM scores WHERE id = max_level_id) AS gold,
+                    time_start
+                FROM (          
+                    SELECT 
+                        game_id AS id,
+                        SUM(kills) AS kills,
+                        SUM(damage_given) AS damage_given,
+                        SUM(damage_recieved) AS damage_recieved, 
+                        SUM(damage_absorbed) AS damage_absorbed,
+                        SUM(bottles_used) AS bottles_used,
+                        max(id) as max_level_id,
+                        MIN(time_start) AS time_start
+                    FROM scores 
+                    GROUP BY game_id
+                )
             )
             ORDER BY score DESC LIMIT ?
         """, (limit,))

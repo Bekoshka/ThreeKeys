@@ -3,6 +3,7 @@ from itertools import chain
 
 import pygame
 
+from animation import animation_tick_counter
 from buttons import Button
 from common import landscape_group, obstacle_group, buttons_group, slots_group, items_group, \
     corpse_group, mouse, creature_group, animated_obstacle_group, tick_counter
@@ -303,6 +304,7 @@ class GameScreen(Screen):
         self.__render_message()
 
         tick_counter.next()
+        animation_tick_counter.next()
 
         pygame.display.flip()
 
@@ -364,10 +366,6 @@ class GameScreen(Screen):
             camera.follow()
 
 
-# TODO ANIM global ticker
-# TODO Fix Gold
 # TODO step, ai_mod, aggr_range
 
-
 # TODO REFACTOR TO PRIVATE VARS
-# TODO REFACTOR DATA DIR STRUCT

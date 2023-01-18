@@ -21,6 +21,7 @@ BUTTON_TO_SLOT = {
 LOOT_RANGE = 100
 
 DATA_DIR = "data"
+IMAGES_DIR = os.path.join(DATA_DIR, "images")
 LEVEL_DIR = os.path.join(DATA_DIR, "levels")
 
 EVENT_MONSTER_DEAD = 1

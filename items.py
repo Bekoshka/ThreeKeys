@@ -79,8 +79,7 @@ class Weapon(Item):
     def apply(self, actor, creature):
         if self.can_apply(actor, creature):
             damage = randrange(*self.damage)
-            smokesignal.emit(EVENT_DAMAGE_GIVEN, type(actor).__name__, type(creature).__name__, type(self).__name__,
-                             damage)
+            smokesignal.emit(EVENT_DAMAGE_GIVEN, actor, creature, self, damage)
             creature.recieve_damage(damage)
 
     def can_apply(self, actor, creature):
@@ -121,7 +120,7 @@ class HealPotion(Item):
         if self.can_apply(actor, creature):
             creature.recieve_heal(self.heal_points)
             self.reduce_amount()
-            smokesignal.emit(EVENT_BOTTLE_USED, type(creature).__name__, type(self).__name__, self.heal_points)
+            smokesignal.emit(EVENT_BOTTLE_USED, creature, self)
 
     def can_apply(self, actor, creature):
         return hasattr(creature, 'recieve_heal') and callable(getattr(creature, 'recieve_heal')) \

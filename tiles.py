@@ -149,7 +149,7 @@ class Creature(Movable):
 
     def recieve_damage(self, damage):
         clean_damage = self.ammunition.reduce_damage(damage)
-        smokesignal.emit(EVENT_DAMAGE_RECIEVED, type(self).__name__, damage, clean_damage)
+        smokesignal.emit(EVENT_DAMAGE_RECIEVED, self, damage, clean_damage)
         if clean_damage > 0:
             self.health_points -= min([clean_damage, self.health_points])
         if not self.health_points:
@@ -159,7 +159,7 @@ class Creature(Movable):
             corpse_group.add(self)
             obstacle_group.remove(self)
             self.ammunition.drop_to_inventory(self.inventory)
-            smokesignal.emit(EVENT_MONSTER_DEAD, type(self).__name__)
+            smokesignal.emit(EVENT_MONSTER_DEAD, self)
 
     def recieve_heal(self, hp):
         self.health_points += hp
