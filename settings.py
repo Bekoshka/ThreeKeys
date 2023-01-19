@@ -2,7 +2,7 @@ import os
 
 FPS = 30
 SIZE = WIDTH, HEIGHT = 1280, 720
-STEP = 20
+STEP = 7
 tile_width = tile_height = 100
 
 KEY_COLOR = 0xff5cf9
@@ -45,3 +45,4 @@ MENU_CONTINUE = 2
 MENU_SCORE = 3
 
 AGGRESSIVE_RANGE = 200
+LOGIC_MOD = 3

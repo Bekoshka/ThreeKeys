@@ -1,4 +1,4 @@
-from utils import Connection
+from db import Connection
 
 
 class Game:

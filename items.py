@@ -19,7 +19,6 @@ class Item(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(0, 0)
         self.__slot_type = slot_type
         self.__count = count
-        self.__delay = 0
 
     def get_description(self):
         return self.__description

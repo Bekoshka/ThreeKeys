@@ -1,15 +1,16 @@
 from random import choice
 
 from common import tick_counter
-from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, AGGRESSIVE_RANGE
+from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, AGGRESSIVE_RANGE, LOGIC_MOD
 from tiles import Creature
 from utils import calculate_sprite_range, get_vector
 
 
 class AI(Creature):
-    def __init__(self, animations, max_health_points, pos_x, pos_y, enemy, aggressive_range=AGGRESSIVE_RANGE):
+    def __init__(self, animations, max_health_points, pos_x, pos_y, enemy, aggressive_range=AGGRESSIVE_RANGE,
+                 logic_mod=LOGIC_MOD):
         super().__init__(animations, max_health_points, pos_x, pos_y)
-        self.__logic_mod = 3
+        self.__logic_mod = logic_mod
         self.__enemy = enemy
         self.__aggressive_range = aggressive_range
 
@@ -21,7 +22,7 @@ class AI(Creature):
         if not self.is_dead():
             if tick_counter.check(self.__logic_mod):
                 if calculate_sprite_range(self.__enemy, self) < self.__aggressive_range and not self.__enemy.is_dead():
-                    choice([self.__move_to_player, self.__attack, self.__do_nothing])()
+                    choice([self.__move_to_player, self.__attack])()
                 else:
                     choice([self.__move_random, self.__do_nothing, self.__do_nothing, self.__do_nothing])()
 

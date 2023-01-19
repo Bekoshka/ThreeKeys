@@ -80,6 +80,10 @@ class Movable(AnimatedTile):
         if dx or dy:
             self.__move_vector = (dx, dy)
             self.change_animation("_".join([ANIMATION_MOVE, str(dx), str(dy)]))
+        else:
+            animation = self.get_animation()
+            if animation.get_name().startswith("move"):
+                animation.stop()
 
     def try_step(self, dx, dy):
         x, y = self.rect.x, self.rect.y
@@ -188,6 +192,8 @@ class Creature(Movable):
 
     def __can_apply(self, creature, slot):
         if self.__dead:
+            return False
+        if not self.get_animation().is_pause():
             return False
         slot_object = self.ammunition.get_slot_by_name(slot)
         if slot_object:

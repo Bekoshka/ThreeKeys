@@ -4,13 +4,21 @@ animation_tick_counter = TickCounter()
 
 
 class Animation:
-    def __init__(self, name, images, mod, is_loop=False):
+    def __init__(self, name, images, mod, is_loop=False, repeat=5):
         self.__name = name
         self.__is_loop = is_loop
         self.__pause = True
         self.__mod = mod
-        self.__images = images
+        self.__images = self.__multiply(images, repeat)
         self.__images_idx = 0
+
+    @staticmethod
+    def __multiply(images, repeat):
+        result = []
+        for i in images:
+            for _ in range(repeat):
+                result.append(i)
+        return result
 
     def is_pause(self):
         return self.__pause

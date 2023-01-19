@@ -57,32 +57,30 @@ CREATURES = {
     "v": ClosedChest,
     "V": ClosedChest2,
     "T": Gates
-
 }
 
 
 class Level:
     def __init__(self, level, player, game):
-        self.game = game
-        self.background = self.load_background(level)
-        self.objects = self.load_objects(level) + self.load_objects_map(level)
-        self.creatures = self.load_creatures(level, player) + self.load_creatures_map(level, player)
-        self.handlers = self.load_handlers(level, game)
+        self.__background = self.load_background_grid(level)
+        self.__objects = self.load_objects_grid(level) + self.load_objects(level)
+        self.__creatures = self.load_creatures_grid(level, player) + self.load_creatures(level, player)
+        self.__handlers = self.load_handlers(level, game)
 
     def clean(self):
-        for i in self.creatures:
+        for i in self.__creatures:
             i.clean()
-        for i in self.background + self.objects + self.creatures:
+        for i in self.__background + self.__objects + self.__creatures:
             i.kill()
-        self.background = []
-        self.objects = []
-        self.creatures = []
-        for i in self.handlers:
+        self.__background = []
+        self.__objects = []
+        self.__creatures = []
+        for i in self.__handlers:
             i.clean()
-        self.handlers = []
+        self.__handlers = []
 
     @staticmethod
-    def load_background(level):
+    def load_background_grid(level):
         grid = Level.load_helper(level, 'background_grid.txt')
         result = []
         for y in range(len(grid)):
@@ -94,7 +92,7 @@ class Level:
         return result
 
     @staticmethod
-    def load_objects_map(level):
+    def load_objects_grid(level):
         grid = Level.load_helper(level, 'objects_grid.txt')
         result = []
         for y in range(len(grid)):
@@ -106,7 +104,7 @@ class Level:
         return result
 
     @staticmethod
-    def load_creatures_map(level, player):
+    def load_creatures_grid(level, player):
         grid = Level.load_helper(level, 'creatures_grid.txt')
         result = []
         for y in range(len(grid)):
@@ -119,7 +117,6 @@ class Level:
                         element = CREATURES[t](tile_width * x, tile_height * y, player)
                         result.append(element)
         return result
-
 
     @staticmethod
     def load_helper(level, file):

@@ -13,7 +13,7 @@ from game import Game
 from creatures import Player
 from inventory import Slot
 from levels import Level
-from score import GameScore
+from gamescore import GameScore
 from settings import WIDTH, HEIGHT, FPS, GAME_COMPLETED, GAME_FAILED, GAME_PAUSED, GAME_RUNNING, KEY_COLOR, MENU_NONE, \
     MENU_NEW_GAME, MENU_CONTINUE, MENU_SCORE
 from utils import load_image, load_level_list
@@ -366,9 +366,10 @@ class GameScreen(Screen):
             camera.follow()
 
 
-# TODO step, ai_mod,
+# TODO step,
 # TODO CAMERA into screen class
 
 # TODO REFACTOR TO PRIVATE VARS
 
-# TODO apply, heal, -> item and handle in event ?
+# TODO SOUND
+# TODO Screen key shotcuts

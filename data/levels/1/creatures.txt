@@ -2,3 +2,4 @@ Player 11000 11000
 ClosedChest 11050 11050
 Chest 11200 11000
 Boss1 12100 12000
+Player 700 700
