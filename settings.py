@@ -1,8 +1,8 @@
 import os
 
-FPS = 60
+FPS = 30
 SIZE = WIDTH, HEIGHT = 1280, 720
-STEP = 15
+STEP = 20
 tile_width = tile_height = 100
 
 KEY_COLOR = 0xff5cf9
@@ -14,13 +14,13 @@ SLOT_RIGHT_HAND = 4
 
 BUTTON_TO_SLOT = {
     3: SLOT_LEFT_HAND,
-    2: SLOT_ARMOR,
     1: SLOT_RIGHT_HAND
 }
 
-LOOT_RANGE = 50
+LOOT_RANGE = 100
 
 DATA_DIR = "data"
+IMAGES_DIR = os.path.join(DATA_DIR, "images")
 LEVEL_DIR = os.path.join(DATA_DIR, "levels")
 
 EVENT_MONSTER_DEAD = 1
@@ -43,3 +43,5 @@ MENU_NONE = 0
 MENU_NEW_GAME = 1
 MENU_CONTINUE = 2
 MENU_SCORE = 3
+
+AGGRESSIVE_RANGE = 200

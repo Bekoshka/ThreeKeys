@@ -8,14 +8,51 @@ from tiles import Obstacle, AnimatedObstacle, Tile
 
 
 LANDSCAPES = {
+    ",": Snow,
     ".": Grass,
-    "#": Sand
+    "#": Sand,
+    "r": Road,
+    "f": Road2,
+    "R": Road3,
+    "F": Road4,
+    "g": Road5,
+    "G": Road6,
+    "h": Road7,
+    "j": SnowRoad1,
+    "J": SnowRoad2,
+    "k": SnowRoad3,
+    "K": SnowRoad4,
+    "l": SnowRoad5,
+    "L": SnowRoad6,
+    "i": Rotate1,
+    "I": Rotate2,
+    "o": Rotate3,
+    "O": Rotate4,
 }
 
 OBJECTS = {
     "!": Beton,
-    "@": Forest,
-    "%": Cactus
+    "s": Pine,
+    "%": Cactus,
+    "c": Rock,
+    "w": Forest2,
+    "x": SnowPine,
+    "q": SnowTree
+}
+
+CREATURES = {
+    "z": Zombie,
+    "q": Skeleton,
+    "d": Scorpion,
+    "C": Chest,
+    "0": Chest2,
+    "1": Chest3,
+    "2": Chest4,
+    "3": Chest5,
+    "4": Chest6,
+    "5": Chest7,
+    "6": Chest8
+
 }
 
 
@@ -24,7 +61,7 @@ class Level:
         self.game = game
         self.background = self.load_background(level)
         self.objects = self.load_objects(level) + self.load_objects_map(level)
-        self.creatures = self.load_creatures(level, player)
+        self.creatures = self.load_creatures(level, player) + self.load_creatures_map(level, player)
         self.handlers = self.load_handlers(level, game)
 
     def clean(self):
@@ -41,26 +78,51 @@ class Level:
 
     @staticmethod
     def load_background(level):
-        return Level.load_helper(level, LANDSCAPES, 'background.txt')
+        grid = Level.load_helper(level, 'background_grid.txt')
+        result = []
+        for y in range(len(grid)):
+            for x in range(len(grid[y])):
+                t = grid[y][x]
+                if t in LANDSCAPES.keys():
+                    element = LANDSCAPES[t](tile_width * x, tile_height * y)
+                    result.append(element)
+        return result
 
     @staticmethod
     def load_objects_map(level):
-        return Level.load_helper(level, OBJECTS, 'obstacles.txt')
+        grid = Level.load_helper(level, 'objects_grid.txt')
+        result = []
+        for y in range(len(grid)):
+            for x in range(len(grid[y])):
+                t = grid[y][x]
+                if t in OBJECTS.keys():
+                    element = OBJECTS[t](tile_width * x, tile_height * y)
+                    result.append(element)
+        return result
 
     @staticmethod
-    def load_helper(level, dict_var, file):
+    def load_creatures_map(level, player):
+        grid = Level.load_helper(level, 'creatures_grid.txt')
         result = []
+        for y in range(len(grid)):
+            for x in range(len(grid[y])):
+                t = grid[y][x]
+                if t in CREATURES.keys():
+                    if issubclass(CREATURES[t], Player):
+                        player.set_position(tile_width * x, tile_height * y)
+                    elif issubclass(CREATURES[t], Creature):
+                        element = CREATURES[t](tile_width * x, tile_height * y, player)
+                        result.append(element)
+        return result
+
+
+    @staticmethod
+    def load_helper(level, file):
         with open(os.path.join(LEVEL_DIR, str(level), file), 'r') as mapFile:
             level_map = [line.strip() for line in mapFile]
         max_width = max(map(len, level_map))
         landscape = list(map(lambda x: x.ljust(max_width, '.'), level_map))
-        for y in range(len(landscape)):
-            for x in range(len(landscape[y])):
-                t = landscape[y][x]
-                if t in dict_var.keys():
-                    element = dict_var[t](tile_width * x, tile_height * y)
-                    result.append(element)
-        return result
+        return landscape
 
     @staticmethod
     def load_objects(level):
@@ -86,7 +148,7 @@ class Level:
                 params = i[1:]
                 if issubclass(cls, Player):
                     player.set_position(*params)
-                elif issubclass(cls, Tile):
+                elif issubclass(cls, Creature):
                     result.append(cls(*params, player))
                 else:
                     raise SystemExit("Creature can't be loaded: " + i[0])

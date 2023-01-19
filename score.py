@@ -48,17 +48,28 @@ class GameScore:
                 ELSE (kills * 150 + damage_given - damage_recieved + gold) 
                 END AS score
             FROM (
-                SELECT 
-                    game_id AS id,
-                    SUM(kills) AS kills,
-                    SUM(damage_given) AS damage_given,
-                    SUM(damage_recieved) AS damage_recieved, 
-                    SUM(damage_absorbed) AS damage_absorbed,
-                    SUM(bottles_used) AS bottles_used,
-                    SUM(gold) AS gold,
-                    MIN(time_start) AS time_start
-                FROM scores 
-                GROUP BY game_id
+                SELECT
+                    id,
+                    kills,
+                    damage_given,
+                    damage_recieved,
+                    damage_absorbed,
+                    bottles_used,
+                    (SELECT gold FROM scores WHERE id = max_level_id) AS gold,
+                    time_start
+                FROM (          
+                    SELECT 
+                        game_id AS id,
+                        SUM(kills) AS kills,
+                        SUM(damage_given) AS damage_given,
+                        SUM(damage_recieved) AS damage_recieved, 
+                        SUM(damage_absorbed) AS damage_absorbed,
+                        SUM(bottles_used) AS bottles_used,
+                        max(id) as max_level_id,
+                        MIN(time_start) AS time_start
+                    FROM scores 
+                    GROUP BY game_id
+                )
             )
             ORDER BY score DESC LIMIT ?
         """, (limit,))
@@ -69,7 +80,7 @@ class GameScore:
 
 
 class Score:
-    def __init__(self, id=None, game_id=None, level=0, kills=0, damage_given=0, damage_recieved=0, damage_absorbed=0,
+    def __init__(self, id=None, game_id=None, level="", kills=0, damage_given=0, damage_recieved=0, damage_absorbed=0,
                  bottles_used=0, gold=0, time_start=None):
         self.id = id
         self.game_id = game_id
@@ -93,7 +104,7 @@ class Score:
             """CREATE TABLE IF NOT EXISTS scores (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             game_id INTEGER NOT NULL,
-            level INTEGER NOT NULL,
+            level TEXT NOT NULL,
             kills INTEGER NOT NULL,
             damage_given INTEGER NOT NULL,
             damage_recieved INTEGER NOT NULL,

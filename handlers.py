@@ -2,9 +2,9 @@ from datetime import datetime
 
 import smokesignal
 
-from creatures import Player
+from creatures import Player, ClosedChest
 from items import Gold, BrownKey, YellowKey
-from landscape import BrownPortal, YellowPortal
+from landscape import BrownPortal, YellowPortal, Box
 from score import Score
 from settings import EVENT_MONSTER_DEAD, EVENT_DAMAGE_RECIEVED, EVENT_BOTTLE_USED, EVENT_DAMAGE_GIVEN, \
     EVENT_ITEM_ASSIGNED, EVENT_TRIGGER_RUN
@@ -26,38 +26,64 @@ class DeathHandler(DefaultHandler):
     def __init__(self, game):
         super().__init__()
         self.__game = game
-        self._register(EVENT_MONSTER_DEAD, self._monster_dead)
+        self._register(EVENT_MONSTER_DEAD, self.__monster_dead)
 
-    def _monster_dead(self, creature):
-        if creature == Player.__name__:
+    def __monster_dead(self, creature):
+        if type(creature).__name__ == Player.__name__:
             self.__game.death_delayed()
 
 
 class TriggerHandler(DefaultHandler):
-    def __init__(self, game):
+    def __init__(self, trigger_name, key_name, game):
         super().__init__()
         self.__game = game
+        self.__trigger_name = trigger_name
+        self.__key_name = key_name
         self._register(EVENT_TRIGGER_RUN, self._trigger_run)
 
     def _trigger_run(self, trigger, key):
-        print(trigger, "run by", key)
+        print(type(self).__name__, "handled", type(trigger).__name__, "run by", type(key).__name__)
 
     def _get_game(self):
         return self.__game
 
+    def _get_trigger_name(self):
+        return self.__trigger_name
 
-class BrownPortalHandler(TriggerHandler):
+    def _get_key_name(self):
+        return self.__key_name
+
+
+class NextLevelHandler(TriggerHandler):
     def _trigger_run(self, trigger, key):
         super()._trigger_run(trigger, key)
-        if trigger == BrownPortal.__name__ and key == BrownKey.__name__:
+        if type(trigger).__name__ == self._get_trigger_name() and type(key).__name__ == self._get_key_name():
             self._get_game().next_level_delayed()
 
 
-class YellowHandler(TriggerHandler):
+class OpenChestHandler(TriggerHandler):
     def _trigger_run(self, trigger, key):
         super()._trigger_run(trigger, key)
-        if trigger == YellowPortal.__name__ and key == YellowKey.__name__:
-            self._get_game().next_level_delayed()
+        if type(trigger).__name__ == self._get_trigger_name() and type(key).__name__ == self._get_key_name():
+            trigger.set_lootable(True)
+
+
+class DisappearHandler(TriggerHandler):
+    def _trigger_run(self, trigger, key):
+        super()._trigger_run(trigger, key)
+        if type(trigger).__name__ == self._get_trigger_name() and type(key).__name__ == self._get_key_name():
+            trigger.kill()
+
+
+class MoveToHandler(TriggerHandler):
+    def __init__(self, trigger_name, key_name, x, y, game):
+        super().__init__(trigger_name, key_name, game)
+        self.pos = (x, y)
+
+    def _trigger_run(self, trigger, key):
+        super()._trigger_run(trigger, key)
+        if type(trigger).__name__ == self._get_trigger_name() and type(key).__name__ == self._get_key_name():
+            self._get_game().get_player().set_position(*self.pos)
 
 
 class ScoreHandler(DefaultHandler):
@@ -73,34 +99,34 @@ class ScoreHandler(DefaultHandler):
         self._register(EVENT_ITEM_ASSIGNED, self.__item_assigned)
 
     def __monster_dead(self, creature):
-        print(creature, "is dead")
-        if creature != Player.__name__:
+        print(type(creature).__name__, "is dead")
+        if type(creature).__name__ != Player.__name__:
             self.__score.kills += 1
             Score.add(self.__score)
 
     def __damage_recieved(self, actor, damage, clean_damage):
-        print(actor, "is attacked with", damage, "damage but recieved", clean_damage)
-        if actor == Player.__name__:
+        print(type(actor).__name__, "is attacked with", damage, "damage but recieved", clean_damage)
+        if type(actor).__name__ == Player.__name__:
             self.__score.damage_absorbed += damage - clean_damage
             self.__score.damage_recieved += clean_damage
             Score.add(self.__score)
 
     def __damage_given(self, actor, enemy, weapon, damage):
-        print(actor, "attacked", enemy, "using", weapon, "with", damage, "damage")
-        if actor == Player.__name__:
+        print(type(actor).__name__, "attacked", type(enemy).__name__, "using", type(weapon).__name__, "with", damage, "damage")
+        if type(actor).__name__ == Player.__name__:
             self.__score.damage_given += damage
             Score.add(self.__score)
 
-    def __bottle_used(self, actor, bottle, heal):
-        print(actor, "used a bottle", bottle, "that is able to replinish", heal, "health points")
-        if actor == Player.__name__:
+    def __bottle_used(self, actor, creature, bottle):
+        print(type(creature).__name__, "used a bottle", type(bottle).__name__, "that is able to replinish")
+        if type(creature).__name__ == Player.__name__:
             self.__score.bottles_used += 1
             Score.add(self.__score)
 
     def __item_assigned(self, actor, slot, item, count):
-        print(actor, f"put into the slot[{slot}]", count, item)
-        if actor == Player.__name__:
-            if item == Gold.__name__:
+        print(type(actor).__name__, f"put into the slot[{slot}]", count, type(item).__name__)
+        if type(actor).__name__ == Player.__name__:
+            if type(item).__name__ == Gold.__name__:
                 self.__gold[slot] = count
             else:
                 self.__gold[slot] = 0

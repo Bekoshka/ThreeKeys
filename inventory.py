@@ -58,7 +58,7 @@ class Slot(pygame.sprite.Sprite):
             count = 0
             if item:
                 count = item.get_count()
-            smokesignal.emit(EVENT_ITEM_ASSIGNED, type(self.creature).__name__, self.id, type(item).__name__, count)
+            smokesignal.emit(EVENT_ITEM_ASSIGNED, self.creature, self.id, item, count)
 
     def can_assign_item(self, item):
         if item is None:

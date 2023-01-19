@@ -1,4 +1,3 @@
-Rock 300 500
-Rock 320 540
-Rock 340 560
-BrownPortal 150 100
+BrownPortal 800 800
+Box 10950 10950
+Cactus 10850 10950
