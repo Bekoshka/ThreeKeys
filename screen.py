@@ -3,10 +3,12 @@ from itertools import chain
 
 import pygame
 
+from animation import animation_tick_counter
 from buttons import Button
 from common import landscape_group, obstacle_group, buttons_group, slots_group, items_group, \
-    corpse_group, mouse, creature_group, animated_obstacle_group
+    corpse_group, mouse, creature_group, animated_obstacle_group, tick_counter
 from camera import camera
+from delay import DelayedRunner
 from game import Game
 from creatures import Player
 from inventory import Slot
@@ -14,7 +16,7 @@ from levels import Level
 from score import GameScore
 from settings import WIDTH, HEIGHT, FPS, GAME_COMPLETED, GAME_FAILED, GAME_PAUSED, GAME_RUNNING, KEY_COLOR, MENU_NONE, \
     MENU_NEW_GAME, MENU_CONTINUE, MENU_SCORE
-from utils import load_image
+from utils import load_image, load_level_list
 
 
 class Screen:
@@ -68,7 +70,7 @@ class Screen:
 
     def __handle_runners(self):
         for runner in self.delayedRunners:
-            runner.update()
+            runner.check()
 
     def _handle_events(self):
         pass
@@ -93,7 +95,7 @@ class StartScreen(Screen):
 
     def _render(self):
         self._render_background(self.background)
-        self._render_text(self.text)
+        # self._render_text(self.text)
         pygame.display.flip()
 
     def _handle_events(self):
@@ -225,23 +227,11 @@ class WinScreen(CentralTextScreen):
         super().__init__(screen, "Congratulations!")
 
 
-class DelayedRunner:
-    def __init__(self, wait, callback):
-        self.tick_counter = 0
-        self.wait = wait
-        self.callback = callback
-
-    def update(self):
-        self.tick_counter += 1
-        if self.tick_counter == self.wait:
-            self.callback()
-
-
 class GameScreen(Screen):
     def __init__(self, screen):
         super().__init__(screen)
         self.player = Player(3, 5)
-        self.levels = [1, 2]
+        self.levels = load_level_list()
         self.game = Game()
         Game.add(self.game)
         self.current_level = 0
@@ -252,6 +242,9 @@ class GameScreen(Screen):
         self.level_complete = False
         self.game_complete = False
         self.player_dead = False
+
+    def get_player(self):
+        return self.player
 
     def get_status(self):
         if self.player_dead:
@@ -310,6 +303,9 @@ class GameScreen(Screen):
 
         self.__render_message()
 
+        tick_counter.next()
+        animation_tick_counter.next()
+
         pygame.display.flip()
 
     def __render_message(self):
@@ -326,13 +322,13 @@ class GameScreen(Screen):
         button = 0
         keys = pygame.key.get_pressed()
         mods = pygame.key.get_mods()
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_a]:
             dx -= 1
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_d]:
             dx += 1
-        if keys[pygame.K_UP]:
+        if keys[pygame.K_w]:
             dy -= 1
-        if keys[pygame.K_DOWN]:
+        if keys[pygame.K_s]:
             dy += 1
 
         for event in pygame.event.get():
@@ -352,13 +348,13 @@ class GameScreen(Screen):
                         if btn.rect.collidepoint(event.pos):
                             btn.handle_click()
             if event.type == pygame.MOUSEBUTTONUP:
-                if event.button  == 2:
+                if event.button == 2:
                     Slot.clean_description()
 
             if event.type == pygame.KEYUP:
-                if event.key == pygame.K_i:
+                if event.key == pygame.K_e:
                     self.player.get_inventory().open(True)
-                if event.key == pygame.K_a:
+                if event.key == pygame.K_q:
                     self.player.get_ammunition().open()
                 if event.key == pygame.K_ESCAPE:
                     self.stop()
@@ -370,14 +366,9 @@ class GameScreen(Screen):
             camera.follow()
 
 
-# TODO Weapon ATTACK SPEED
-# TODO Fix Gold
+# TODO step, ai_mod, aggr_range
+
 
 # TODO REFACTOR TO PRIVATE VARS
-# TODO REFACTOR DATA DIR STRUCT
-# TODO OPTIMIZE OUT
 
-
-# TODO MAKE SAVE - LOW(PRIO)
-# TODO MAKE NEWGAME LOAD BUTTONS - LOW(PRIO)
-# TODO RANGE WEAPON - LOW(PRIO)
+# TODO apply, heal, -> item and handle in event ?

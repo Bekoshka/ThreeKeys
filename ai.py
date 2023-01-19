@@ -1,6 +1,7 @@
 from random import choice
 
-from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND
+from common import tick_counter
+from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, AGGRESSIVE_RANGE
 from tiles import Creature
 from utils import calculate_sprite_range, get_vector
 
@@ -9,8 +10,7 @@ class AI(Creature):
     def __init__(self, animations, max_health_points, pos_x, pos_y, enemy):
         super().__init__(animations, max_health_points, pos_x, pos_y)
         self.spawn_point = self.rect.center
-        self.logic_tick_counter = 0
-        self.logic_mod = 10
+        self.logic_mod = 3
         self.enemy = enemy
 
     def update(self, screen):
@@ -19,12 +19,11 @@ class AI(Creature):
 
     def action(self):
         if self.health_points:
-            if self.logic_tick_counter % self.logic_mod == 0:
-                if calculate_sprite_range(self.enemy, self) < 200 and not self.enemy.is_dead():
+            if tick_counter.check(self.logic_mod):
+                if calculate_sprite_range(self.enemy, self) < AGGRESSIVE_RANGE and not self.enemy.is_dead():
                     choice([self.move_to_player, self.attack, self.do_nothing])()
                 else:
                     choice([self.move_random, self.do_nothing, self.do_nothing, self.do_nothing])()
-            self.logic_tick_counter += 1
 
     def attack(self):
         if not super().apply(self.enemy, SLOT_RIGHT_HAND):

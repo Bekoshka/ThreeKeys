@@ -1,1 +1,4 @@
-BrownPortalHandler
+NextLevelHandler BrownPortal BrownKey
+OpenChestHandler ClosedChest YellowKey
+DisappearHandler Box YellowKey
+MoveToHandler Cactus YellowKey 1000 700

@@ -4,8 +4,7 @@ import pygame
 import os
 
 from animation import Animation
-from settings import tile_width, DATA_DIR, KEY_COLOR
-
+from settings import tile_width, DATA_DIR, KEY_COLOR, LEVEL_DIR, IMAGES_DIR
 
 CACHE = dict()
 
@@ -37,7 +36,7 @@ def load_raw_image(name, color_key=None):
     return image
 
 
-def load_image(name, color_key=None, resize=False, size=tile_width, base=DATA_DIR):
+def load_image(name, color_key=None, resize=False, size=tile_width, base=IMAGES_DIR):
     image = load_raw_image(os.path.join(base, name) if base else name, color_key)
 
     if resize:
@@ -47,14 +46,18 @@ def load_image(name, color_key=None, resize=False, size=tile_width, base=DATA_DI
 
 def load_animations(resource, loop=False):
     animations = {}
-    for dir in next(os.walk(os.path.join(DATA_DIR, resource)))[1]:
+    for dir in next(os.walk(os.path.join(IMAGES_DIR, resource)))[1]:
         name, mod = dir.split('#')
         images = []
-        for file in sorted(next(os.walk(os.path.join(DATA_DIR, resource, dir)))[2]):
-            images.append(load_raw_image(os.path.join(DATA_DIR, resource, dir, file),
+        for file in sorted(next(os.walk(os.path.join(IMAGES_DIR, resource, dir)))[2]):
+            images.append(load_raw_image(os.path.join(IMAGES_DIR, resource, dir, file),
                                          color_key=KEY_COLOR))
         animations[name] = Animation(name, images, int(mod), loop)
     return animations
+
+
+def load_level_list():
+    return sorted(next(os.walk(LEVEL_DIR))[1])
 
 
 def calculate_sprite_range(a, b):
