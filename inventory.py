@@ -26,49 +26,46 @@ AMMUNITION_SLOTS = {
 class Slot(pygame.sprite.Sprite):
     def __init__(self, id, creature, images, x=0, y=0, type=None):
         super().__init__()
-        self.id = id
-        self.creature = creature
-        self.images = images
-        self.image = self.images[0]
+        self.__id = id
+        self.__creature = creature
+        self.__images = images
+        self.image = self.__images[0]
         self.rect = self.image.get_rect().move(x, y)
-        self.item = None
-        self.default_item = None
-        self.type = type
+        self.__item = None
+        self.__default_item = None
+        self.__type = type
 
     def update(self, _):
         global selected_slot
-        self.image = self.images[self == selected_slot]
+        self.image = self.__images[self == selected_slot]
 
     def assigned_item(self):
-        if self.item:
-            return self.item
+        if self.__item:
+            return self.__item
         else:
-            if self.default_item:
-                return self.default_item
+            if self.__default_item:
+                return self.__default_item
         return None
 
     def can_drop(self):
-        return bool(self.item)
+        return bool(self.__item)
 
     def assign(self, item):
-        if self.can_assign_item(item):
-            if self.item is None and self.default_item:
-                self.default_item.kill()
-            self.item = item
-            count = 0
-            if item:
-                count = item.get_count()
-            smokesignal.emit(EVENT_ITEM_ASSIGNED, self.creature, self.id, item, count)
+        if self.__can_assign_item(item):
+            if self.__item is None and self.__default_item:
+                self.__default_item.kill()
+            self.__item = item
+            smokesignal.emit(EVENT_ITEM_ASSIGNED, self.__creature, self.__id, item)
 
-    def can_assign_item(self, item):
+    def __can_assign_item(self, item):
         if item is None:
             return True
-        if self.type is None:
+        if self.__type is None:
             return True
-        return item.slot_type & self.type
+        return item.get_slot_type() & self.__type
 
     def assign_default(self, item):
-        self.default_item = item
+        self.__default_item = item
 
     def handle_click(self, button, union=False, divide=False):
         global selected_slot
@@ -77,17 +74,17 @@ class Slot(pygame.sprite.Sprite):
         if button == 1:
             if selected_slot:
                 if not (union or divide):
-                    i = self.item
-                    si = selected_slot.item
-                    if selected_slot.can_assign_item(i) and self.can_assign_item(si):
+                    i = self.__item
+                    si = selected_slot.__item
+                    if selected_slot.__can_assign_item(i) and self.__can_assign_item(si):
                         selected_slot.assign(i)
                         self.assign(si)
                         selected_slot = None
                 elif union ^ divide:
-                    i = self.item
-                    si = selected_slot.item
+                    i = self.__item
+                    si = selected_slot.__item
                     if si:
-                        if self.can_assign_item(si):
+                        if self.__can_assign_item(si):
                             si, i = si.transfer(i, union)
                             selected_slot.assign(si)
                             self.assign(i)
@@ -98,8 +95,8 @@ class Slot(pygame.sprite.Sprite):
         elif button == 2:
             description_slot = (self, x, y)
         elif button == 3:
-            if self.item:
-                self.item.apply(self.creature, self.creature)
+            if self.__item:
+                self.__item.apply(self.__creature, self.__creature)
 
     @staticmethod
     def clean_description():
@@ -116,7 +113,7 @@ class Slot(pygame.sprite.Sprite):
                 blits = []
                 max_width = 0
                 max_height = 0
-                for i, text in enumerate(item.description.split('\n')):
+                for i, text in enumerate(item.get_description().split('\n')):
                     bg_color = pygame.Color('white')
                     image = pygame.font.Font(None, 30).render(text, True, pygame.Color('black'), bg_color)
                     rect = image.get_rect()
@@ -132,7 +129,7 @@ class Slot(pygame.sprite.Sprite):
 
 class Container:
     def __init__(self, is_left):
-        self.close_button = Button(load_image("close.png", KEY_COLOR), self.close)
+        self.__close_button = Button(load_image("close.png", KEY_COLOR), self.close)
         self.__slots = dict()
         self.__is_left = is_left
         self.__is_visible = False
@@ -152,7 +149,7 @@ class Container:
 
     def clean(self):
         self.close()
-        self._clean()
+        self.__clean()
 
     def close(self):
         global right_side_menu_open
@@ -169,9 +166,9 @@ class Container:
         self.__is_left = is_left
         self.__is_visible = True
 
-    def _clean(self):
+    def __clean(self):
         global selected_slot
-        self.close_button.kill()
+        self.__close_button.kill()
         for slot in self.__slots.values():
             slot.kill()
             if slot == selected_slot:
@@ -189,14 +186,14 @@ class Container:
     def update(self, screen):
         global selected_slot
         if not self.__is_visible:
-            self._clean()
+            self.__clean()
             return
         x = 0 if self.__is_left else WIDTH // 2
         pygame.draw.rect(screen, (50, 50, 50), pygame.Rect(x, 0, WIDTH // 2, HEIGHT))
 
-        if buttons_group not in self.close_button.groups():
-            buttons_group.add(self.close_button)
-        self.close_button.rect.x = x
+        if buttons_group not in self.__close_button.groups():
+            buttons_group.add(self.__close_button)
+        self.__close_button.rect.x = x
 
         for k in self.__slots.keys():
             slot = self.__slots[k]
@@ -228,7 +225,6 @@ class Container:
 class Inventory(Container):
     def __init__(self, creature):
         super().__init__(False)
-        self.creature = creature
         for i in range(INVENTORY_DIMENTION):
             for j in range(INVENTORY_DIMENTION):
                 self._add_slot((i, j), creature)
@@ -248,7 +244,6 @@ class Inventory(Container):
 class Ammunition(Container):
     def __init__(self, creature):
         super().__init__(False)
-        self.creature = creature
         for k in AMMUNITION_SLOTS.keys():
             x, y = AMMUNITION_SLOTS[k]
             self._add_slot(k, creature, x, y, k)

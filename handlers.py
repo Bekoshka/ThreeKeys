@@ -2,9 +2,8 @@ from datetime import datetime
 
 import smokesignal
 
-from creatures import Player, ClosedChest
-from items import Gold, BrownKey, YellowKey
-from landscape import BrownPortal, YellowPortal, Box
+from creatures import Player
+from items import Gold
 from score import Score
 from settings import EVENT_MONSTER_DEAD, EVENT_DAMAGE_RECIEVED, EVENT_BOTTLE_USED, EVENT_DAMAGE_GIVEN, \
     EVENT_ITEM_ASSIGNED, EVENT_TRIGGER_RUN
@@ -78,12 +77,12 @@ class DisappearHandler(TriggerHandler):
 class MoveToHandler(TriggerHandler):
     def __init__(self, trigger_name, key_name, x, y, game):
         super().__init__(trigger_name, key_name, game)
-        self.pos = (x, y)
+        self.__pos = (x, y)
 
     def _trigger_run(self, trigger, key):
         super()._trigger_run(trigger, key)
         if type(trigger).__name__ == self._get_trigger_name() and type(key).__name__ == self._get_key_name():
-            self._get_game().get_player().set_position(*self.pos)
+            self._get_game().get_player().set_position(*self.__pos)
 
 
 class ScoreHandler(DefaultHandler):
@@ -117,13 +116,16 @@ class ScoreHandler(DefaultHandler):
             self.__score.damage_given += damage
             Score.add(self.__score)
 
-    def __bottle_used(self, actor, creature, bottle):
+    def __bottle_used(self, _, creature, bottle):
         print(type(creature).__name__, "used a bottle", type(bottle).__name__, "that is able to replinish")
         if type(creature).__name__ == Player.__name__:
             self.__score.bottles_used += 1
             Score.add(self.__score)
 
-    def __item_assigned(self, actor, slot, item, count):
+    def __item_assigned(self, actor, slot, item):
+        count = 0
+        if item:
+            count = item.get_count()
         print(type(actor).__name__, f"put into the slot[{slot}]", count, type(item).__name__)
         if type(actor).__name__ == Player.__name__:
             if type(item).__name__ == Gold.__name__:

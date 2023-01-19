@@ -99,9 +99,6 @@ class Rotate4(Background):
         super().__init__(load_image('rotate4.jpg'), pos_x, pos_y)
 
 
-
-
-
 class Sand(Background):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_image('sand.png', resize=True), pos_x, pos_y)
@@ -140,6 +137,11 @@ class Beton(Obstacle):
 class Box(Obstacle):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_image('wall.png'), pos_x, pos_y)
+
+
+class Gates(Obstacle):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('gates.png'), pos_x, pos_y)
 
 
 class Rock(Obstacle):

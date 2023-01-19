@@ -238,7 +238,7 @@ class GameScreen(Screen):
 
         self.level = Level(self.levels[self.current_level], self.player, self)
 
-        camera.focus = self.player
+        camera.set_focus(self.player)
         self.level_complete = False
         self.game_complete = False
         self.player_dead = False
@@ -262,7 +262,7 @@ class GameScreen(Screen):
 
     def next_level_delayed(self):
         self.level_complete = True
-        self.delayedRunners.append(DelayedRunner(200, self.next_level))
+        self.delayedRunners.append(DelayedRunner(50, self.next_level))
 
     def clean(self):
         self.level.clean()
@@ -366,8 +366,8 @@ class GameScreen(Screen):
             camera.follow()
 
 
-# TODO step, ai_mod, aggr_range
-
+# TODO step, ai_mod,
+# TODO CAMERA into screen class
 
 # TODO REFACTOR TO PRIVATE VARS
 

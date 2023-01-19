@@ -16,7 +16,7 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(x, y)
 
     def set_position(self, x, y):
-        self.rect = self.rect.move(int(x), int(y))
+        self.rect.topleft = (int(x), int(y))
 
 
 class Trigger(Tile):
@@ -31,7 +31,7 @@ class AnimatedTile(Trigger):
     def __init__(self, animations, start_animation_name, pos_x, pos_y, groups):
         self.animations = animations
         self.animation = animations[start_animation_name]
-        super().__init__(self.animation.images[0], pos_x, pos_y, groups)
+        super().__init__(self.animation.get_image(), pos_x, pos_y, groups)
 
     def get_animation(self):
         return self.animation
@@ -44,7 +44,7 @@ class AnimatedTile(Trigger):
             self.animation_tick(self.animation)
 
     def change_animation(self, name):
-        if self.animation != self.animations[name] or self.animation.is_pause:
+        if self.animation != self.animations[name] or self.animation.is_pause():
             self.animation = self.animations[name]
             self.animation.start()
 
@@ -95,7 +95,7 @@ class Movable(AnimatedTile):
         return True
 
     def animation_tick(self, animation):
-        if animation.name.startswith("move"):
+        if animation.get_name().startswith("move"):
             dx, dy = self.__move_vector
             if dx != 0 and dy != 0:
                 step = int(((self.speed ** 2) // 2) ** 0.5)

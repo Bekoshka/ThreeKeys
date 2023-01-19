@@ -51,7 +51,12 @@ CREATURES = {
     "3": Chest5,
     "4": Chest6,
     "5": Chest7,
-    "6": Chest8
+    "6": Chest8,
+    "B": Boss1,
+    "p": BrownPortal,
+    "v": ClosedChest,
+    "V": ClosedChest2,
+    "T": Gates
 
 }
 
