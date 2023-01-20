@@ -16,7 +16,7 @@ class Score:
         self.time_start = time_start
 
     def __repr__(self):
-        return f"Score {self.id}"
+        return f"<Score ({self.id}, {self.time_start}, {self.level})>"
 
     @staticmethod
     def init_db():

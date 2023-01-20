@@ -114,8 +114,8 @@ class Slot(pygame.sprite.Sprite):
                 max_width = 0
                 max_height = 0
                 for i, text in enumerate(item.get_description().split('\n')):
-                    bg_color = pygame.Color('white')
-                    image = pygame.font.Font(None, 30).render(text, True, pygame.Color('black'), bg_color)
+                    bg_color = pygame.Color('WHITE')
+                    image = pygame.font.Font(None, 30).render(text, True, pygame.Color('BLACK'), bg_color)
                     rect = image.get_rect()
                     rect.topleft = x, 20 + y + i * rect.height
                     max_width = max([max_width, rect.width])

@@ -1,9 +1,5 @@
-Monster1 -300 0
-Monster2 -300 500
-Monster1 10 -500
-Monster2 1000 500
-Monster1 1000 100
-Monster2 100 700
-Monster1 100 1000
-Monster2 1500 1500
-Player 5000 5000
+Player 11000 11000
+ClosedChest 11050 11050
+Chest 11200 11200
+Boss1 12100 12000
+Player 11250 11200

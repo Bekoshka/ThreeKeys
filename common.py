@@ -3,7 +3,7 @@ import pygame
 from groups import CameraGroup
 from settings import WIDTH, HEIGHT
 from ticker import TickCounter
-from utils import Mouse
+from mouse import Mouse
 
 
 landscape_group = CameraGroup()

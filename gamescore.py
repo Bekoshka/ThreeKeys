@@ -17,7 +17,7 @@ class GameScore:
         self.gold = gold
 
     def __repr__(self):
-        return f"<GameScore ({self.time_start}, {self.score})>"
+        return f"<GameScore ({self.id}, {self.time_start}, {self.score})>"
 
     def __str__(self):
         return f"""|{self.id:4d}|{datetime.fromisoformat(self.time_start).strftime("%Y-%m-%d %H-%M-%S")}|""" + \

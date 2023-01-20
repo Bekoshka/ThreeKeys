@@ -156,7 +156,7 @@ class BigHealPotion(HealPotion):
 
 class Hood(Armor):
     def __init__(self):
-        super().__init__("Теплый капюшон. Не\nдаёт много защиты.", load_image("hood.png", KEY_COLOR), 1125, SLOT_ARMOR)
+        super().__init__("Теплый капюшон. Не\nдаёт много защиты.", load_image("hood.png", KEY_COLOR), 25, SLOT_ARMOR)
 
 
 class Sword(Weapon):
@@ -225,6 +225,30 @@ class Axe(Weapon):
                          SLOT_RIGHT_HAND)
 
 
+class Axe2(Weapon):
+    def __init__(self):
+        super().__init__("Огромный, тяжёлый топор.", load_image("axe2.png", KEY_COLOR), (70, 80), 110,
+                         SLOT_RIGHT_HAND)
+
+
+class Bit(Weapon):
+    def __init__(self):
+        super().__init__("Длинная и увесистая и с железными кольями, была сделана местными мастерами.", load_image("бита.png", KEY_COLOR), (70, 80), 110,
+                         SLOT_RIGHT_HAND)
+
+
+class Sickle(Weapon):
+    def __init__(self):
+        super().__init__("Он остался здесь с момента бегства фермеров от глобального похолодания.", load_image("серп.png", KEY_COLOR), (70, 80), 110,
+                         SLOT_RIGHT_HAND)
+
+
+class Sword2(Weapon):
+    def __init__(self):
+        super().__init__("После убийства короля  поклониками великой звезды, все забыли про его меч.", load_image("sword2.png", KEY_COLOR), (70, 80), 110,
+                         SLOT_RIGHT_HAND)
+
+
 class Axe1(Weapon):
     def __init__(self):
         super().__init__("Новенький стальной меч.", load_image("axe1.png", KEY_COLOR), (80, 96), 120,
@@ -240,6 +264,18 @@ class LeftHand(Weapon):
 class Leftclaw(Weapon):
     def __init__(self):
         super().__init__("Его левая рука", load_image("left_hand.png", KEY_COLOR), (30, 45), 55,
+                         SLOT_LEFT_HAND)
+
+
+class LeftWolfclaw(Weapon):
+    def __init__(self):
+        super().__init__("Его левая рука", load_image("left_hand.png", KEY_COLOR), (42, 45), 55,
+                         SLOT_LEFT_HAND)
+
+
+class RightWolfclaw(Weapon):
+    def __init__(self):
+        super().__init__("Его правая рука", load_image("left_hand.png", KEY_COLOR), (42, 45), 55,
                          SLOT_LEFT_HAND)
 
 
@@ -274,3 +310,18 @@ class BrownKey(Key):
 class GreenKey(Key):
     def __init__(self):
         super().__init__("Открываает сундук в левом верхнем углу карты", load_image("green_key.png", KEY_COLOR))
+
+
+class BlueKey(Key):
+    def __init__(self):
+        super().__init__("Открываает ворота в правом нижнем углу карты", load_image("blue_key.png", KEY_COLOR))
+
+
+class PurpleKey(Key):
+    def __init__(self):
+        super().__init__("Открываает ворота в правом нижнем углу карты", load_image("purple_key.png", KEY_COLOR))
+
+
+class RedKey(Key):
+    def __init__(self):
+        super().__init__("Нужен для использования портала в правом нижнем углу карты", load_image("red_key.png", KEY_COLOR))

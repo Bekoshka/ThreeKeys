@@ -3,7 +3,7 @@ import os
 from handlers import *
 from landscape import *
 from creatures import *
-from settings import tile_width, tile_height, LEVEL_DIR
+from settings import TILE_WIDTH, TILE_HEIGHT, LEVEL_DIR
 from tiles import Obstacle, AnimatedObstacle, Tile
 
 
@@ -37,12 +37,16 @@ OBJECTS = {
     "c": Rock,
     "w": Forest2,
     "x": SnowPine,
-    "q": SnowTree
+    "q": SnowTree,
+    "T": Gates,
+    "u": Gates2,
+    "p": BrownPortal,
+    "P": RedPortal
 }
 
 CREATURES = {
     "z": Zombie,
-    "q": Skeleton,
+    "Z": Skeleton,
     "d": Scorpion,
     "C": Chest,
     "0": Chest2,
@@ -53,10 +57,15 @@ CREATURES = {
     "5": Chest7,
     "6": Chest8,
     "B": Boss1,
-    "p": BrownPortal,
     "v": ClosedChest,
     "V": ClosedChest2,
-    "T": Gates
+    "W": Wolf,
+    "b": Cheest1,
+    "n": Cheest2,
+    "N": Cheest3,
+    "m": Cheest4,
+    "M": Cheest5,
+    "X": Boss2
 }
 
 
@@ -87,7 +96,7 @@ class Level:
             for x in range(len(grid[y])):
                 t = grid[y][x]
                 if t in LANDSCAPES.keys():
-                    element = LANDSCAPES[t](tile_width * x, tile_height * y)
+                    element = LANDSCAPES[t](TILE_WIDTH * x, TILE_HEIGHT * y)
                     result.append(element)
         return result
 
@@ -99,7 +108,7 @@ class Level:
             for x in range(len(grid[y])):
                 t = grid[y][x]
                 if t in OBJECTS.keys():
-                    element = OBJECTS[t](tile_width * x, tile_height * y)
+                    element = OBJECTS[t](TILE_WIDTH * x, TILE_HEIGHT * y)
                     result.append(element)
         return result
 
@@ -112,9 +121,9 @@ class Level:
                 t = grid[y][x]
                 if t in CREATURES.keys():
                     if issubclass(CREATURES[t], Player):
-                        player.set_position(tile_width * x, tile_height * y)
+                        player.set_position(TILE_WIDTH * x, TILE_HEIGHT * y)
                     elif issubclass(CREATURES[t], Creature):
-                        element = CREATURES[t](tile_width * x, tile_height * y, player)
+                        element = CREATURES[t](TILE_WIDTH * x, TILE_HEIGHT * y, player)
                         result.append(element)
         return result
 
@@ -168,6 +177,6 @@ class Level:
                     result.append(cls(*params, game))
                 else:
                     raise SystemExit("Handler can't be loaded: " + i[0])
-        result.append(ScoreHandler(level, game.game.id))
+        result.append(ScoreHandler(level, game.get_game_id()))
         result.append(DeathHandler(game))
         return result

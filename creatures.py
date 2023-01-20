@@ -2,7 +2,8 @@ from random import randrange
 
 from ai import AI
 from items import SmallHealPotion, Sword, LeftHand, RightHand, Hood, Gold, Axe, YellowKey, BrownKey, Pitchfork, \
-    BigHealPotion, Mace, Braid, Spear, Sledgehammer, Knucle, Leftclaw, Rightclaw, Boss1Log, GreenKey
+    BigHealPotion, Mace, Braid, Spear, Sledgehammer, Knucle, Leftclaw, Rightclaw, Boss1Log, GreenKey, LeftWolfclaw, \
+    RightWolfclaw, Bit, BlueKey, Sickle, PurpleKey, Axe2, RedKey, Axe1, Sword2
 from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, SLOT_ARMOR
 from tiles import Creature
 
@@ -29,7 +30,7 @@ class Chest(Creature):
 
 class ClosedChest(Creature):
     def __init__(self, pos_x, pos_y, _=None):
-        super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=False)
+        super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y))
         super().get_inventory().add_item(BigHealPotion(2))
         super().get_inventory().add_item(Sword())
         super().get_inventory().add_item(YellowKey())
@@ -88,6 +89,49 @@ class Chest8(Creature):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
         super().get_inventory().add_item(BigHealPotion(1))
         super().get_inventory().add_item(Knucle())
+        super().get_inventory().add_item(Gold(randrange(100, 250)))
+
+
+class Cheest1(Creature):
+    def __init__(self, pos_x, pos_y, _=None):
+        super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
+        super().get_inventory().add_item(BigHealPotion(1))
+        super().get_inventory().add_item(Bit())
+        super().get_inventory().add_item(BlueKey())
+        super().get_inventory().add_item(Gold(randrange(100, 250)))
+
+
+class Cheest2(Creature):
+    def __init__(self, pos_x, pos_y, _=None):
+        super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
+        super().get_inventory().add_item(SmallHealPotion(5))
+        super().get_inventory().add_item(Sickle())
+        super().get_inventory().add_item(PurpleKey())
+        super().get_inventory().add_item(Gold(randrange(100, 250)))
+
+
+class Cheest3(Creature):
+    def __init__(self, pos_x, pos_y, _=None):
+        super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
+        super().get_inventory().add_item(BigHealPotion(2))
+        super().get_inventory().add_item(Axe2())
+        super().get_inventory().add_item(RedKey())
+        super().get_inventory().add_item(Gold(randrange(100, 250)))
+
+
+class Cheest4(Creature):
+    def __init__(self, pos_x, pos_y, _=None):
+        super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
+        super().get_inventory().add_item(BigHealPotion(2))
+        super().get_inventory().add_item(Axe1())
+        super().get_inventory().add_item(Gold(randrange(100, 250)))
+
+
+class Cheest5(Creature):
+    def __init__(self, pos_x, pos_y, _=None):
+        super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
+        super().get_inventory().add_item(SmallHealPotion(4))
+        super().get_inventory().add_item(Sword2())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
 
@@ -160,15 +204,23 @@ class Skeleton(AI):
 
 class Wolf(AI):
     def __init__(self, pos_x, pos_y, enemy):
-        super().__init__(load_animations("skeleton"), 130, int(pos_x), int(pos_y), enemy)
-        self.get_ammunition().assign_default(Leftclaw(), SLOT_LEFT_HAND)
-        self.get_ammunition().assign_default(RightHand(), SLOT_RIGHT_HAND)
-        self.get_inventory().add_item(Gold(randrange(50, 150)))
+        super().__init__(load_animations("wolf"), 130, int(pos_x), int(pos_y), enemy)
+        self.get_ammunition().assign_default(LeftWolfclaw(), SLOT_LEFT_HAND)
+        self.get_ammunition().assign_default(RightWolfclaw(), SLOT_RIGHT_HAND)
+        self.get_inventory().add_item(Gold(randrange(100, 250)))
 
 
 class Boss1(AI):
     def __init__(self, pos_x, pos_y, enemy):
         super().__init__(load_animations("boss1"), 2000, int(pos_x), int(pos_y), enemy)
+        self.get_ammunition().assign_default(Boss1Log(), SLOT_LEFT_HAND)
+        self.get_ammunition().assign_default(RightHand(), SLOT_RIGHT_HAND)
+        self.get_inventory().add_item(Gold(randrange(500, 750)))
+
+
+class Boss2(AI):
+    def __init__(self, pos_x, pos_y, enemy):
+        super().__init__(load_animations("boss2"), 3700, int(pos_x), int(pos_y), enemy)
         self.get_ammunition().assign_default(Boss1Log(), SLOT_LEFT_HAND)
         self.get_ammunition().assign_default(RightHand(), SLOT_RIGHT_HAND)
         self.get_inventory().add_item(Gold(randrange(500, 750)))

@@ -1,10 +1,8 @@
-import sqlite3
-
 import pygame
 import os
 
 from animation import Animation
-from settings import tile_width, DATA_DIR, KEY_COLOR, LEVEL_DIR, IMAGES_DIR
+from settings import TILE_WIDTH, KEY_COLOR, LEVEL_DIR, IMAGES_DIR
 
 CACHE = dict()
 
@@ -36,7 +34,7 @@ def load_raw_image(name, color_key=None):
     return image
 
 
-def load_image(name, color_key=None, resize=False, size=tile_width, base=IMAGES_DIR):
+def load_image(name, color_key=None, resize=False, size=TILE_WIDTH, base=IMAGES_DIR):
     image = load_raw_image(os.path.join(base, name) if base else name, color_key)
 
     if resize:
@@ -80,15 +78,3 @@ def get_vector(x1, y1, x2, y2):
     if y2 < y1:
         dy -= 1
     return (dx, dy)
-
-
-class Mouse():
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-
-    def get_pos(self):
-        return self.x, self.y
-
-    def set_pos(self, pos):
-        self.x, self.y = pos

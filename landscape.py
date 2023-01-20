@@ -1,5 +1,6 @@
 import pygame
 
+from settings import KEY_COLOR
 from tiles import Background, Obstacle
 from utils import load_image
 
@@ -12,6 +13,11 @@ class Grass(Background):
 class Snow(Background):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_image('snow.jpg'), pos_x, pos_y)
+
+
+class Ashes(Background):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('ashes.jpg'), pos_x, pos_y)
 
 
 class Road(Background):
@@ -106,32 +112,32 @@ class Sand(Background):
 
 class Pine(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('pine.png', color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=False), pos_x, pos_y)
+        super().__init__(load_image('pine.png', color_key=KEY_COLOR, resize=False), pos_x, pos_y)
 
 
 class SnowPine(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('pine2.png', color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=False), pos_x, pos_y)
+        super().__init__(load_image('pine2.png', color_key=KEY_COLOR, resize=False), pos_x, pos_y)
 
 
 class SnowTree(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('tree2.png', color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=False), pos_x, pos_y)
+        super().__init__(load_image('tree2.png', color_key=KEY_COLOR, resize=False), pos_x, pos_y)
 
 
 class Forest2(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('tree.png', color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=False), pos_x, pos_y)
+        super().__init__(load_image('tree.png', color_key=KEY_COLOR, resize=False), pos_x, pos_y)
 
 
 class Cactus(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('cactus.png', color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=True), pos_x, pos_y)
+        super().__init__(load_image('cactus.png', color_key=KEY_COLOR, resize=True), pos_x, pos_y)
 
 
 class Beton(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image("beton.jpg", color_key=pygame.Color(0xff, 0x5c, 0xf9), resize=True), pos_x, pos_y)
+        super().__init__(load_image("beton.jpg", color_key=KEY_COLOR, resize=True), pos_x, pos_y)
 
 
 class Box(Obstacle):
@@ -141,19 +147,24 @@ class Box(Obstacle):
 
 class Gates(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('gates.png'), pos_x, pos_y)
+        super().__init__(load_image('gates.png', color_key=KEY_COLOR), pos_x, pos_y)
+
+
+class Gates2(Obstacle):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('gates.png', color_key=KEY_COLOR), pos_x, pos_y)
 
 
 class Rock(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('rock.png', color_key=pygame.Color(0xff, 0x5c, 0xf9)), pos_x, pos_y)
+        super().__init__(load_image('rock.png', color_key=KEY_COLOR), pos_x, pos_y)
 
 
-class YellowPortal(Obstacle):
+class RedPortal(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('wall.png'), pos_x, pos_y)
+        super().__init__(load_image('portal_2.png', color_key=KEY_COLOR), pos_x, pos_y)
 
 
 class BrownPortal(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('portal_1.png', color_key=pygame.Color(0xff, 0x5c, 0xf9)), pos_x, pos_y)
+        super().__init__(load_image('portal_1.png', color_key=KEY_COLOR), pos_x, pos_y)

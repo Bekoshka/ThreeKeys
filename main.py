@@ -1,7 +1,7 @@
 import pygame
 
-from screen import StartScreen, GameScreen, FailScreen, WinScreen, ScoreTableScreen, MenuScreen
-from settings import SIZE, GAME_PAUSED, GAME_FAILED, GAME_COMPLETED, MENU_SCORE, MENU_NEW_GAME
+from screen import StartScreen, GameScreen, FailScreen, WinScreen, ScoreTableScreen, MenuScreen, HotkeysScreen
+from settings import SIZE, GAME_PAUSED, GAME_FAILED, GAME_COMPLETED, MENU_SCORE, MENU_NEW_GAME, MENU_HOTKEYS
 
 
 def main_loop():
@@ -25,6 +25,9 @@ def main_loop():
                 if game:
                     game.exit()
                 game = GameScreen(screen)
+            elif status == MENU_HOTKEYS:
+                HotkeysScreen(screen).run()
+                continue
             game.run()
             status = game.get_status()
             if status == GAME_PAUSED:

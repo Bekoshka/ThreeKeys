@@ -1,14 +1,14 @@
 from random import choice
 
 from common import tick_counter
-from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, AGGRESSIVE_RANGE, LOGIC_MOD
+from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, DEFAULT_AI_AGGRESSIVE_RANGE, DEFAULT_AI_LOGIC_MOD
 from tiles import Creature
 from utils import calculate_sprite_range, get_vector
 
 
 class AI(Creature):
-    def __init__(self, animations, max_health_points, pos_x, pos_y, enemy, aggressive_range=AGGRESSIVE_RANGE,
-                 logic_mod=LOGIC_MOD):
+    def __init__(self, animations, max_health_points, pos_x, pos_y, enemy, aggressive_range=DEFAULT_AI_AGGRESSIVE_RANGE,
+                 logic_mod=DEFAULT_AI_LOGIC_MOD):
         super().__init__(animations, max_health_points, pos_x, pos_y)
         self.__logic_mod = logic_mod
         self.__enemy = enemy
