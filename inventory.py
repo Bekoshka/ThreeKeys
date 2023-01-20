@@ -2,11 +2,11 @@ from items import *
 from buttons import Button
 from common import buttons_group, slots_group, items_group, mouse
 
-from settings import WIDTH, HEIGHT, SLOT_RIGHT_HAND, SLOT_LEFT_HAND, EVENT_ITEM_ASSIGNED
+from settings import WIDTH, HEIGHT
 
 import pygame
 
-from settings import SLOT_ARMOR, KEY_COLOR
+from globals import SLOT_ARMOR, KEY_COLOR, SLOT_RIGHT_HAND, SLOT_LEFT_HAND, EVENT_ITEM_ASSIGNED
 from utils import load_image
 
 selected_slot = None
@@ -165,6 +165,12 @@ class Container:
             right_side_menu_open = self
         self.__is_left = is_left
         self.__is_visible = True
+
+    def handle_click(self, is_left=False):
+        if self.__is_visible:
+            self.close()
+        else:
+            self.open(is_left)
 
     def __clean(self):
         global selected_slot

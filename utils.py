@@ -2,7 +2,8 @@ import pygame
 import os
 
 from animation import Animation
-from settings import TILE_WIDTH, KEY_COLOR, LEVEL_DIR, IMAGES_DIR
+from settings import TILE_WIDTH, LEVEL_DIR, IMAGES_DIR
+from globals import KEY_COLOR
 
 CACHE = dict()
 
@@ -77,4 +78,4 @@ def get_vector(x1, y1, x2, y2):
         dy += 1
     if y2 < y1:
         dy -= 1
-    return (dx, dy)
+    return dx, dy

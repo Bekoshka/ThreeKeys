@@ -5,16 +5,17 @@ import pygame
 
 from animation import animation_tick_counter
 from buttons import Button
+from camera import camera
 from common import landscape_group, obstacle_group, buttons_group, slots_group, items_group, \
     corpse_group, mouse, creature_group, animated_obstacle_group, tick_counter
-from camera import camera
 from delay import DelayedRunner
 from game import Game
 from creatures import Player
 from inventory import Slot
 from levels import Level
 from gamescore import GameScore
-from settings import WIDTH, HEIGHT, FPS, GAME_COMPLETED, GAME_FAILED, GAME_PAUSED, GAME_RUNNING, KEY_COLOR, MENU_NONE, \
+from settings import WIDTH, HEIGHT, FPS
+from globals import GAME_COMPLETED, GAME_FAILED, GAME_PAUSED, GAME_RUNNING, KEY_COLOR, MENU_NONE, \
     MENU_NEW_GAME, MENU_CONTINUE, MENU_SCORE, MENU_HOTKEYS
 from utils import load_image, load_level_list
 
@@ -98,23 +99,30 @@ class HotkeysScreen(Screen):
     def __init__(self, screen):
         super().__init__(screen)
         self.text = [
-            "Доступ в инвентарь осуществляется нажатием клавиши E, посмотреть амуницию персонажа  - нажатием Q. ",
-            "Управление внутри осуществляется мышью. Для выбора и перемещения предмета в другую ячейку используется ",
-            "левая кнопка мыши. Правая кнопка мыши позволяет использовать предмет на себя. Средняя кнопка мыши показывает ",
-            "описание предмета. При зажатом shift левой кнопкой мыши можно объединять одинаковые предметы, за  ",
-            "исключением предметов, для которых данная операция запрещена(оружие, амуниция).При зажатом ctrl ",
-            "можно разделять предметы.",
-            "   Предметы, находящиеся в руках используются нажатием левой и правой кнопки мыши. При отсутствии предмета ",
-            "в ячейке используется предмет по умолчанию, например кулаки. При смерти существ предметы из рук оказываются",
-            " в инвентаре, за исключением предметов по умолчанию. Нажатие средней кнопки мыши позволяет обыскать ",
-            "умершего противника или сундук. Сундук может быть закрыт, в таком случае его необходимо предварительно ",
-            "открыть с помощью ключа."
+            "КАРТА:",
+            "   Доступ в инвентарь осуществляется нажатием клавиши E.",
+            "   Посмотреть амуницию персонажа - нажатием Q.",
+            "   Предметы, находящиеся в руках используются нажатием левой и ",
+            "правой кнопки мыши. При отсутствии предмета в ячейке используется",
+            "предмет по умолчанию, например кулаки.",
+            "   Нажатие средней кнопки мыши позволяет обыскать умершего",
+            "противника или сундук. Сундук может быть заперт, в таком случае его",
+            "необходимо предварительно открыть с помощью ключа.",
+            "ИНВЕНТАРЬ:",
+            "   Для выбора и перемещения предмета в другую ячейку используется",
+            "левая кнопка мыши(ЛКМ).",
+            "   Правая кнопка мыши(ПКМ) позволяет использовать предмет на себя.",
+            "   Средняя кнопка мыши(СКМ) показывает описание предмета.",
+            "   SHIFT + (ЛКМ) объединяет одинаковые предметы, за исключением",
+            "предметов, для которых данная операция запрещена(оружие, амуниция).",
+            "   CTRL + (ЛКМ) разделяет предметы"
         ]
-        self.background = load_image('snow.jpg')
 
     def _render(self):
-        self._render_background(self.background)
-        self._render_text(self.text)
+        self._screen.fill(pygame.Color('BLACK'))
+        self._render_central_string("HOTKEYS", color=pygame.Color('WHITE'), pos=(WIDTH // 2, 50))
+        self._render_text(self.text, font=pygame.font.SysFont("MONOSPACE", 30),
+                          color=pygame.Color("WHITE"), pos=(50, 100))
         pygame.display.flip()
 
 
@@ -184,7 +192,7 @@ class MenuScreen(Screen):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self._terminate()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for btn in self.__menu_buttons_group:
                     if btn.rect.collidepoint(event.pos):
                         btn.handle_click()
@@ -342,35 +350,34 @@ class GameScreen(Screen):
                     for i in chain(obstacle_group, corpse_group):
                         if camera.translate(i.rect).collidepoint(event.pos):
                             obstacle = i
+                            break
                     for slot in slots_group:
                         if slot.rect.collidepoint(event.pos):
                             slot.handle_click(button, mods & pygame.KMOD_SHIFT, mods & pygame.KMOD_CTRL)
+                            break
                     for btn in buttons_group:
                         if btn.rect.collidepoint(event.pos):
                             btn.handle_click()
+                            break
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 2:
                     Slot.clean_description()
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_e:
-                    self.__player.get_inventory().open(True)
+                    self.__player.get_inventory().handle_click(True)
                 if event.key == pygame.K_q:
-                    self.__player.get_ammunition().open()
+                    self.__player.get_ammunition().handle_click()
                 if event.key == pygame.K_ESCAPE:
                     self.stop()
 
         if obstacle:
-            self.__player.handle_click(obstacle, button)
+            if not self.__player.handle_click(obstacle, button):
+                self.__player.step(dx, dy)
+                camera.follow()
         else:
             self.__player.step(dx, dy)
             camera.follow()
 
-# TODO step,
-# TODO CAMERA into screen class
-# TODO CLOSE Q E
-# TODO REFACTOR TO PRIVATE VARS
-
+# TODO ANIM_REPEAT
 # TODO SOUND
-# TODO Screen key shotcuts
-# GLOBALS

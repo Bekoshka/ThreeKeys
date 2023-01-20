@@ -1,12 +1,13 @@
 import pygame
 
 from screen import StartScreen, GameScreen, FailScreen, WinScreen, ScoreTableScreen, MenuScreen, HotkeysScreen
-from settings import SIZE, GAME_PAUSED, GAME_FAILED, GAME_COMPLETED, MENU_SCORE, MENU_NEW_GAME, MENU_HOTKEYS
+from settings import SIZE
+from globals import GAME_PAUSED, GAME_FAILED, GAME_COMPLETED, MENU_SCORE, MENU_NEW_GAME, MENU_HOTKEYS
 
 
 def main_loop():
     pygame.init()
-    screen = pygame.display.set_mode(SIZE)#, pygame.FULLSCREEN)
+    screen = pygame.display.set_mode(SIZE)  # , pygame.FULLSCREEN)
 
     start = StartScreen(screen)
     fail = FailScreen(screen)

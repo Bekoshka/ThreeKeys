@@ -3,7 +3,7 @@ from random import randrange
 import pygame
 import smokesignal
 
-from settings import SLOT_LEFT_HAND, SLOT_RIGHT_HAND, KEY_COLOR, SLOT_ARMOR, SLOT_NONE, EVENT_BOTTLE_USED, \
+from globals import SLOT_LEFT_HAND, SLOT_RIGHT_HAND, KEY_COLOR, SLOT_ARMOR, SLOT_NONE, EVENT_BOTTLE_USED, \
     EVENT_DAMAGE_GIVEN, ANIMATION_ATTACK
 from utils import load_image, calculate_sprite_range
 
@@ -106,12 +106,12 @@ class Armor(Item):
 
 
 class HealPotion(Item):
-    def __init__(self, description, image, heal_points, count):
+    def __init__(self, description, image, heal_points, count, range):
         if type(self).__name__ == HealPotion.__name__:
             raise SystemExit("It is abstract class: " + HealPotion.__name__)
         super().__init__(description, image, SLOT_LEFT_HAND | SLOT_RIGHT_HAND, count)
         self.__heal_points = heal_points
-        self.__range = 50
+        self.__range = range
 
     def apply(self, actor, creature):
         if self.can_apply(actor, creature):
@@ -125,11 +125,11 @@ class HealPotion(Item):
 
 
 class Key(Item):
-    def __init__(self, description, image):
+    def __init__(self, description, image, range):
         if type(self).__name__ == Key.__name__:
             raise SystemExit("It is abstract class: " + Key.__name__)
         super().__init__(description, image, SLOT_LEFT_HAND | SLOT_RIGHT_HAND, stackable=False)
-        self.__range = 500
+        self.__range = range
 
     def apply(self, actor, trigger):
         if self.can_apply(actor, trigger):
@@ -144,14 +144,14 @@ class SmallHealPotion(HealPotion):
     def __init__(self, count=1):
         super().__init__(
             "Small Heal Potion description",
-            load_image("shp.png", KEY_COLOR), 25, int(count))
+            load_image("shp.png", KEY_COLOR), 25, int(count), range=50)
 
 
 class BigHealPotion(HealPotion):
     def __init__(self, count=1):
         super().__init__(
             "Small Heal Potion description",
-            load_image("big_bottle.png", KEY_COLOR), 50, int(count))
+            load_image("big_bottle.png", KEY_COLOR), 50, int(count), range=50)
 
 
 class Hood(Armor):
@@ -173,13 +173,15 @@ class SkeletonSword(Weapon):
 
 class Mace(Weapon):
     def __init__(self):
-        super().__init__("Мощная и неуклюжая булава, сделана на совесть", load_image("mace.png", KEY_COLOR), (60, 90), 60,
+        super().__init__("Мощная и неуклюжая булава, сделана на совесть", load_image("mace.png", KEY_COLOR), (60, 90),
+                         60,
                          SLOT_RIGHT_HAND)
 
 
 class Braid(Weapon):
     def __init__(self):
-        super().__init__("Что в мультиках, что и здесь, всё равно забирает жизни.", load_image("braid.png", KEY_COLOR), (60, 70), 100,
+        super().__init__("Что в мультиках, что и здесь, всё равно забирает жизни.", load_image("braid.png", KEY_COLOR),
+                         (60, 70), 100,
                          SLOT_RIGHT_HAND)
 
 
@@ -203,7 +205,8 @@ class Sword1(Weapon):
 
 class Sledgehammer(Weapon):
     def __init__(self):
-        super().__init__("Кувалда, что тут ещё сказать, мощно и громоздко", load_image("sledgehammer.png", KEY_COLOR), (110, 130), 130,
+        super().__init__("Кувалда, что тут ещё сказать, мощно и громоздко", load_image("sledgehammer.png", KEY_COLOR),
+                         (110, 130), 130,
                          SLOT_RIGHT_HAND)
 
 
@@ -233,19 +236,22 @@ class Axe2(Weapon):
 
 class Bit(Weapon):
     def __init__(self):
-        super().__init__("Длинная и увесистая и с железными кольями, была сделана местными мастерами.", load_image("бита.png", KEY_COLOR), (70, 80), 110,
+        super().__init__("Длинная и увесистая и с железными кольями, была сделана местными мастерами.",
+                         load_image("бита.png", KEY_COLOR), (70, 80), 110,
                          SLOT_RIGHT_HAND)
 
 
 class Sickle(Weapon):
     def __init__(self):
-        super().__init__("Он остался здесь с момента бегства фермеров от глобального похолодания.", load_image("серп.png", KEY_COLOR), (70, 80), 110,
+        super().__init__("Он остался здесь с момента бегства фермеров от глобального похолодания.",
+                         load_image("серп.png", KEY_COLOR), (70, 80), 110,
                          SLOT_RIGHT_HAND)
 
 
 class Sword2(Weapon):
     def __init__(self):
-        super().__init__("После убийства короля  поклониками великой звезды, все забыли про его меч.", load_image("sword2.png", KEY_COLOR), (70, 80), 110,
+        super().__init__("После убийства короля  поклониками великой звезды, все забыли про его меч.",
+                         load_image("sword2.png", KEY_COLOR), (70, 80), 110,
                          SLOT_RIGHT_HAND)
 
 
@@ -299,29 +305,32 @@ class Gold(Item):
 
 class YellowKey(Key):
     def __init__(self):
-        super().__init__("Используется для откыртия ворот в левом ниженм углу карты", load_image("yellow_key.png", KEY_COLOR))
+        super().__init__("Используется для откыртия ворот в левом ниженм углу карты",
+                         load_image("yellow_key.png", KEY_COLOR), 500)
 
 
 class BrownKey(Key):
     def __init__(self):
-        super().__init__("Нужен для использования портала в правом нижнем углу карты", load_image("key.png", KEY_COLOR))
+        super().__init__("Нужен для использования портала в правом нижнем углу карты", load_image("key.png", KEY_COLOR),
+                         500)
 
 
 class GreenKey(Key):
     def __init__(self):
-        super().__init__("Открываает сундук в левом верхнем углу карты", load_image("green_key.png", KEY_COLOR))
+        super().__init__("Открываает сундук в левом верхнем углу карты", load_image("green_key.png", KEY_COLOR), 500)
 
 
 class BlueKey(Key):
     def __init__(self):
-        super().__init__("Открываает ворота в правом нижнем углу карты", load_image("blue_key.png", KEY_COLOR))
+        super().__init__("Открываает ворота в правом нижнем углу карты", load_image("blue_key.png", KEY_COLOR), 500)
 
 
 class PurpleKey(Key):
     def __init__(self):
-        super().__init__("Открываает ворота в правом нижнем углу карты", load_image("purple_key.png", KEY_COLOR))
+        super().__init__("Открываает ворота в правом нижнем углу карты", load_image("purple_key.png", KEY_COLOR), 500)
 
 
 class RedKey(Key):
     def __init__(self):
-        super().__init__("Нужен для использования портала в правом нижнем углу карты", load_image("red_key.png", KEY_COLOR))
+        super().__init__("Нужен для использования портала в правом нижнем углу карты",
+                         load_image("red_key.png", KEY_COLOR), 500)

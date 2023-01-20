@@ -44,6 +44,7 @@ class Animation:
 
     def start(self):
         self.__pause = False
+        self.__images_idx = 0
 
     def stop(self):
         self.__pause = True

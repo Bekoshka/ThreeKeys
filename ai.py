@@ -1,7 +1,8 @@
 from random import choice
 
 from common import tick_counter
-from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, DEFAULT_AI_AGGRESSIVE_RANGE, DEFAULT_AI_LOGIC_MOD
+from settings import DEFAULT_AI_AGGRESSIVE_RANGE, DEFAULT_AI_LOGIC_MOD
+from globals import SLOT_RIGHT_HAND, SLOT_LEFT_HAND
 from tiles import Creature
 from utils import calculate_sprite_range, get_vector
 

@@ -4,7 +4,7 @@ from ai import AI
 from items import SmallHealPotion, Sword, LeftHand, RightHand, Hood, Gold, Axe, YellowKey, BrownKey, Pitchfork, \
     BigHealPotion, Mace, Braid, Spear, Sledgehammer, Knucle, Leftclaw, Rightclaw, Boss1Log, GreenKey, LeftWolfclaw, \
     RightWolfclaw, Bit, BlueKey, Sickle, PurpleKey, Axe2, RedKey, Axe1, Sword2
-from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, SLOT_ARMOR
+from globals import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, SLOT_ARMOR
 from tiles import Creature
 
 from utils import load_animations

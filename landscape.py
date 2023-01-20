@@ -1,6 +1,4 @@
-import pygame
-
-from settings import KEY_COLOR
+from globals import KEY_COLOR
 from tiles import Background, Obstacle
 from utils import load_image
 
