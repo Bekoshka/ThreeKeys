@@ -11,4 +11,5 @@ DEFAULT_AI_LOGIC_MOD = 3
 
 DATA_DIR = "data"
 IMAGES_DIR = os.path.join(DATA_DIR, "images")
+SOUNDS_DIR = os.path.join(DATA_DIR, "sounds")
 LEVEL_DIR = os.path.join(DATA_DIR, "levels")

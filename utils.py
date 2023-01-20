@@ -2,13 +2,13 @@ import pygame
 import os
 
 from animation import Animation
-from settings import TILE_WIDTH, LEVEL_DIR, IMAGES_DIR
+from settings import TILE_WIDTH, LEVEL_DIR, IMAGES_DIR, SOUNDS_DIR
 from globals import KEY_COLOR
 
 CACHE = dict()
 
 
-def cached(func):
+def cached_image(func):
     def wrapper(name, color_key=None):
         if (name, str(color_key)) in CACHE.keys():
             return CACHE[name, str(color_key)]
@@ -18,7 +18,22 @@ def cached(func):
     return wrapper
 
 
-@cached
+def cached_sound(func):
+    def wrapper(name):
+        if name in CACHE.keys():
+            return CACHE[name]
+        result = func(name)
+        CACHE[name] = result
+        return result
+    return wrapper
+
+
+@cached_sound
+def load_sound(name):
+    return pygame.mixer.Sound(os.path.join(SOUNDS_DIR, name))
+
+
+@cached_image
 def load_raw_image(name, color_key=None):
     try:
         image = pygame.image.load(name).convert()
@@ -46,12 +61,12 @@ def load_image(name, color_key=None, resize=False, size=TILE_WIDTH, base=IMAGES_
 def load_animations(resource, loop=False):
     animations = {}
     for dir in next(os.walk(os.path.join(IMAGES_DIR, resource)))[1]:
-        name, mod = dir.split('#')
+        name, mod, repeat = dir.split('#')
         images = []
         for file in sorted(next(os.walk(os.path.join(IMAGES_DIR, resource, dir)))[2]):
             images.append(load_raw_image(os.path.join(IMAGES_DIR, resource, dir, file),
                                          color_key=KEY_COLOR))
-        animations[name] = Animation(name, images, int(mod), loop)
+        animations[name] = Animation(name, images, int(mod), int(repeat), loop)
     return animations
 
 

@@ -246,6 +246,15 @@ class GameScreen(Screen):
         self.__game_complete = False
         self.__player_dead = False
 
+    def stop(self):
+        super().stop()
+        pygame.mixer.music.stop()
+
+    def run(self):
+        pygame.mixer.music.load("data/sounds/music.mp3")
+        pygame.mixer.music.play(-1)
+        super().run()
+
     def get_player(self):
         return self.__player
 
@@ -370,6 +379,15 @@ class GameScreen(Screen):
                     self.__player.get_ammunition().handle_click()
                 if event.key == pygame.K_ESCAPE:
                     self.stop()
+                if event.key == pygame.K_EQUALS:
+                    vol = pygame.mixer.music.get_volume()
+                    vol += 0.1
+                    pygame.mixer.music.set_volume(vol)
+                if event.key == pygame.K_MINUS:
+                    vol = pygame.mixer.music.get_volume()
+                    vol -= 0.1
+                    pygame.mixer.music.set_volume(vol)
+
 
         if obstacle:
             if not self.__player.handle_click(obstacle, button):
@@ -379,5 +397,3 @@ class GameScreen(Screen):
             self.__player.step(dx, dy)
             camera.follow()
 
-# TODO ANIM_REPEAT
-# TODO SOUND

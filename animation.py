@@ -4,7 +4,7 @@ animation_tick_counter = TickCounter()
 
 
 class Animation:
-    def __init__(self, name, images, mod, is_loop=False, repeat=5):
+    def __init__(self, name, images, mod, repeat, is_loop=False):
         self.__name = name
         self.__is_loop = is_loop
         self.__pause = True

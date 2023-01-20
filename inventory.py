@@ -189,6 +189,12 @@ class Container:
             return item.get_animation_type()
         return None
 
+    def get_slot_sound(self, slot):
+        item = self.__slots[slot].assigned_item()
+        if item:
+            return item.get_sound()
+        return None
+
     def update(self, screen):
         global selected_slot
         if not self.__is_visible:

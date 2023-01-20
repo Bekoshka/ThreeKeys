@@ -7,8 +7,7 @@ from inventory import Ammunition, Inventory
 from settings import DEFAULT_STEP, DEFAULT_LOOT_RANGE
 from globals import EVENT_MONSTER_DEAD, EVENT_DAMAGE_RECIEVED, EVENT_TRIGGER_RUN, ANIMATION_MOVE, \
     ANIMATION_DEATH, SLOT_LEFT_HAND, SLOT_RIGHT_HAND, ANIMATION_MOVE_PREFIX
-from utils import calculate_sprite_range, get_vector
-
+from utils import calculate_sprite_range, get_vector, load_sound
 
 BUTTON_TO_SLOT = {
     3: SLOT_LEFT_HAND,
@@ -77,6 +76,7 @@ class Movable(AnimatedTile):
     def __init__(self, animations, pos_x, pos_y, step_size=DEFAULT_STEP, groups=[]):
         self.__step_size = step_size
         self.__move_vector = (0, -1)
+        self.__sound = load_sound("step.mp3")
         start_animation_name = "_".join([ANIMATION_MOVE, "0", "-1"])
         super().__init__(animations, start_animation_name, pos_x, pos_y, groups + [obstacle_group])
 
@@ -88,9 +88,11 @@ class Movable(AnimatedTile):
                 self._change_animation(animation)
                 if self._animation.is_pause():
                     self._animation.start()
+                    self.__sound.play()
             else:
                 if self._animation.is_pause():
                     self._change_animation(animation)
+                    self.__sound.play()
         else:
             if self._animation.get_name().startswith(ANIMATION_MOVE_PREFIX):
                 self._animation.stop()
@@ -191,6 +193,9 @@ class Creature(Movable):
             if animation_type:
                 vector = [str(x) for x in get_vector(self.rect.x, self.rect.y, *mouse.get_pos())]
                 self._change_animation("_".join([animation_type, *vector]))
+            sound = self.__ammunition.get_slot_sound(slot)
+            if sound:
+                sound.play()
             slot_object = self.__ammunition.get_slot_by_name(slot)
             if slot_object:
                 item = slot_object.assigned_item()

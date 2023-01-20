@@ -6,6 +6,7 @@ from globals import GAME_PAUSED, GAME_FAILED, GAME_COMPLETED, MENU_SCORE, MENU_N
 
 
 def main_loop():
+    pygame.mixer.pre_init(44100, -16, 1, 512)
     pygame.init()
     screen = pygame.display.set_mode(SIZE)  # , pygame.FULLSCREEN)
 
