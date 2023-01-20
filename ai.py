@@ -1,41 +1,43 @@
 from random import choice
 
 from common import tick_counter
-from settings import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, AGGRESSIVE_RANGE
+from settings import DEFAULT_AI_AGGRESSIVE_RANGE, DEFAULT_AI_LOGIC_MOD
+from globals import SLOT_RIGHT_HAND, SLOT_LEFT_HAND
 from tiles import Creature
 from utils import calculate_sprite_range, get_vector
 
 
 class AI(Creature):
-    def __init__(self, animations, max_health_points, pos_x, pos_y, enemy):
+    def __init__(self, animations, max_health_points, pos_x, pos_y, enemy, aggressive_range=DEFAULT_AI_AGGRESSIVE_RANGE,
+                 logic_mod=DEFAULT_AI_LOGIC_MOD):
         super().__init__(animations, max_health_points, pos_x, pos_y)
-        self.spawn_point = self.rect.center
-        self.logic_mod = 3
-        self.enemy = enemy
+        self.__logic_mod = logic_mod
+        self.__enemy = enemy
+        self.__aggressive_range = aggressive_range
 
     def update(self, screen):
-        self.action()
+        self.__action()
         super().update(screen)
 
-    def action(self):
-        if self.health_points:
-            if tick_counter.check(self.logic_mod):
-                if calculate_sprite_range(self.enemy, self) < AGGRESSIVE_RANGE and not self.enemy.is_dead():
-                    choice([self.move_to_player, self.attack, self.do_nothing])()
+    def __action(self):
+        if not self.is_dead():
+            if tick_counter.check(self.__logic_mod):
+                if calculate_sprite_range(self.__enemy, self) < self.__aggressive_range and not self.__enemy.is_dead():
+                    choice([self.__move_to_player, self.__attack])()
                 else:
-                    choice([self.move_random, self.do_nothing, self.do_nothing, self.do_nothing])()
+                    choice([self.__move_random, self.__do_nothing, self.__do_nothing, self.__do_nothing])()
 
-    def attack(self):
-        if not super().apply(self.enemy, SLOT_RIGHT_HAND):
-            super().apply(self.enemy, SLOT_LEFT_HAND)
+    def __attack(self):
+        if not super().apply(self.__enemy, SLOT_RIGHT_HAND):
+            super().apply(self.__enemy, SLOT_LEFT_HAND)
 
-    def move_random(self):
+    def __move_random(self):
         dx = choice([-1, 0, 1])
         dy = choice([-1, 0, 1])
         self.step(dx, dy)
 
-    def do_nothing(self):
+    def __do_nothing(self):
         pass
 
-    def move_to_player(self):
-        self.step(*get_vector(*self.rect.center, *self.enemy.rect.center))
+    def __move_to_player(self):
+        self.step(*get_vector(*self.rect.center, *self.__enemy.rect.center))

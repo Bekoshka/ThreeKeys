@@ -3,7 +3,7 @@ import os
 from handlers import *
 from landscape import *
 from creatures import *
-from settings import tile_width, tile_height, LEVEL_DIR
+from settings import TILE_WIDTH, TILE_HEIGHT, LEVEL_DIR
 from tiles import Obstacle, AnimatedObstacle, Tile
 
 
@@ -37,12 +37,16 @@ OBJECTS = {
     "c": Rock,
     "w": Forest2,
     "x": SnowPine,
-    "q": SnowTree
+    "q": SnowTree,
+    "T": Gates,
+    "u": Gates2,
+    "p": BrownPortal,
+    "P": RedPortal
 }
 
 CREATURES = {
     "z": Zombie,
-    "q": Skeleton,
+    "Z": Skeleton,
     "d": Scorpion,
     "C": Chest,
     "0": Chest2,
@@ -51,57 +55,65 @@ CREATURES = {
     "3": Chest5,
     "4": Chest6,
     "5": Chest7,
-    "6": Chest8
-
+    "6": Chest8,
+    "B": Boss1,
+    "v": ClosedChest,
+    "V": ClosedChest2,
+    "W": Wolf,
+    "b": Cheest1,
+    "n": Cheest2,
+    "N": Cheest3,
+    "m": Cheest4,
+    "M": Cheest5,
+    "X": Boss2
 }
 
 
 class Level:
     def __init__(self, level, player, game):
-        self.game = game
-        self.background = self.load_background(level)
-        self.objects = self.load_objects(level) + self.load_objects_map(level)
-        self.creatures = self.load_creatures(level, player) + self.load_creatures_map(level, player)
-        self.handlers = self.load_handlers(level, game)
+        self.__background = self.load_background_grid(level)
+        self.__objects = self.load_objects_grid(level) + self.load_objects(level)
+        self.__creatures = self.load_creatures_grid(level, player) + self.load_creatures(level, player)
+        self.__handlers = self.load_handlers(level, game)
 
     def clean(self):
-        for i in self.creatures:
+        for i in self.__creatures:
             i.clean()
-        for i in self.background + self.objects + self.creatures:
+        for i in self.__background + self.__objects + self.__creatures:
             i.kill()
-        self.background = []
-        self.objects = []
-        self.creatures = []
-        for i in self.handlers:
+        self.__background = []
+        self.__objects = []
+        self.__creatures = []
+        for i in self.__handlers:
             i.clean()
-        self.handlers = []
+        self.__handlers = []
 
     @staticmethod
-    def load_background(level):
+    def load_background_grid(level):
         grid = Level.load_helper(level, 'background_grid.txt')
         result = []
         for y in range(len(grid)):
             for x in range(len(grid[y])):
                 t = grid[y][x]
                 if t in LANDSCAPES.keys():
-                    element = LANDSCAPES[t](tile_width * x, tile_height * y)
+                    element = LANDSCAPES[t](TILE_WIDTH * x, TILE_HEIGHT * y)
                     result.append(element)
         return result
 
     @staticmethod
-    def load_objects_map(level):
+    def load_objects_grid(level):
         grid = Level.load_helper(level, 'objects_grid.txt')
         result = []
         for y in range(len(grid)):
             for x in range(len(grid[y])):
                 t = grid[y][x]
                 if t in OBJECTS.keys():
-                    element = OBJECTS[t](tile_width * x, tile_height * y)
+                    element = OBJECTS[t](TILE_WIDTH * x, TILE_HEIGHT * y)
                     result.append(element)
         return result
 
     @staticmethod
-    def load_creatures_map(level, player):
+    def load_creatures_grid(level, player):
         grid = Level.load_helper(level, 'creatures_grid.txt')
         result = []
         for y in range(len(grid)):
@@ -109,12 +121,11 @@ class Level:
                 t = grid[y][x]
                 if t in CREATURES.keys():
                     if issubclass(CREATURES[t], Player):
-                        player.set_position(tile_width * x, tile_height * y)
+                        player.set_position(TILE_WIDTH * x, TILE_HEIGHT * y)
                     elif issubclass(CREATURES[t], Creature):
-                        element = CREATURES[t](tile_width * x, tile_height * y, player)
+                        element = CREATURES[t](TILE_WIDTH * x, TILE_HEIGHT * y, player)
                         result.append(element)
         return result
-
 
     @staticmethod
     def load_helper(level, file):
@@ -166,6 +177,6 @@ class Level:
                     result.append(cls(*params, game))
                 else:
                     raise SystemExit("Handler can't be loaded: " + i[0])
-        result.append(ScoreHandler(level, game.game.id))
+        result.append(ScoreHandler(level, game.get_game_id()))
         result.append(DeathHandler(game))
         return result

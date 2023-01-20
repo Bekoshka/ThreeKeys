@@ -1,4 +1,4 @@
-from utils import Connection
+from db import Connection
 
 
 class Game:
@@ -6,7 +6,7 @@ class Game:
         self.id = id
 
     def __repr__(self):
-        return f"Game {self.id}"
+        return f"<Game ({self.id})>"
 
     @staticmethod
     def init_db():
