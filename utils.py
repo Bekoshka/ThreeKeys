@@ -50,11 +50,11 @@ def load_raw_image(name, color_key=None):
     return image
 
 
-def load_image(name, color_key=None, resize=False, size=TILE_WIDTH, base=IMAGES_DIR):
+def load_image(name, color_key=None, resize=False, width=TILE_WIDTH, height=TILE_WIDTH, base=IMAGES_DIR):
     image = load_raw_image(os.path.join(base, name) if base else name, color_key)
 
     if resize:
-        image = pygame.transform.scale(image, (size, size))
+        image = pygame.transform.scale(image, (width, height))
     return image
 
 

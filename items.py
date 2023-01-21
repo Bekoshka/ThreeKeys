@@ -76,6 +76,8 @@ class Weapon(Item):
     def __init__(self, description, image, sound, damage, range, slot_type):
         if type(self).__name__ == Weapon.__name__:
             raise SystemExit("It is abstract class: " + Weapon.__name__)
+        if not(type(damage) is tuple and len(damage) == 2 and int(damage[0]) < int(damage[1])):
+            raise SystemExit("Weapon damage is set incorrectly: " + type(self).__name__)
         super().__init__(description, image, slot_type, stackable=False)
         self.__damage = damage
         self.__range = range
@@ -131,6 +133,25 @@ class HealPotion(Item):
                and not creature.is_dead() and calculate_sprite_range(actor, creature) < self.__range
 
 
+class SpeedPotion(Item):
+    def __init__(self, description, image, agility_points, count, range):
+        if type(self).__name__ == HealPotion.__name__:
+            raise SystemExit("It is abstract class: " + HealPotion.__name__)
+        super().__init__(description, image, SLOT_LEFT_HAND | SLOT_RIGHT_HAND, count)
+        self.__agility_points = agility_points
+        self.__range = range
+
+    def apply(self, actor, creature):
+        if self.can_apply(actor, creature):
+            creature.recieve_speed(self.__agility_points)
+            self._reduce_amount()
+            smokesignal.emit(EVENT_BOTTLE_USED, actor, creature, self)
+
+    def can_apply(self, actor, creature):
+        return hasattr(creature, 'recieve_speed') and callable(getattr(creature, 'recieve_speed')) \
+               and not creature.is_dead() and calculate_sprite_range(actor, creature) < self.__range
+
+
 class Key(Item):
     def __init__(self, description, image, range):
         if type(self).__name__ == Key.__name__:
@@ -161,6 +182,20 @@ class BigHealPotion(HealPotion):
             load_image("big_bottle.png", KEY_COLOR), 50, int(count), range=50)
 
 
+class PlusSpeedPotion(SpeedPotion):
+    def __init__(self, count=1):
+        super().__init__(
+            "Увеличивает скоросто",
+            load_image("pspeed.png", KEY_COLOR), 1, int(count), range=50)
+
+
+class MinusSpeedPotion(SpeedPotion):
+    def __init__(self, count=1):
+        super().__init__(
+            "Уменьшает скоросто",
+            load_image("mspeed.png", KEY_COLOR), -1, int(count), range=50)
+
+
 class Hood(Armor):
     def __init__(self):
         super().__init__("Теплый капюшон. Не\nдаёт много защиты.", load_image("hood.png", KEY_COLOR), 25, SLOT_ARMOR)
@@ -180,8 +215,8 @@ class SkeletonSword(Weapon):
 
 class Mace(Weapon):
     def __init__(self):
-        super().__init__("Мощная и неуклюжая булава, сделана на совесть", load_image("mace.png", KEY_COLOR), (60, 90),
-                         load_sound("sword.mp3"), 60, SLOT_RIGHT_HAND)
+        super().__init__("Мощная и неуклюжая булава, сделана на совесть", load_image("mace.png", KEY_COLOR),
+                         load_sound("sword.mp3"), (60, 90), 60, SLOT_RIGHT_HAND)
 
 
 class Braid(Weapon):
@@ -292,6 +327,41 @@ class Rightclaw(Weapon):
                          load_sound("sword.mp3"), (30, 38), 55, SLOT_LEFT_HAND)
 
 
+class HellSword(Weapon):
+    def __init__(self):
+        super().__init__("Адский меч", load_image("sword4.png", KEY_COLOR),
+                         load_sound("sword.mp3"), (130, 140), 110, SLOT_LEFT_HAND)
+
+
+class Sword3(Weapon):
+    def __init__(self):
+        super().__init__("Меч нашей некогда могучей армии.", load_image("sword3.png", KEY_COLOR),
+                         load_sound("sword.mp3"), (80, 105), 115, SLOT_LEFT_HAND)
+
+
+class HellHood(Armor):
+    def __init__(self):
+        super().__init__("Лучшая ьроня на свете.", load_image("hood.png", KEY_COLOR), 60, SLOT_ARMOR)
+
+
+class HellSldgehammer(Weapon):
+    def __init__(self):
+        super().__init__("Адская кувалда", load_image("sledgehammerhell.png", KEY_COLOR),
+                         load_sound("sword.mp3"), (150, 155), 110, SLOT_LEFT_HAND)
+
+
+class HellAxe(Weapon):
+    def __init__(self):
+        super().__init__("Адская кувалда", load_image("axe3.png", KEY_COLOR),
+                         load_sound("sword.mp3"), (135, 145), 119, SLOT_LEFT_HAND)
+
+
+class DemonSword(Weapon):
+    def __init__(self):
+        super().__init__("Его адский меч", load_image("sword4.png", KEY_COLOR),
+                         load_sound("sword.mp3"), (80, 90), 110, SLOT_LEFT_HAND)
+
+
 class RightHand(Weapon):
     def __init__(self):
         super().__init__("Твоя правая рука", load_image("right_hand.png", KEY_COLOR), load_sound("sword.mp3"),
@@ -335,3 +405,20 @@ class RedKey(Key):
     def __init__(self):
         super().__init__("Нужен для использования портала в правом нижнем углу карты",
                          load_image("red_key.png", KEY_COLOR), 500)
+
+
+class OrangeKey(Key):
+    def __init__(self):
+        super().__init__("Ты прошёл игру! (нужен для активирования портала)",
+                         load_image("orange_key.png", KEY_COLOR), 500)
+
+
+class CheaterHood(Armor):
+    def __init__(self):
+        super().__init__("Накидка мошенника", load_image("hood.png", KEY_COLOR), 1000000, SLOT_ARMOR)
+
+
+class CheaterSword(Weapon):
+    def __init__(self):
+        super().__init__("Меч мошенника", load_image("sword4.png", KEY_COLOR),
+                         load_sound("sword.mp3"), (999999, 1000000), 500, SLOT_RIGHT_HAND | SLOT_LEFT_HAND)

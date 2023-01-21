@@ -10,6 +10,7 @@ from tiles import Obstacle, AnimatedObstacle, Tile
 LANDSCAPES = {
     ",": Snow,
     ".": Grass,
+    "*": Ashes,
     "#": Sand,
     "r": Road,
     "f": Road2,
@@ -33,6 +34,9 @@ LANDSCAPES = {
 OBJECTS = {
     "!": Beton,
     "s": Pine,
+    "$": Skuls,
+    "y": Vulcan,
+    "i": Moltenrock,
     "%": Cactus,
     "c": Rock,
     "w": Forest2,
@@ -41,10 +45,14 @@ OBJECTS = {
     "T": Gates,
     "u": Gates2,
     "p": BrownPortal,
-    "P": RedPortal
+    "P": RedPortal,
+    "/": HellPortal,
 }
 
 CREATURES = {
+    "~": Player,
+    "?": CheaterChest,
+    "ц": HealChest,
     "z": Zombie,
     "Z": Skeleton,
     "d": Scorpion,
@@ -65,7 +73,13 @@ CREATURES = {
     "N": Cheest3,
     "m": Cheest4,
     "M": Cheest5,
-    "X": Boss2
+    "X": Boss2,
+    "@": Boss3,
+    "Y": Cheeest1,
+    "<": Cheeest2,
+    ">": Cheeest3,
+    "&": Cheeest4,
+    "S": Knight_demon
 }
 
 
@@ -119,6 +133,8 @@ class Level:
         for y in range(len(grid)):
             for x in range(len(grid[y])):
                 t = grid[y][x]
+                if t == "ъ":
+                    print(t)
                 if t in CREATURES.keys():
                     if issubclass(CREATURES[t], Player):
                         player.set_position(TILE_WIDTH * x, TILE_HEIGHT * y)

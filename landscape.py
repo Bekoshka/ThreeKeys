@@ -113,6 +113,21 @@ class Pine(Obstacle):
         super().__init__(load_image('pine.png', color_key=KEY_COLOR, resize=False), pos_x, pos_y)
 
 
+class Vulcan(Obstacle):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('vulcan.png', color_key=KEY_COLOR, resize=False), pos_x, pos_y)
+
+
+class Moltenrock(Obstacle):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('moltenrock.png', color_key=KEY_COLOR, resize=False), pos_x, pos_y)
+
+
+class Skuls(Obstacle):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('skulls.png', color_key=KEY_COLOR, resize=False), pos_x, pos_y)
+
+
 class SnowPine(Obstacle):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_image('pine2.png', color_key=KEY_COLOR, resize=False), pos_x, pos_y)
@@ -159,6 +174,11 @@ class Rock(Obstacle):
 
 
 class RedPortal(Obstacle):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('portal_2.png', color_key=KEY_COLOR), pos_x, pos_y)
+
+
+class HellPortal(Obstacle):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_image('portal_2.png', color_key=KEY_COLOR), pos_x, pos_y)
 

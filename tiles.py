@@ -36,20 +36,23 @@ class Trigger(Tile):
 class AnimatedTile(Trigger):
     def __init__(self, animations, start_animation_name, pos_x, pos_y, groups):
         self.__animations = animations
-        self._animation = animations[start_animation_name]
-        super().__init__(self._animation.get_image(), pos_x, pos_y, groups)
+        self.__animation = animations[start_animation_name]
+        super().__init__(self.__animation.get_image(), pos_x, pos_y, groups)
 
     def update(self, screen):
-        image, changed = self._animation.tick()
+        image, changed = self.__animation.tick()
         if changed:
             self.image = image
             self.rect = self.image.get_rect(center=self.rect.center)
-            self._animation_tick(self._animation)
+            self._animation_tick(self.__animation)
+
+    def _get_animation(self):
+        return self.__animation
 
     def _change_animation(self, name):
-        if self._animation != self.__animations[name]:
-            self._animation = self.__animations[name]
-            self._animation.start()
+        if self.__animation != self.__animations[name]:
+            self.__animation = self.__animations[name]
+            self.__animation.start()
 
     def _animation_tick(self, animation):
         pass
@@ -64,7 +67,7 @@ class AnimatedObstacle(AnimatedTile):
     def __init__(self, animations, start_animation_name, pos_x, pos_y):
         super().__init__(animations, start_animation_name, int(pos_x), int(pos_y),
                          [animated_obstacle_group, obstacle_group])
-        self._animation.start()
+        self._get_animation().start()
 
 
 class Obstacle(Trigger):
@@ -80,22 +83,27 @@ class Movable(AnimatedTile):
         start_animation_name = "_".join([ANIMATION_MOVE, "0", "-1"])
         super().__init__(animations, start_animation_name, pos_x, pos_y, groups + [obstacle_group])
 
+    def _add_step_size(self, ds):
+        self.__step_size += ds
+        if self.__step_size <= 0:
+            self.__step_size = 0
+
     def step(self, dx, dy):
         if dx or dy:
             self.__move_vector = (dx, dy)
             animation = "_".join([ANIMATION_MOVE, str(dx), str(dy)])
-            if self._animation.get_name().startswith(ANIMATION_MOVE_PREFIX):
+            if self._get_animation().get_name().startswith(ANIMATION_MOVE_PREFIX):
                 self._change_animation(animation)
-                if self._animation.is_pause():
-                    self._animation.start()
+                if self._get_animation().is_pause():
+                    self._get_animation().start()
                     self.__sound.play()
             else:
-                if self._animation.is_pause():
+                if self._get_animation().is_pause():
                     self._change_animation(animation)
                     self.__sound.play()
         else:
-            if self._animation.get_name().startswith(ANIMATION_MOVE_PREFIX):
-                self._animation.stop()
+            if self._get_animation().get_name().startswith(ANIMATION_MOVE_PREFIX):
+                self._get_animation().stop()
 
     def __try_step(self, dx, dy):
         pos = self.rect.topleft
@@ -182,6 +190,9 @@ class Creature(Movable):
         self.__health_points += hp
         self.__health_points = min(self.__health_points, self.__max_health_points)
 
+    def recieve_speed(self, agility):
+        self._add_step_size(agility)
+
     def step(self, dx, dy):
         if not self.__dead:
             super().step(dx, dy)
@@ -206,7 +217,8 @@ class Creature(Movable):
     def __can_apply(self, creature, slot):
         if self.__dead:
             return False
-        if not self._animation.get_name().startswith(ANIMATION_MOVE_PREFIX) and not self._animation.is_pause():
+        if not self._get_animation().get_name().startswith(
+                ANIMATION_MOVE_PREFIX) and not self._get_animation().is_pause():
             return False
         slot_object = self.__ammunition.get_slot_by_name(slot)
         if slot_object:

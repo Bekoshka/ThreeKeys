@@ -1,6 +1,6 @@
 from items import *
 from buttons import Button
-from common import buttons_group, slots_group, items_group, mouse
+from common import buttons_group, slots_group, items_group, mouse, window_groups
 
 from settings import WIDTH, HEIGHT
 
@@ -21,6 +21,12 @@ AMMUNITION_SLOTS = {
     SLOT_RIGHT_HAND: (WIDTH // 2 + WIDTH // 4 - INVENTORY_ITEM_SIZE * 1.5, HEIGHT // 2),
     SLOT_LEFT_HAND: (WIDTH // 2 + WIDTH // 4 + INVENTORY_ITEM_SIZE * 0.5, HEIGHT // 2)
 }
+
+class Window(pygame.sprite.Sprite):
+    def __init__(self, image, x=0, y=0):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect().move(x, y)
 
 
 class Slot(pygame.sprite.Sprite):
@@ -131,6 +137,7 @@ class Container:
     def __init__(self, is_left):
         self.__close_button = Button(load_image("close.png", KEY_COLOR), self.close)
         self.__slots = dict()
+        self.__window = Window(load_image("window.png", resize=True, width=WIDTH // 2, height=HEIGHT))
         self.__is_left = is_left
         self.__is_visible = False
 
@@ -141,9 +148,10 @@ class Container:
         return self.__slots[slot]
 
     def _add_slot(self, name, creature, x=0, y=0, type=None):
+        size = INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2
         images = [
-            load_image("slot.png", resize=True, size=(INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2)),
-            load_image("slot_.png", resize=True, size=(INVENTORY_ITEM_SIZE - INVENTORY_BORDER * 2))
+            load_image("slot.png", resize=True, width=size, height=size),
+            load_image("slot_.png", resize=True, width=size, height=size)
         ]
         self.__slots[name] = Slot(name, creature, images, x, y, type)
 
@@ -175,6 +183,7 @@ class Container:
     def __clean(self):
         global selected_slot
         self.__close_button.kill()
+        self.__window.kill()
         for slot in self.__slots.values():
             slot.kill()
             if slot == selected_slot:
@@ -195,13 +204,16 @@ class Container:
             return item.get_sound()
         return None
 
-    def update(self, screen):
+    def update(self, _):
         global selected_slot
         if not self.__is_visible:
             self.__clean()
             return
         x = 0 if self.__is_left else WIDTH // 2
-        pygame.draw.rect(screen, (50, 50, 50), pygame.Rect(x, 0, WIDTH // 2, HEIGHT))
+
+        if window_groups not in self.__window.groups():
+            window_groups.add(self.__window)
+        self.__window.rect.x = x
 
         if buttons_group not in self.__close_button.groups():
             buttons_group.add(self.__close_button)

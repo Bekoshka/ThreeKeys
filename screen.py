@@ -7,7 +7,7 @@ from animation import animation_tick_counter
 from buttons import Button
 from camera import camera
 from common import landscape_group, obstacle_group, buttons_group, slots_group, items_group, \
-    corpse_group, mouse, creature_group, animated_obstacle_group, tick_counter
+    corpse_group, mouse, creature_group, animated_obstacle_group, tick_counter, window_groups
 from delay import DelayedRunner
 from game import Game
 from creatures import Player
@@ -308,6 +308,7 @@ class GameScreen(Screen):
         animated_obstacle_group.update(self._screen)
         creature_group.update(self._screen)
 
+        window_groups.draw(self._screen)
         slots_group.update(self._screen)
         slots_group.draw(self._screen)
         items_group.draw(self._screen)
