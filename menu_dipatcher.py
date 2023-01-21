@@ -10,7 +10,7 @@ class MenuDispatcher:
         pygame.mixer.pre_init(44100, -16, 1, 512)
         pygame.init()
 
-        self.__screen = pygame.display.set_mode(SIZE)  # , pygame.FULLSCREEN)
+        self.__screen = pygame.display.set_mode(SIZE, pygame.FULLSCREEN)
         self.__start = StartScreen(self.__screen)
         self.__fail = FailScreen(self.__screen)
         self.__win = WinScreen(self.__screen)
