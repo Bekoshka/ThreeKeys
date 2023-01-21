@@ -11,9 +11,13 @@ class CameraGroup(pygame.sprite.AbstractGroup):
 
     def draw(self, surface):
         sprites = self.__filter()
-        self.spritedict.update(
-            zip(sprites, surface.blits((spr.image, camera.translate(spr.rect)) for spr in sprites))
-        )
+        if hasattr(surface, "blits"):
+            self.spritedict.update(
+                zip(sprites, surface.blits((spr.image, camera.translate(spr.rect)) for spr in sprites))
+            )
+        else:
+            for spr in sprites:
+                self.spritedict[spr] = surface.blit(spr.image, camera.translate(spr.rect))
         self.lostsprites = []
         dirty = self.lostsprites
         return dirty
