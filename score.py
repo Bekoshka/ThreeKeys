@@ -74,7 +74,8 @@ class Score:
             c.execute(
                 'INSERT INTO scores (game_id, level, kills, damage_given, damage_recieved, damage_absorbed,'
                 'bottles_used, gold, time_start) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
-                (score.game_id, score.level, score.kills, score.damage_given, score.damage_recieved, score.damage_absorbed,
+                (score.game_id, score.level, score.kills, score.damage_given, score.damage_recieved,
+                 score.damage_absorbed,
                  score.bottles_used, score.gold, score.time_start))
             r = c.fetchone()
             score.id = r[0]

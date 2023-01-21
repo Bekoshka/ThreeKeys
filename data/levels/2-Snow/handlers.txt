@@ -1,1 +1,3 @@
-NextLevelHandler YellowPortal YellowKey
+NextLevelHandler RedPortal RedKey
+DisappearHandler Gates2 BlueKey
+DisappearHandler Gates3 PurpleKey

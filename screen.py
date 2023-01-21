@@ -4,20 +4,20 @@ from itertools import chain
 import pygame
 
 from animation import animation_tick_counter
-from buttons import Button
+from button import Button
 from camera import camera
 from common import landscape_group, obstacle_group, buttons_group, slots_group, items_group, \
-    corpse_group, mouse, creature_group, animated_obstacle_group, tick_counter
+    corpse_group, mouse, creature_group, animated_obstacle_group, tick_counter, window_groups
 from delay import DelayedRunner
 from game import Game
-from creatures import Player
+from creature import Player
 from inventory import Slot
-from levels import Level
+from level import Level
 from gamescore import GameScore
 from settings import WIDTH, HEIGHT, FPS
 from globals import GAME_COMPLETED, GAME_FAILED, GAME_PAUSED, GAME_RUNNING, KEY_COLOR, MENU_NONE, \
     MENU_NEW_GAME, MENU_CONTINUE, MENU_SCORE, MENU_HOTKEYS
-from utils import load_image, load_level_list
+from util import load_image, load_level_list
 
 
 class Screen:
@@ -29,6 +29,9 @@ class Screen:
 
     def _append_delayed_runners(self, runner):
         self.__delayedRunners.append(runner)
+
+    def _clean_delayed_runners(self):
+        self.__delayedRunners.clear()
 
     def _render_background(self, background):
         fon = pygame.transform.scale(background, (WIDTH, HEIGHT))
@@ -80,7 +83,8 @@ class Screen:
     def _render(self):
         pass
 
-    def _terminate(self):
+    @staticmethod
+    def _terminate():
         pygame.quit()
         sys.exit()
 
@@ -155,7 +159,7 @@ class MenuScreen(Screen):
                 self.__menu_buttons_group.add(button)
                 self.__initialized = True
 
-    def run(self, game_exist):
+    def run_with_parameters(self, game_exist):
         self.__init(game_exist)
         super().run()
 
@@ -202,6 +206,10 @@ class ScoreTableScreen(Screen):
     def __init__(self, screen):
         super().__init__(screen)
         self.__text = [str(x) for x in [GameScore.title()] + GameScore.get(limit=15)]
+
+    def run(self):
+        self.__text = [str(x) for x in [GameScore.title()] + GameScore.get(limit=15)]
+        super().run()
 
     def _render(self):
         self._screen.fill(pygame.Color('BLACK'))
@@ -272,14 +280,17 @@ class GameScreen(Screen):
             return GAME_RUNNING
 
     def death_delayed(self):
-        self.__player_dead = True
-        self._append_delayed_runners(DelayedRunner(90, self.stop))
+        if not self.__player_dead:
+            self.__player_dead = True
+            self._append_delayed_runners(DelayedRunner(90, self.stop))
 
     def next_level_delayed(self):
-        self.__level_complete = True
-        self._append_delayed_runners(DelayedRunner(90, self.__next_level))
+        if not self.__level_complete:
+            self.__level_complete = True
+            self._append_delayed_runners(DelayedRunner(90, self.__next_level))
 
     def __clean(self):
+        self._clean_delayed_runners()
         self.__level.clean()
 
     def exit(self):
@@ -308,6 +319,7 @@ class GameScreen(Screen):
         animated_obstacle_group.update(self._screen)
         creature_group.update(self._screen)
 
+        window_groups.draw(self._screen)
         slots_group.update(self._screen)
         slots_group.draw(self._screen)
         items_group.draw(self._screen)
@@ -388,7 +400,6 @@ class GameScreen(Screen):
                     vol -= 0.1
                     pygame.mixer.music.set_volume(vol)
 
-
         if obstacle:
             if not self.__player.handle_click(obstacle, button):
                 self.__player.step(dx, dy)
@@ -396,4 +407,3 @@ class GameScreen(Screen):
         else:
             self.__player.step(dx, dy)
             camera.follow()
-
