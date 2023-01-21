@@ -150,14 +150,14 @@ class Key(Item):
 class SmallHealPotion(HealPotion):
     def __init__(self, count=1):
         super().__init__(
-            "Small Heal Potion description",
+            "Малое зелье лечения",
             load_image("shp.png", KEY_COLOR), 25, int(count), range=50)
 
 
 class BigHealPotion(HealPotion):
     def __init__(self, count=1):
         super().__init__(
-            "Small Heal Potion description",
+            "Большое зелье лечения.",
             load_image("big_bottle.png", KEY_COLOR), 50, int(count), range=50)
 
 
@@ -306,7 +306,7 @@ class Gold(Item):
 
 class YellowKey(Key):
     def __init__(self):
-        super().__init__("Используется для откыртия ворот в левом ниженм углу карты",
+        super().__init__("Используется для открытия ворот в левом нижнем углу карты",
                          load_image("yellow_key.png", KEY_COLOR), 500)
 
 
