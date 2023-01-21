@@ -30,6 +30,9 @@ class Screen:
     def _append_delayed_runners(self, runner):
         self.__delayedRunners.append(runner)
 
+    def _clean_delayed_runners(self):
+        self.__delayedRunners.clear()
+
     def _render_background(self, background):
         fon = pygame.transform.scale(background, (WIDTH, HEIGHT))
         self._screen.blit(fon, (0, 0))
@@ -80,7 +83,8 @@ class Screen:
     def _render(self):
         pass
 
-    def _terminate(self):
+    @staticmethod
+    def _terminate():
         pygame.quit()
         sys.exit()
 
@@ -155,7 +159,7 @@ class MenuScreen(Screen):
                 self.__menu_buttons_group.add(button)
                 self.__initialized = True
 
-    def run(self, game_exist):
+    def run_with_parameters(self, game_exist):
         self.__init(game_exist)
         super().run()
 
@@ -202,6 +206,10 @@ class ScoreTableScreen(Screen):
     def __init__(self, screen):
         super().__init__(screen)
         self.__text = [str(x) for x in [GameScore.title()] + GameScore.get(limit=15)]
+
+    def run(self):
+        self.__text = [str(x) for x in [GameScore.title()] + GameScore.get(limit=15)]
+        super().run()
 
     def _render(self):
         self._screen.fill(pygame.Color('BLACK'))
@@ -272,14 +280,17 @@ class GameScreen(Screen):
             return GAME_RUNNING
 
     def death_delayed(self):
-        self.__player_dead = True
-        self._append_delayed_runners(DelayedRunner(90, self.stop))
+        if not self.__player_dead:
+            self.__player_dead = True
+            self._append_delayed_runners(DelayedRunner(90, self.stop))
 
     def next_level_delayed(self):
-        self.__level_complete = True
-        self._append_delayed_runners(DelayedRunner(90, self.__next_level))
+        if not self.__level_complete:
+            self.__level_complete = True
+            self._append_delayed_runners(DelayedRunner(90, self.__next_level))
 
     def __clean(self):
+        self._clean_delayed_runners()
         self.__level.clean()
 
     def exit(self):
@@ -389,7 +400,6 @@ class GameScreen(Screen):
                     vol -= 0.1
                     pygame.mixer.music.set_volume(vol)
 
-
         if obstacle:
             if not self.__player.handle_click(obstacle, button):
                 self.__player.step(dx, dy)
@@ -397,4 +407,3 @@ class GameScreen(Screen):
         else:
             self.__player.step(dx, dy)
             camera.follow()
-

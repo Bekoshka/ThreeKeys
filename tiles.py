@@ -76,7 +76,9 @@ class Obstacle(Trigger):
 
 
 class Movable(AnimatedTile):
-    def __init__(self, animations, pos_x, pos_y, step_size=DEFAULT_STEP, groups=[]):
+    def __init__(self, animations, pos_x, pos_y, step_size=DEFAULT_STEP, groups=None):
+        if groups is None:
+            groups = []
         self.__step_size = step_size
         self.__move_vector = (0, -1)
         self.__sound = load_sound("step.mp3")

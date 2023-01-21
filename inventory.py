@@ -22,6 +22,7 @@ AMMUNITION_SLOTS = {
     SLOT_LEFT_HAND: (WIDTH // 2 + WIDTH // 4 + INVENTORY_ITEM_SIZE * 0.5, HEIGHT // 2)
 }
 
+
 class Window(pygame.sprite.Sprite):
     def __init__(self, image, x=0, y=0):
         super().__init__()
@@ -119,8 +120,8 @@ class Slot(pygame.sprite.Sprite):
                 blits = []
                 max_width = 0
                 max_height = 0
+                bg_color = pygame.Color('WHITE')
                 for i, text in enumerate(item.get_description().split('\n')):
-                    bg_color = pygame.Color('WHITE')
                     image = pygame.font.Font(None, 30).render(text, True, pygame.Color('BLACK'), bg_color)
                     rect = image.get_rect()
                     rect.topleft = x, 20 + y + i * rect.height

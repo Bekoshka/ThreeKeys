@@ -1,4 +1,4 @@
 NextLevelHandler BrownPortal BrownKey
 OpenChestHandler ClosedChest GreenKey
-OpenChestHandler Closed2Chest YellowKey
+OpenChestHandler ClosedChest2 YellowKey
 DisappearHandler Gates YellowKey

@@ -111,7 +111,8 @@ class ScoreHandler(DefaultHandler):
             Score.add(self.__score)
 
     def __damage_given(self, actor, enemy, weapon, damage):
-        print(type(actor).__name__, "attacked", type(enemy).__name__, "using", type(weapon).__name__, "with", damage, "damage")
+        print(type(actor).__name__, "attacked", type(enemy).__name__, "using", type(weapon).__name__, "with", damage,
+              "damage")
         if type(actor).__name__ == Player.__name__:
             self.__score.damage_given += damage
             Score.add(self.__score)

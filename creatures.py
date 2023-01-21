@@ -39,7 +39,7 @@ class ClosedChest(Creature):
 
 class Chest2(Creature):
     def __init__(self, pos_x, pos_y, _=None):
-        super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
+        super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y))
         super().get_inventory().add_item(BigHealPotion(2))
         super().get_inventory().add_item(Sword())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
@@ -96,7 +96,7 @@ class Chest8(Creature):
 class Cheest1(Creature):
     def __init__(self, pos_x, pos_y, _=None):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
-        super().get_inventory().add_item(BigHealPotion(1))
+        super().get_inventory().add_item(BigHealPotion(2))
         super().get_inventory().add_item(Bit())
         super().get_inventory().add_item(BlueKey())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
@@ -105,7 +105,7 @@ class Cheest1(Creature):
 class Cheest2(Creature):
     def __init__(self, pos_x, pos_y, _=None):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
-        super().get_inventory().add_item(SmallHealPotion(5))
+        super().get_inventory().add_item(SmallHealPotion(8))
         super().get_inventory().add_item(Sickle())
         super().get_inventory().add_item(PurpleKey())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
@@ -114,7 +114,7 @@ class Cheest2(Creature):
 class Cheest3(Creature):
     def __init__(self, pos_x, pos_y, _=None):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
-        super().get_inventory().add_item(BigHealPotion(2))
+        super().get_inventory().add_item(BigHealPotion(3))
         super().get_inventory().add_item(Axe2())
         super().get_inventory().add_item(RedKey())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
@@ -123,7 +123,7 @@ class Cheest3(Creature):
 class Cheest4(Creature):
     def __init__(self, pos_x, pos_y, _=None):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
-        super().get_inventory().add_item(BigHealPotion(2))
+        super().get_inventory().add_item(BigHealPotion(3))
         super().get_inventory().add_item(Axe1())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
@@ -131,7 +131,7 @@ class Cheest4(Creature):
 class Cheest5(Creature):
     def __init__(self, pos_x, pos_y, _=None):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
-        super().get_inventory().add_item(SmallHealPotion(4))
+        super().get_inventory().add_item(SmallHealPotion(5))
         super().get_inventory().add_item(Sword2())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
@@ -139,14 +139,14 @@ class Cheest5(Creature):
 class HealChest(Creature):
     def __init__(self, pos_x, pos_y, _=None):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
-        super().get_inventory().add_item(SmallHealPotion(9))
+        super().get_inventory().add_item(SmallHealPotion(10))
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
 
 class Cheeest1(Creature):
     def __init__(self, pos_x, pos_y, _=None):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
-        super().get_inventory().add_item(SmallHealPotion(7))
+        super().get_inventory().add_item(SmallHealPotion(8))
         super().get_inventory().add_item(Sword3())
         super().get_inventory().add_item(HellHood())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
@@ -155,7 +155,7 @@ class Cheeest1(Creature):
 class Cheeest2(Creature):
     def __init__(self, pos_x, pos_y, _=None):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
-        super().get_inventory().add_item(BigHealPotion(2))
+        super().get_inventory().add_item(BigHealPotion(3))
         super().get_inventory().add_item(HellSword())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
@@ -224,7 +224,7 @@ class Skeleton(AI):
         self.get_inventory().add_item(Gold(randrange(50, 150)))
 
 
-class Knight_demon(AI):
+class KnightDemon(AI):
     def __init__(self, pos_x, pos_y, enemy):
         super().__init__(load_animations("demon_knight"), 368, int(pos_x), int(pos_y), enemy)
         self.get_ammunition().assign_default(DemonSword(), SLOT_LEFT_HAND)
@@ -235,6 +235,14 @@ class Knight_demon(AI):
 class Wolf(AI):
     def __init__(self, pos_x, pos_y, enemy):
         super().__init__(load_animations("wolf"), 130, int(pos_x), int(pos_y), enemy)
+        self.get_ammunition().assign_default(LeftWolfclaw(), SLOT_LEFT_HAND)
+        self.get_ammunition().assign_default(RightWolfclaw(), SLOT_RIGHT_HAND)
+        self.get_inventory().add_item(Gold(randrange(100, 250)))
+
+
+class Bandit(AI):
+    def __init__(self, pos_x, pos_y, enemy):
+        super().__init__(load_animations("bandit"), 100, int(pos_x), int(pos_y), enemy)
         self.get_ammunition().assign_default(LeftWolfclaw(), SLOT_LEFT_HAND)
         self.get_ammunition().assign_default(RightWolfclaw(), SLOT_RIGHT_HAND)
         self.get_inventory().add_item(Gold(randrange(100, 250)))
@@ -270,5 +278,6 @@ class CheaterChest(Creature):
         super().__init__(load_animations("cheater_chest"), 0, int(pos_x), int(pos_y), lootable=True)
         super().get_inventory().add_item(CheaterSword())
         super().get_inventory().add_item(CheaterHood())
+        super().get_inventory().add_item(BrownKey())
         super().get_inventory().add_item(PlusSpeedPotion(9999999))
         super().get_inventory().add_item(MinusSpeedPotion(9999999))

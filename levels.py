@@ -4,7 +4,7 @@ from handlers import *
 from landscape import *
 from creatures import *
 from settings import TILE_WIDTH, TILE_HEIGHT, LEVEL_DIR
-from tiles import Obstacle, AnimatedObstacle, Tile
+from tiles import Obstacle, AnimatedObstacle
 
 
 LANDSCAPES = {
@@ -44,6 +44,7 @@ OBJECTS = {
     "q": SnowTree,
     "T": Gates,
     "u": Gates2,
+    "U": Gates3,
     "p": BrownPortal,
     "P": RedPortal,
     "/": HellPortal,
@@ -51,6 +52,7 @@ OBJECTS = {
 
 CREATURES = {
     "~": Player,
+    "[": Bandit,
     "?": CheaterChest,
     "ц": HealChest,
     "z": Zombie,
@@ -79,7 +81,7 @@ CREATURES = {
     "<": Cheeest2,
     ">": Cheeest3,
     "&": Cheeest4,
-    "S": Knight_demon
+    "S": KnightDemon
 }
 
 

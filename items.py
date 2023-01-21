@@ -130,7 +130,8 @@ class HealPotion(Item):
 
     def can_apply(self, actor, creature):
         return hasattr(creature, 'recieve_heal') and callable(getattr(creature, 'recieve_heal')) \
-               and not creature.is_dead() and calculate_sprite_range(actor, creature) < self.__range
+               and not self.is_empty() and not creature.is_dead() and calculate_sprite_range(actor,
+                                                                                             creature) < self.__range
 
 
 class SpeedPotion(Item):
@@ -149,7 +150,8 @@ class SpeedPotion(Item):
 
     def can_apply(self, actor, creature):
         return hasattr(creature, 'recieve_speed') and callable(getattr(creature, 'recieve_speed')) \
-               and not creature.is_dead() and calculate_sprite_range(actor, creature) < self.__range
+               and not self.is_empty() and not creature.is_dead() and calculate_sprite_range(actor,
+                                                                                             creature) < self.__range
 
 
 class Key(Item):
@@ -411,6 +413,12 @@ class OrangeKey(Key):
     def __init__(self):
         super().__init__("Ты прошёл игру! (нужен для активирования портала)",
                          load_image("orange_key.png", KEY_COLOR), 500)
+
+
+class GreeenKey(Key):
+    def __init__(self):
+        super().__init__("Салатовый ключ для сундука в левом нижнем углу карты",
+                         load_image("key1.png", KEY_COLOR), 500)
 
 
 class CheaterHood(Armor):

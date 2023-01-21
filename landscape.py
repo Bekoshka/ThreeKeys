@@ -168,6 +168,11 @@ class Gates2(Obstacle):
         super().__init__(load_image('gates.png', color_key=KEY_COLOR), pos_x, pos_y)
 
 
+class Gates3(Obstacle):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(load_image('gates.png', color_key=KEY_COLOR), pos_x, pos_y)
+
+
 class Rock(Obstacle):
     def __init__(self, pos_x, pos_y):
         super().__init__(load_image('rock.png', color_key=KEY_COLOR), pos_x, pos_y)
