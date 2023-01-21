@@ -4,29 +4,47 @@ animation_tick_counter = TickCounter()
 
 
 class Animation:
-    def __init__(self, name, images, mod, is_loop=False):
-        self.name = name
-        self.is_loop = is_loop
-        self.is_pause = True
-        self.mod = mod
-        self.images = images
-        self.images_idx = 0
+    def __init__(self, name, images, mod, repeat, is_loop=False):
+        self.__name = name
+        self.__is_loop = is_loop
+        self.__pause = True
+        self.__mod = mod
+        self.__images = self.__multiply(images, repeat)
+        self.__images_idx = 0
+
+    @staticmethod
+    def __multiply(images, repeat):
+        result = []
+        for i in images:
+            for _ in range(repeat):
+                result.append(i)
+        return result
+
+    def is_pause(self):
+        return self.__pause
+
+    def get_name(self):
+        return self.__name
+
+    def get_image(self):
+        return self.__images[self.__images_idx]
 
     def tick(self):
         global animation_tick_counter
-        image = self.images[self.images_idx]
+        image = self.__images[self.__images_idx]
         changed = False
-        if not self.is_pause:
-            if animation_tick_counter.check(self.mod):
-                self.images_idx = (self.images_idx + 1) % len(self.images)
+        if not self.__pause:
+            if animation_tick_counter.check(self.__mod):
+                self.__images_idx = (self.__images_idx + 1) % len(self.__images)
                 changed = True
-                if self.images_idx == 0:
-                    if not self.is_loop:
-                        self.is_pause = True
+                if self.__images_idx == 0:
+                    if not self.__is_loop:
+                        self.__pause = True
         return image, changed
 
     def start(self):
-        self.is_pause = False
+        self.__pause = False
+        self.__images_idx = 0
 
     def stop(self):
-        self.is_pause = True
+        self.__pause = True

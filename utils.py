@@ -1,15 +1,14 @@
-import sqlite3
-
 import pygame
 import os
 
 from animation import Animation
-from settings import tile_width, DATA_DIR, KEY_COLOR, LEVEL_DIR, IMAGES_DIR
+from settings import TILE_WIDTH, LEVEL_DIR, IMAGES_DIR, SOUNDS_DIR
+from globals import KEY_COLOR
 
 CACHE = dict()
 
 
-def cached(func):
+def cached_image(func):
     def wrapper(name, color_key=None):
         if (name, str(color_key)) in CACHE.keys():
             return CACHE[name, str(color_key)]
@@ -19,7 +18,22 @@ def cached(func):
     return wrapper
 
 
-@cached
+def cached_sound(func):
+    def wrapper(name):
+        if name in CACHE.keys():
+            return CACHE[name]
+        result = func(name)
+        CACHE[name] = result
+        return result
+    return wrapper
+
+
+@cached_sound
+def load_sound(name):
+    return pygame.mixer.Sound(os.path.join(SOUNDS_DIR, name))
+
+
+@cached_image
 def load_raw_image(name, color_key=None):
     try:
         image = pygame.image.load(name).convert()
@@ -36,7 +50,7 @@ def load_raw_image(name, color_key=None):
     return image
 
 
-def load_image(name, color_key=None, resize=False, size=tile_width, base=IMAGES_DIR):
+def load_image(name, color_key=None, resize=False, size=TILE_WIDTH, base=IMAGES_DIR):
     image = load_raw_image(os.path.join(base, name) if base else name, color_key)
 
     if resize:
@@ -47,12 +61,12 @@ def load_image(name, color_key=None, resize=False, size=tile_width, base=IMAGES_
 def load_animations(resource, loop=False):
     animations = {}
     for dir in next(os.walk(os.path.join(IMAGES_DIR, resource)))[1]:
-        name, mod = dir.split('#')
+        name, mod, repeat = dir.split('#')
         images = []
         for file in sorted(next(os.walk(os.path.join(IMAGES_DIR, resource, dir)))[2]):
             images.append(load_raw_image(os.path.join(IMAGES_DIR, resource, dir, file),
                                          color_key=KEY_COLOR))
-        animations[name] = Animation(name, images, int(mod), loop)
+        animations[name] = Animation(name, images, int(mod), int(repeat), loop)
     return animations
 
 
@@ -68,26 +82,6 @@ def calculate_sprite_range(a, b):
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
 
-DB_FILE = "db.sqlite"
-
-
-class Connection:
-    def __init__(self, debug=False):
-        self.con = sqlite3.connect(os.path.join(DATA_DIR, DB_FILE))
-        self.con.cursor().execute("PRAGMA foreign_keys = on")
-        if debug:
-            self.con.set_trace_callback(print)
-
-    def cursor(self):
-        return self.con.cursor()
-
-    def commit(self):
-        self.con.commit()
-
-    def rollback(self):
-        self.con.rollback()
-
-
 def get_vector(x1, y1, x2, y2):
     dx = 0
     dy = 0
@@ -99,16 +93,4 @@ def get_vector(x1, y1, x2, y2):
         dy += 1
     if y2 < y1:
         dy -= 1
-    return (dx, dy)
-
-
-class Mouse():
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-
-    def get_pos(self):
-        return self.x, self.y
-
-    def set_pos(self, pos):
-        self.x, self.y = pos
+    return dx, dy

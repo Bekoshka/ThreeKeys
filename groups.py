@@ -7,7 +7,7 @@ from settings import WIDTH, HEIGHT
 class CameraGroup(pygame.sprite.AbstractGroup):
     def __init__(self, range=(WIDTH // 2 + 100, HEIGHT // 2 + 100)):
         super().__init__()
-        self.range = range
+        self.__range = range
 
     def draw(self, surface):
         sprites = self.__filter()
@@ -24,10 +24,9 @@ class CameraGroup(pygame.sprite.AbstractGroup):
 
     def __filter(self):
         sprites = []
+        x, y = camera.get_focus_pos()
         for i in self.sprites():
-            if abs(i.rect.x - camera.focus.rect.x) > self.range[0]:
-                continue
-            if abs(i.rect.y - camera.focus.rect.y) > self.range[1]:
+            if abs(i.rect.x - x) > self.__range[0] or abs(i.rect.y - y) > self.__range[1]:
                 continue
             sprites.append(i)
         return sprites
