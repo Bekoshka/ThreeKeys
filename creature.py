@@ -1,14 +1,15 @@
 from random import randrange
 
 from ai import AI
-from items import SmallHealPotion, Sword, LeftHand, RightHand, Hood, Gold, Axe, YellowKey, BrownKey, Pitchfork, \
+from item import SmallHealPotion, Sword, LeftHand, RightHand, Hood, Gold, Axe, YellowKey, BrownKey, Pitchfork, \
     BigHealPotion, Mace, Braid, Spear, Sledgehammer, Knucle, Leftclaw, Rightclaw, Boss1Log, GreenKey, LeftWolfclaw, \
     RightWolfclaw, Bit, BlueKey, Sickle, PurpleKey, Axe2, RedKey, Axe1, Sword2, Sword3, HellSword, HellSldgehammer, \
-    HellAxe, OrangeKey, DemonSword, HellHood, CheaterSword, CheaterHood, MinusSpeedPotion, PlusSpeedPotion
+    HellAxe, OrangeKey, DemonSword, CheaterSword, CheaterHood, MinusSpeedPotion, PlusSpeedPotion, MetalArmor, \
+    HellArmor
 from globals import SLOT_RIGHT_HAND, SLOT_LEFT_HAND, SLOT_ARMOR
-from tiles import Creature
+from tile import Creature
 
-from utils import load_animations
+from util import load_animations
 
 
 class Player(Creature):
@@ -26,6 +27,7 @@ class Chest(Creature):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
         super().get_inventory().add_item(SmallHealPotion(7))
         super().get_inventory().add_item(Braid())
+        super().get_inventory().add_item(Hood())
         super().get_inventory().add_item(GreenKey())
 
 
@@ -42,6 +44,7 @@ class Chest2(Creature):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y))
         super().get_inventory().add_item(BigHealPotion(2))
         super().get_inventory().add_item(Sword())
+        super().get_inventory().add_item(Hood())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
 
@@ -58,6 +61,7 @@ class Chest4(Creature):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
         super().get_inventory().add_item(SmallHealPotion(5))
         super().get_inventory().add_item(Mace())
+        super().get_inventory().add_item(Hood())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
 
@@ -98,6 +102,7 @@ class Cheest1(Creature):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
         super().get_inventory().add_item(BigHealPotion(2))
         super().get_inventory().add_item(Bit())
+        super().get_inventory().add_item(MetalArmor())
         super().get_inventory().add_item(BlueKey())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
@@ -107,6 +112,7 @@ class Cheest2(Creature):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
         super().get_inventory().add_item(SmallHealPotion(8))
         super().get_inventory().add_item(Sickle())
+        super().get_inventory().add_item(MetalArmor())
         super().get_inventory().add_item(PurpleKey())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
@@ -117,6 +123,7 @@ class Cheest3(Creature):
         super().get_inventory().add_item(BigHealPotion(3))
         super().get_inventory().add_item(Axe2())
         super().get_inventory().add_item(RedKey())
+        super().get_inventory().add_item(MetalArmor())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
 
@@ -133,6 +140,7 @@ class Cheest5(Creature):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
         super().get_inventory().add_item(SmallHealPotion(5))
         super().get_inventory().add_item(Sword2())
+        super().get_inventory().add_item(MetalArmor())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
 
@@ -148,7 +156,7 @@ class Cheeest1(Creature):
         super().__init__(load_animations("chest"), 0, int(pos_x), int(pos_y), lootable=True)
         super().get_inventory().add_item(SmallHealPotion(8))
         super().get_inventory().add_item(Sword3())
-        super().get_inventory().add_item(HellHood())
+        super().get_inventory().add_item(HellArmor())
         super().get_inventory().add_item(Gold(randrange(100, 250)))
 
 

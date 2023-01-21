@@ -2,8 +2,8 @@ from datetime import datetime
 
 import smokesignal
 
-from creatures import Player
-from items import Gold
+from creature import Player
+from item import Gold
 from score import Score
 from globals import EVENT_MONSTER_DEAD, EVENT_DAMAGE_RECIEVED, EVENT_BOTTLE_USED, EVENT_DAMAGE_GIVEN, \
     EVENT_ITEM_ASSIGNED, EVENT_TRIGGER_RUN

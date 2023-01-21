@@ -7,7 +7,7 @@ from inventory import Ammunition, Inventory
 from settings import DEFAULT_STEP, DEFAULT_LOOT_RANGE
 from globals import EVENT_MONSTER_DEAD, EVENT_DAMAGE_RECIEVED, EVENT_TRIGGER_RUN, ANIMATION_MOVE, \
     ANIMATION_DEATH, SLOT_LEFT_HAND, SLOT_RIGHT_HAND, ANIMATION_MOVE_PREFIX
-from utils import calculate_sprite_range, get_vector, load_sound
+from util import calculate_sprite_range, get_vector, load_sound
 
 BUTTON_TO_SLOT = {
     3: SLOT_LEFT_HAND,
@@ -204,7 +204,8 @@ class Creature(Movable):
         if can_apply:
             animation_type = self.__ammunition.get_slot_animation_type(slot)
             if animation_type:
-                vector = [str(x) for x in get_vector(self.rect.x, self.rect.y, *mouse.get_pos())]
+                copy = camera.translate(self.rect)
+                vector = [str(x) for x in get_vector(copy.centerx, copy.centery, *mouse.get_pos())]
                 self._change_animation("_".join([animation_type, *vector]))
             sound = self.__ammunition.get_slot_sound(slot)
             if sound:

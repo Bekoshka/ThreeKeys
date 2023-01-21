@@ -4,20 +4,20 @@ from itertools import chain
 import pygame
 
 from animation import animation_tick_counter
-from buttons import Button
+from button import Button
 from camera import camera
 from common import landscape_group, obstacle_group, buttons_group, slots_group, items_group, \
     corpse_group, mouse, creature_group, animated_obstacle_group, tick_counter, window_groups
 from delay import DelayedRunner
 from game import Game
-from creatures import Player
+from creature import Player
 from inventory import Slot
-from levels import Level
+from level import Level
 from gamescore import GameScore
 from settings import WIDTH, HEIGHT, FPS
 from globals import GAME_COMPLETED, GAME_FAILED, GAME_PAUSED, GAME_RUNNING, KEY_COLOR, MENU_NONE, \
     MENU_NEW_GAME, MENU_CONTINUE, MENU_SCORE, MENU_HOTKEYS
-from utils import load_image, load_level_list
+from util import load_image, load_level_list
 
 
 class Screen:

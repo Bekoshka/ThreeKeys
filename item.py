@@ -5,7 +5,7 @@ import smokesignal
 
 from globals import SLOT_LEFT_HAND, SLOT_RIGHT_HAND, KEY_COLOR, SLOT_ARMOR, SLOT_NONE, EVENT_BOTTLE_USED, \
     EVENT_DAMAGE_GIVEN, ANIMATION_ATTACK
-from utils import load_image, calculate_sprite_range, load_sound
+from util import load_image, calculate_sprite_range, load_sound
 
 
 class Item(pygame.sprite.Sprite):
@@ -76,7 +76,7 @@ class Weapon(Item):
     def __init__(self, description, image, sound, damage, range, slot_type):
         if type(self).__name__ == Weapon.__name__:
             raise SystemExit("It is abstract class: " + Weapon.__name__)
-        if not(type(damage) is tuple and len(damage) == 2 and int(damage[0]) < int(damage[1])):
+        if not (type(damage) is tuple and len(damage) == 2 and int(damage[0]) < int(damage[1])):
             raise SystemExit("Weapon damage is set incorrectly: " + type(self).__name__)
         super().__init__(description, image, slot_type, stackable=False)
         self.__damage = damage
@@ -172,35 +172,40 @@ class Key(Item):
 
 class SmallHealPotion(HealPotion):
     def __init__(self, count=1):
-        super().__init__(
-            "Малое зелье лечения",
-            load_image("shp.png", KEY_COLOR), 25, int(count), range=50)
+        super().__init__("Малое зелье лечения", load_image("shp.png", KEY_COLOR), 25, int(count), range=50)
 
 
 class BigHealPotion(HealPotion):
     def __init__(self, count=1):
-        super().__init__(
-            "Большое зелье лечения.",
-            load_image("big_bottle.png", KEY_COLOR), 50, int(count), range=50)
+        super().__init__("Большое зелье лечения.", load_image("big_bottle.png", KEY_COLOR), 50, int(count), range=50)
 
 
 class PlusSpeedPotion(SpeedPotion):
     def __init__(self, count=1):
-        super().__init__(
-            "Увеличивает скоросто",
-            load_image("pspeed.png", KEY_COLOR), 1, int(count), range=50)
+        super().__init__("Увеличивает скорость", load_image("pspeed.png", KEY_COLOR), 1, int(count), range=50)
 
 
 class MinusSpeedPotion(SpeedPotion):
     def __init__(self, count=1):
-        super().__init__(
-            "Уменьшает скоросто",
-            load_image("mspeed.png", KEY_COLOR), -1, int(count), range=50)
+        super().__init__("Уменьшает скоросто", load_image("mspeed.png", KEY_COLOR), -1, int(count), range=50)
 
 
 class Hood(Armor):
     def __init__(self):
-        super().__init__("Теплый капюшон. Не\nдаёт много защиты.", load_image("hood.png", KEY_COLOR), 25, SLOT_ARMOR)
+        super().__init__("Теплый капюшон. Не\nдаёт много защиты.", load_image("leath_armor.png", KEY_COLOR), 34,
+                         SLOT_ARMOR)
+
+
+class MetalArmor(Armor):
+    def __init__(self):
+        super().__init__("Прочная стальная броня, осталась от нашей армии.", load_image("metal_armor.png", KEY_COLOR),
+                         43, SLOT_ARMOR)
+
+
+class HellArmor(Armor):
+    def __init__(self):
+        super().__init__("Прочная стальная броня, осталась от нашей армии.", load_image("hell_armor.png", KEY_COLOR),
+                         60, SLOT_ARMOR)
 
 
 class Sword(Weapon):
@@ -212,7 +217,7 @@ class Sword(Weapon):
 class SkeletonSword(Weapon):
     def __init__(self):
         super().__init__("Старый добрый железный меч.", load_image("sword.png", KEY_COLOR),
-                         load_sound("sword.mp3"), (45, 50), 45, SLOT_RIGHT_HAND)
+                         load_sound("sword.mp3"), (55, 60), 45, SLOT_RIGHT_HAND)
 
 
 class Mace(Weapon):
@@ -308,25 +313,25 @@ class LeftHand(Weapon):
 class Leftclaw(Weapon):
     def __init__(self):
         super().__init__("Его левая рука", load_image("left_hand.png", KEY_COLOR), load_sound("sword.mp3"),
-                         (30, 45), 55, SLOT_LEFT_HAND)
+                         (40, 55), 55, SLOT_LEFT_HAND)
 
 
 class LeftWolfclaw(Weapon):
     def __init__(self):
         super().__init__("Его левая рука", load_image("left_hand.png", KEY_COLOR), load_sound("sword.mp3"),
-                         (42, 45), 55, SLOT_LEFT_HAND)
+                         (55, 60), 55, SLOT_LEFT_HAND)
 
 
 class RightWolfclaw(Weapon):
     def __init__(self):
         super().__init__("Его правая рука", load_image("left_hand.png", KEY_COLOR), load_sound("sword.mp3"),
-                         (42, 45), 55, SLOT_LEFT_HAND)
+                         (55, 60), 55, SLOT_LEFT_HAND)
 
 
 class Rightclaw(Weapon):
     def __init__(self):
         super().__init__("Его правая рука", load_image("left_hand.png", KEY_COLOR),
-                         load_sound("sword.mp3"), (30, 38), 55, SLOT_LEFT_HAND)
+                         load_sound("sword.mp3"), (40, 55), 55, SLOT_LEFT_HAND)
 
 
 class HellSword(Weapon):
@@ -339,11 +344,6 @@ class Sword3(Weapon):
     def __init__(self):
         super().__init__("Меч нашей некогда могучей армии.", load_image("sword3.png", KEY_COLOR),
                          load_sound("sword.mp3"), (80, 105), 115, SLOT_LEFT_HAND)
-
-
-class HellHood(Armor):
-    def __init__(self):
-        super().__init__("Лучшая ьроня на свете.", load_image("hood.png", KEY_COLOR), 60, SLOT_ARMOR)
 
 
 class HellSldgehammer(Weapon):
@@ -361,7 +361,7 @@ class HellAxe(Weapon):
 class DemonSword(Weapon):
     def __init__(self):
         super().__init__("Его адский меч", load_image("sword4.png", KEY_COLOR),
-                         load_sound("sword.mp3"), (80, 90), 110, SLOT_LEFT_HAND)
+                         load_sound("sword.mp3"), (85, 90), 110, SLOT_LEFT_HAND)
 
 
 class RightHand(Weapon):

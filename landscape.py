@@ -1,6 +1,6 @@
 from globals import KEY_COLOR
-from tiles import Background, Obstacle
-from utils import load_image
+from tile import Background, Obstacle
+from util import load_image
 
 
 class Grass(Background):
@@ -180,12 +180,12 @@ class Rock(Obstacle):
 
 class RedPortal(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('portal_2.png', color_key=KEY_COLOR), pos_x, pos_y)
+        super().__init__(load_image('portal_1.png', color_key=KEY_COLOR), pos_x, pos_y)
 
 
 class HellPortal(Obstacle):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image('portal_2.png', color_key=KEY_COLOR), pos_x, pos_y)
+        super().__init__(load_image('portal_1.png', color_key=KEY_COLOR), pos_x, pos_y)
 
 
 class BrownPortal(Obstacle):

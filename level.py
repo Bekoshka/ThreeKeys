@@ -1,10 +1,10 @@
 import os
 
-from handlers import *
+from handler import *
 from landscape import *
-from creatures import *
+from creature import *
 from settings import TILE_WIDTH, TILE_HEIGHT, LEVEL_DIR
-from tiles import Obstacle, AnimatedObstacle
+from tile import Obstacle, AnimatedObstacle
 
 
 LANDSCAPES = {

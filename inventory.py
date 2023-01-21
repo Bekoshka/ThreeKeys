@@ -1,5 +1,5 @@
-from items import *
-from buttons import Button
+from item import *
+from button import Button
 from common import buttons_group, slots_group, items_group, mouse, window_groups
 
 from settings import WIDTH, HEIGHT
@@ -7,7 +7,8 @@ from settings import WIDTH, HEIGHT
 import pygame
 
 from globals import SLOT_ARMOR, KEY_COLOR, SLOT_RIGHT_HAND, SLOT_LEFT_HAND, EVENT_ITEM_ASSIGNED
-from utils import load_image
+from util import load_image
+from windows import Window
 
 selected_slot = None
 right_side_menu_open = None
@@ -21,13 +22,6 @@ AMMUNITION_SLOTS = {
     SLOT_RIGHT_HAND: (WIDTH // 2 + WIDTH // 4 - INVENTORY_ITEM_SIZE * 1.5, HEIGHT // 2),
     SLOT_LEFT_HAND: (WIDTH // 2 + WIDTH // 4 + INVENTORY_ITEM_SIZE * 0.5, HEIGHT // 2)
 }
-
-
-class Window(pygame.sprite.Sprite):
-    def __init__(self, image, x=0, y=0):
-        super().__init__()
-        self.image = image
-        self.rect = self.image.get_rect().move(x, y)
 
 
 class Slot(pygame.sprite.Sprite):

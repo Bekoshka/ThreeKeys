@@ -1,6 +1,6 @@
 import pygame
 
-from groups import CameraGroup
+from group import CameraGroup
 from settings import WIDTH, HEIGHT
 from ticker import TickCounter
 from mouse import Mouse
