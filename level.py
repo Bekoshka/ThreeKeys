@@ -36,7 +36,7 @@ OBJECTS = {
     "s": Pine,
     "$": Skuls,
     "y": Vulcan,
-    "i": Moltenrock,
+    "t": Moltenrock,
     "%": Cactus,
     "c": Rock,
     "w": Forest2,
